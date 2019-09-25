@@ -1,11 +1,13 @@
-import cpu_pkg::*;
+//import cpu_pkg::*;
+import project_pkg::*;
 
-module instr_mem(clk, addr, instr, imm);
+module instr_mem(addr, instr, imm);
 	parameter WORD=8, SIZE=2**WORD;
-	input clk;
-	input  word 	addr;
-	output word		imm;
-	output e_instr instr;
+	typedef logic [WORD-1:0] word;
+	
+	input  word addr;
+	output word	imm;
+	output word	instr;
 	
 	logic [WORD-1:0] rom [SIZE-1:0];
 	
@@ -16,9 +18,9 @@ module instr_mem(clk, addr, instr, imm);
 		rom[3] = {WO, RegA, RegA};   // Show $ra
 	end
 	
-	always_ff @(posedge clk) begin
-		instr <= e_instr'(rom[addr]);
-		imm <= rom[addr + 1];
+	always_comb begin
+		instr = rom[addr];
+		imm = rom[addr + 1];
 	end
 
 endmodule

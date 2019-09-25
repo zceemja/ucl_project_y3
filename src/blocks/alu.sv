@@ -1,5 +1,8 @@
-package alu_pkg;
+//import project_pkg::*;
 
+module alu(op, srcA, srcB, result, zero);	
+	parameter WORD=8;
+	
 	typedef enum logic [2:0] { 
 		ALU_ADD=3'b000,
 		ALU_SUB=3'b001,
@@ -11,15 +14,11 @@ package alu_pkg;
 		ALU_NOP=3'b111
 	} e_alu_op;
 	
-endpackage
-
-module alu(op, srcA, srcB, result, zero);	
-	input  e_alu_op 	op;
-	input  word 		srcA;
-	input  word			srcB;
-	output word			result;
-	output logic		zero;
-	
+	input  e_alu_op 			op;
+	input  logic[WORD-1:0]	srcA;
+	input  logic[WORD-1:0]	srcB;
+	output logic[WORD-1:0]	result;
+	output logic				zero;
 	
 	always_comb begin
 	case(op)

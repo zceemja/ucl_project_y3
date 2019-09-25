@@ -1,5 +1,7 @@
 import alu_pkg::*;
 package cpu_pkg;	
+	localparam word_length = 8;
+	localparam mem_length = 256;
 	
 	typedef enum logic [1:0] {
 		RegA = 2'b00,
@@ -28,7 +30,7 @@ package cpu_pkg;
 		
 	} e_instr;
 	
-	typedef logic [7:0] word;
+	typedef logic [word_length-1:0] word;
 	typedef logic [1:0] regAddr;
 	
 endpackage
@@ -77,7 +79,7 @@ module cpu(clk, rst, in_data, out_data);
 	regAddr	reg_rd_addr_2;
 	word		reg_rd_data_1;
 	word		reg_rd_data_2;
-	reg_file #(8,4) RFILE(clk, reg_rd_addr_1, reg_rd_addr_2, reg_rd_data_1, reg_rd_data_2, reg_wr_addr, reg_wr_data, reg_wr_en);
+	reg_file #(8,2) RFILE(clk, reg_rd_addr_1, reg_rd_addr_2, reg_rd_data_1, reg_rd_data_2, reg_wr_addr, reg_wr_data, reg_wr_en);
 	
 	
 	// =====================
@@ -85,7 +87,7 @@ module cpu(clk, rst, in_data, out_data);
 	// =====================
 	logic 	mem_wr_en;
 	word		mem_rd_data;
-	memory #(8,256) RAM(clk, alu_result, mem_rd_data, reg_rd_data_2, mem_wr_en);
+	memory RAM(clk, alu_result, mem_rd_data, reg_rd_data_2, mem_wr_en);
 	
 	// =====================
 	// Control unit
