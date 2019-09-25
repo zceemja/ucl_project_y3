@@ -1,43 +1,8 @@
-import alu_pkg::*;
-package cpu_pkg;	
-	localparam word_length = 8;
-	localparam mem_length = 256;
-	
-	typedef enum logic [1:0] {
-		RegA = 2'b00,
-		RegB = 2'b01,
-		RegC = 2'b10,
-		RegD = 2'b11
-	} e_reg;
-	
-	typedef enum logic [3:0] { 
-		NOP =4'h0,	// No operation
-		ADD =4'h1,  // $rs = $rs + $rt
-		ADDI=4'h2,  // $rs = $rs + $imm
-		SUB =4'h3,  // $rs = $rs - $rt
-		AND =4'h4,  // $rs = $rs & $rt
-		OR  =4'h5,  // $rs = $rs | $rt
-		NOT =4'h6,  // $rs = ~$rt
-		LW  =4'h7,  // Load word from $rt to $rs
-		SW  =4'h8,  // Save word from $rt to $rs
-		WO  =4'h9,  // Write $rs to output
-		RO  =4'hA,  // Read output to $rs
-		COPY=4'hB,  // $rs = $rt
-		JEQ =4'hC,  // Jump to $imm if $rs == $rt
-		ZERO=4'hD,  // $rs = 0x00
-		__0 =4'hE,  //
-		__1 =4'hF   //
-		
-	} e_instr;
-	
-	typedef logic [word_length-1:0] word;
-	typedef logic [1:0] regAddr;
-	
-endpackage
+import project_pkg::*;
 
 module cpu(clk, rst, in_data, out_data);
 	input logic clk, rst;
-	input logic [7:0]in_data;
+	input logic  [7:0]in_data;
 	output logic [7:0]out_data;
 	
 	// ==================
@@ -46,7 +11,6 @@ module cpu(clk, rst, in_data, out_data);
 	word  pc;			// Program counter
 	word  pcn; 			// Next PC
 
-	
 	always_ff@(posedge clk, negedge rst) begin
 		if (!rst) pc <= '0;
 		else pc <= pcn;
@@ -55,9 +19,15 @@ module cpu(clk, rst, in_data, out_data);
 	// ==================
 	// Instruction memory
 	// ==================
-	e_instr instr;			// Instruction
-	word    imm;			// Immidiate value
+	word	instr, imm;
+	e_instr instr_op;
+	regAddr rs, rt;
+	
 	instr_mem #(8) IMEM(clk, pc, instr, imm);
+	// Instruction decoding
+	assign instr_op 	= instr[7:4];
+	assign rs 			= instr[3:2];
+	assign rt 			= instr[1:0];
 	
 	// =====================
 	// ALU
@@ -81,7 +51,6 @@ module cpu(clk, rst, in_data, out_data);
 	word		reg_rd_data_2;
 	reg_file #(8,2) RFILE(clk, reg_rd_addr_1, reg_rd_addr_2, reg_rd_data_1, reg_rd_data_2, reg_wr_addr, reg_wr_data, reg_wr_en);
 	
-	
 	// =====================
 	// System memory
 	// =====================
@@ -97,13 +66,13 @@ module cpu(clk, rst, in_data, out_data);
 	logic mem_to_reg;
 	
 	assign alu_srcA 	 = reg_rd_data_1;
-	assign alu_src     = (instr == ADDI);
+	assign alu_src     = (instr_op == ADDI);
 	assign alu_srcB    = (alu_src)    ? reg_rd_data_2 : imm;
 	assign reg_wr_data = (mem_to_reg) ? mem_rd_data   : alu_result;
 	
-	assign reg_wr_addr   = regAddr'(instr[5:4]);  // It's always $rs
-	assign reg_rd_addr_1 = regAddr'(instr[5:4]);  // $rs
-	assign reg_rd_addr_2 = regAddr'(instr[7:6]);  // $rt
+	assign reg_wr_addr   = rs;
+	assign reg_rd_addr_1 = rs;
+	assign reg_rd_addr_2 = rt;
 	
 	always_comb begin
 	case(instr)
@@ -122,4 +91,8 @@ module cpu(clk, rst, in_data, out_data);
 	assign mem_to_reg = instr == LW;
 	assign pcn = (alu_zero && instr == JEQ) ? imm : pc + 1;
 	
+endmodule
+
+module cpu_tb;
+
 endmodule

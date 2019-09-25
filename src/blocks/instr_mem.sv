@@ -2,14 +2,11 @@
 import project_pkg::*;
 
 module instr_mem(addr, instr, imm);
-	parameter WORD=8, SIZE=2**WORD;
-	typedef logic [WORD-1:0] word;
-	
 	input  word addr;
 	output word	imm;
 	output word	instr;
 	
-	logic [WORD-1:0] rom [SIZE-1:0];
+	logic [word_length-1:0] rom [rom_length-1:0];
 	
 	always_comb begin
 		rom[0] = {NOP, RegA, RegA};  // Do nothing

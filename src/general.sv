@@ -1,10 +1,13 @@
 package project_pkg;
 		
-	localparam word_length = 8;
-	localparam mem_length = 256;
-	
-	typedef logic [word_length-1:0] word;
-	typedef logic [1:0] regAddr;
+	localparam word_size = 8;
+	localparam mem_size = 256;
+	localparam rom_size = 256;
+	localparam reg_size = 4;
+
+	localparam reg_addr_size = $clog2(reg_size);
+	typedef logic [word_size-1:0] word;
+	typedef logic [reg_addr_size-1:0] regAddr;
 	
 	typedef enum logic [1:0] {
 		RegA = 2'b00,
@@ -32,6 +35,17 @@ package project_pkg;
 		__1 =4'hF   //
 		
 	} e_instr;
+	
+		typedef enum logic [2:0] { 
+		ALU_ADD=3'b000,
+		ALU_SUB=3'b001,
+		ALU_AND=3'b010,
+		ALU_OR =3'b011,
+		ALU_SLT=3'b100,
+		ALU_NOT=3'b101,
+		ALU___0=3'b110,
+		ALU_NOP=3'b111
+	} e_alu_op;
 	
 	
 endpackage
