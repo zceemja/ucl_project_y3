@@ -6,6 +6,6 @@ module io_unit(switches, keys, leds);
 	
 	assign rst = keys[0];
 	assign clk = keys[1];
-//	cpu CPU(clk, rst);
+	cpu CPU(clk, rst);
 	
 endmodule

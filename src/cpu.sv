@@ -23,11 +23,11 @@ module cpu(clk, rst, in_data, out_data);
 	e_instr instr_op;
 	regAddr rs, rt;
 	
-	instr_mem #(8) IMEM(clk, pc, instr, imm);
+	instr_mem IMEM(pc, instr, imm);
 	// Instruction decoding
-	assign instr_op 	= instr[7:4];
-	assign rs 			= instr[3:2];
-	assign rt 			= instr[1:0];
+	assign instr_op 	= e_instr'(instr[7:4]);
+	assign rs 			= regAddr'(instr[3:2]);
+	assign rt 			= regAddr'(instr[1:0]);
 	
 	// =====================
 	// ALU
@@ -49,7 +49,7 @@ module cpu(clk, rst, in_data, out_data);
 	regAddr	reg_rd_addr_2;
 	word		reg_rd_data_1;
 	word		reg_rd_data_2;
-	reg_file #(8,2) RFILE(clk, reg_rd_addr_1, reg_rd_addr_2, reg_rd_data_1, reg_rd_data_2, reg_wr_addr, reg_wr_data, reg_wr_en);
+	reg_file RFILE(clk, reg_rd_addr_1, reg_rd_addr_2, reg_rd_data_1, reg_rd_data_2, reg_wr_addr, reg_wr_data, reg_wr_en);
 	
 	// =====================
 	// System memory
@@ -75,7 +75,7 @@ module cpu(clk, rst, in_data, out_data);
 	assign reg_rd_addr_2 = rt;
 	
 	always_comb begin
-	case(instr)
+	case(instr_op)
 		ADD:  	alu_op = ALU_ADD;
 		ADDI: 	alu_op = ALU_ADD;
 		SUB:  	alu_op = ALU_SUB;
@@ -87,12 +87,9 @@ module cpu(clk, rst, in_data, out_data);
 	endcase
 	end
 	
-	assign mem_wr_en = instr == SW;
-	assign mem_to_reg = instr == LW;
-	assign pcn = (alu_zero && instr == JEQ) ? imm : pc + 1;
+	assign mem_wr_en = instr_op == SW;
+	assign mem_to_reg = instr_op == LW;
+	assign pcn = (alu_zero && instr_op == JEQ) ? imm : pc + 1;
 	
 endmodule
 
-module cpu_tb;
-
-endmodule

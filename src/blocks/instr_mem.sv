@@ -1,4 +1,3 @@
-//import cpu_pkg::*;
 import project_pkg::*;
 
 module instr_mem(addr, instr, imm);
@@ -6,7 +5,7 @@ module instr_mem(addr, instr, imm);
 	output word	imm;
 	output word	instr;
 	
-	logic [word_length-1:0] rom [rom_length-1:0];
+	logic [word_size-1:0] rom [rom_size-1:0];
 	
 	always_comb begin
 		rom[0] = {NOP, RegA, RegA};  // Do nothing
