@@ -1,11 +1,11 @@
 import project_pkg::*;
 
-module datapath(clk, rst, rs, rt, imm, alu_op, reg_wr, pc_src, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero);
+module datapath(clk, rst, rs, rt, imm, alu_op, reg_wr, pc_src, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, mem_wr_data);
 	input logic clk, rst, reg_wr, pc_src, alu_src, mem_to_reg;
 	input e_reg rs, rt;
 	input e_alu_op alu_op;
 	input word imm, mem_data;
-	output word pc, alu_out;
+	output word pc, alu_out, mem_wr_data;
 	output logic alu_zero;
 	
 	// Reg File
@@ -14,19 +14,25 @@ module datapath(clk, rst, rs, rt, imm, alu_op, reg_wr, pc_src, alu_src, mem_to_r
 	assign reg_rd_a1 = rs;
 	assign reg_rd_a2 = rt;
 	assign reg_wr_a = rs;
-	assign reg_wr_d = (mem_to_reg) ? mem_data : alu_out; 
+	assign reg_wr_d = (mem_to_reg) ? mem_data : alu_out;
 	reg_file RFILE(clk, rst, reg_rd_a1, reg_rd_a2, reg_rd_d1, reg_rd_d2, reg_wr_a, reg_wr_d, reg_wr);
+
+	// Mem output data
+	assign mem_wr_data = reg_rd_a2;
 
 	// ALU
 	word alu_srcA, alu_srcB;
 	assign alu_srcA = reg_rd_d1;
-	assign alu_srcB = (alu_src) ? reg_rd_d2 : imm;
+	assign alu_srcB = (alu_src) ? imm : reg_rd_d2;
 	alu ALU(alu_op, alu_srcA, alu_srcB, alu_out, alu_zero);
 	
 	// Program counter
 	word pcn; 	// PC next
-	assign pcn = (pc_src) ? imm : pc + 1;
-	always_ff@(posedge clk, negedge rst) begin
+	word pcj;   // PC jump, +2 if imm used otherwise +1
+	assign pcj = (alu_src) ? pc + 2 : pc + 1;
+	//assign pcj = pc + 1;
+	assign pcn = (pc_src) ? imm : pcj;
+	always_ff@(posedge clk) begin
 	  	if (rst) pc <= 0;
 		else pc <= pcn;
 	end

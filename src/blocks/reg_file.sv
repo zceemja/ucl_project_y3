@@ -2,9 +2,7 @@ import project_pkg::*;
 
 module reg_file(clk, rst, rd_addr1, rd_addr2, rd_data1, rd_data2, wr_addr, wr_data, wr_en);
 	input logic  clk, rst, wr_en;
-	input  regAddr rd_addr1;
-	input  regAddr rd_addr2;
-	input  regAddr	wr_addr;
+	input  e_reg rd_addr1, rd_addr2, wr_addr;
 	input  word		wr_data;
 	output word 	rd_data1;
 	output word 	rd_data2;

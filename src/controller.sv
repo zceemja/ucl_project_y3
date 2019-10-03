@@ -6,11 +6,11 @@ module controller(instr, zero, alu_op, mem_wr, reg_wr, pc_src, alu_src, mem_to_r
 	output e_alu_op alu_op;
 	output logic mem_wr, reg_wr, alu_src, mem_to_reg, pc_src;
 	output e_instr instr_op;
-	output regAddr rs, rt;
+	output e_reg rs, rt;
 	// Instruction decoding
 	assign instr_op 	= e_instr'(instr[7:4]);
-	assign rs 			= regAddr'(instr[3:2]);
-	assign rt 			= regAddr'(instr[1:0]);
+	assign rs 			= e_reg'(instr[3:2]);
+	assign rt 			= e_reg'(instr[1:0]);
 
 	always_comb begin
 	case(instr_op)
@@ -27,7 +27,7 @@ module controller(instr, zero, alu_op, mem_wr, reg_wr, pc_src, alu_src, mem_to_r
 					reg_wr = 1;
 			end
 			SUB : begin
-1					alu_op = ALU_SUB;
+					alu_op = ALU_SUB;
 					reg_wr = 1;
 			end
 			AND : begin
