@@ -1,7 +1,7 @@
 package project_pkg;
 		
 	localparam word_size = 8;
-	localparam mem_size = 256;
+	localparam mem_size = 8;
 	localparam rom_size = 256;
 	localparam reg_size = 4;
 
@@ -32,11 +32,10 @@ package project_pkg;
 		JEQ =4'hC,  // Jump to $imm if $rs == $rt
 		ZERO=4'hD,  // $rs = 0x00
 		__0 =4'hE,  //
-		__1 =4'hF   //
-		
+		__1 =4'hF   //		
 	} e_instr;
 	
-		typedef enum logic [2:0] { 
+	typedef enum logic [2:0] { 
 		ALU_ADD=3'b000,
 		ALU_SUB=3'b001,
 		ALU_AND=3'b010,

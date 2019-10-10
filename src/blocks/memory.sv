@@ -1,15 +1,15 @@
 import project_pkg::*;
 
-module memory(clk, addr, rd_data, wr_data, wr_en);	
-	input clk, wr_en;
-	input word addr;
-	input word wr_data;
-	output word rd_data;
+module memory(
+		input 	logic 	clk, we,
+		input 	word 	a, rd, 
+		output 	word 	wd
+	);	
 	
 	logic [word_size-1:0]memory[mem_size-1:0];
-	assign rd_data = memory[addr];
+	assign rd = memory[a];
 	
-	always_ff@(posedge clk) if(wr_en) memory[addr] <= wr_data;
+	always_ff@(posedge clk) if(we) memory[a] <= wd;
 	
 	
 endmodule

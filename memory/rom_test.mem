@@ -4,9 +4,9 @@ FA // imm
 24 // ADDI regB = 01
 01 // imm
 31 // SUB regA = regA - regB
-00
-00
-00
+83 // SW mem[regC] = regA 
+60 // ~regA
+73 // LW regA = mem[regC]
 00
 00
 00
