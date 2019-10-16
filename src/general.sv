@@ -1,7 +1,7 @@
 package project_pkg;
 		
 	localparam word_size = 8;
-	localparam mem_size = 8;
+	localparam mem_size = 256;
 	localparam rom_size = 256;
 	localparam reg_size = 4;
 
@@ -10,40 +10,43 @@ package project_pkg;
 	typedef logic [reg_addr_size-1:0] regAddr;
 	
 	typedef enum logic [1:0] {
-		RegA = 2'b00,
-		RegB = 2'b01,
-		RegC = 2'b10,
-		RegD = 2'b11
+		ra = 2'b00,
+		rb = 2'b01,
+		rc = 2'b10,
+		re = 2'b11
 	} e_reg;
 	
 	typedef enum logic [3:0] { 
-		NOP =4'h0,	// No operation
-		ADD =4'h1,  // $rs = $rs + $rt
-		ADDI=4'h2,  // $rs = $rs + $imm
-		SUB =4'h3,  // $rs = $rs - $rt
-		AND =4'h4,  // $rs = $rs & $rt
-		OR  =4'h5,  // $rs = $rs | $rt
-		NOT =4'h6,  // $rs = ~$rt
-		LW  =4'h7,  // Load word from $rt to $rs
-		SW  =4'h8,  // Save word from $rt to $rs
-		WO  =4'h9,  // Write $rs to output
-		RO  =4'hA,  // Read output to $rs
-		COPY=4'hB,  // $rs = $rt
-		JEQ =4'hC,  // Jump to $imm if $rs == $rt
-		ZERO=4'hD,  // $rs = 0x00
-		__0 =4'hE,  //
-		__1 =4'hF   //		
+		// [ xxxx xx xx ] => [ inst rd rs ]
+		// mp: Memory page
+		// cp: Co-processor, 0x00 = RAM, 0x01 = ROM, 0x02 = FPU, 0x03 = GPIO
+		CPY =4'b0000,  // $rd = imm if rd == rs else $rd = $rs
+		ADD =4'b0001,  // $rd = $rd + $rs
+		SUB =4'b0010,  // $rd = $rd - $rs
+		AND =4'b0011,  // $rd = $rd & $rs
+		OR  =4'b0100,  // $rd = $rd | $rs
+		XOR =4'b0101,  // $rd = $rd ^ $rs
+		GT  =4'b0110,  // $rd = $rd > $rs
+		EXT =4'b0111,  // $rd binary [ xxxxx xxx ], first 5 bits means shift operation, last 3 means shift amount
+		LW  =4'b1000,  // $rd = mem[$mp + $rs]
+		SW  =4'b1001,  // mem[$mp + $rs] = $rd
+		JEQ =4'b1010,  // Jump to imm if $rd == $rs
+		JMP =4'b1011,  // Jump to case rs 00: $rd  01: imm 10: $rd+imm 11: ??
+		SET =4'b1100,  // Set memory page $mp = $rd
+		SCO =4'b1101,  // Set co-processor $cp = $rs
+		PUSH=4'b1110,  // Push $rd to top of stack
+		POP =4'b1111   // Pop stack to $rd
 	} e_instr;
-	
-	typedef enum logic [2:0] { 
-		ALU_ADD=3'b000,
-		ALU_SUB=3'b001,
-		ALU_AND=3'b010,
-		ALU_OR =3'b011,
-		ALU_SLT=3'b100,
-		ALU_NOT=3'b101,
-		ALU___0=3'b110,
-		ALU_NOP=3'b111
+
+	typedef enum logic [2:0] {
+		ALU_CPY = 3'b000,
+		ALU_ADD = 3'b001,
+		ALU_SUB = 3'b010,
+		ALU_AND = 3'b011,
+		ALU_OR  = 3'b100,
+		ALU_XOR = 3'b101,
+		ALU_GT  = 3'b110,
+		ALU_EXT = 3'b111
 	} e_alu_op;
 	
 	

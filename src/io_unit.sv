@@ -1,3 +1,4 @@
+import project_pkg::word;
 
 module io_unit(switches, keys, leds);
 	input  logic [3:0]switches;
@@ -9,7 +10,9 @@ module io_unit(switches, keys, leds);
 	logic mem_wr;
 	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;	
 	cpu CPU(clk, rst, instr, imm, pc, mem_addr, mem_wr, mem_data, mem_rd_data);
-	instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/rom_test.mem") IMEM(pc, instr, imm);	
-	memory RAM(clk, mem_addr, mem_data, mem_rd_data, mem_wr);	
+	// Instruction memory
+	instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") IMEM(pc, instr, imm);
+	// System memory
+	memory RAM(clk, mem_wr, mem_addr, mem_data, mem_rd_data);	
 
 endmodule
