@@ -23,11 +23,11 @@ package project_pkg;
 		CPY =4'b0000,  // $rd = imm if rd == rs else $rd = $rs
 		ADD =4'b0001,  // $rd = $rd + $rs
 		SUB =4'b0010,  // $rd = $rd - $rs
-		AND =4'b0011,  // $rd = $rd & $rs
+		AND =4'b0011,  // $rd = $rd & $rsgt
 		OR  =4'b0100,  // $rd = $rd | $rs
 		XOR =4'b0101,  // $rd = $rd ^ $rs
 		GT  =4'b0110,  // $rd = $rd > $rs
-		EXT =4'b0111,  // $rd binary [ xxxxx xxx ], first 5 bits means shift operation, last 3 means shift amount
+		EXT =4'b0111,  // rs 00: shift left; 01: shift right; 10: rotate right; 
 		LW  =4'b1000,  // $rd = mem[$mp + $rs]
 		SW  =4'b1001,  // mem[$mp + $rs] = $rd
 		JEQ =4'b1010,  // Jump to imm if $rd == $rs
@@ -39,7 +39,7 @@ package project_pkg;
 	} e_instr;
 
 	typedef enum logic [2:0] {
-		ALU_CPY = 3'b000,
+		ALU_CPY = 3'b000, // TODO: Could be replaced by AEX_3
 		ALU_ADD = 3'b001,
 		ALU_SUB = 3'b010,
 		ALU_AND = 3'b011,
@@ -48,6 +48,12 @@ package project_pkg;
 		ALU_GT  = 3'b110,
 		ALU_EXT = 3'b111
 	} e_alu_op;
-	
+
+	typedef enum logic [1:0] {
+		AEX_SHFL = 2'b00,
+		AEX_SHFR = 2'b01,
+		AEX_ROTR = 2'b10,
+		AEX_3	 = 2'b11
+	} e_alu_ext_op;
 	
 endpackage

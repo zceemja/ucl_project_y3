@@ -39,6 +39,10 @@ def is_reg(r):
 
 
 def decode_reg(r):
+    if isinstance(r, int):
+        if 0 <= r <= 3:
+            return r
+        raise ValueError(f"Invalid register value {r}")
     rl = r.lower()
     if rl.startswith('$'):
         rl = rl[1:]
@@ -106,6 +110,18 @@ def assemble(file):
         elif instr == 'EX' or instr == 'EXT':
             iname = 'EXT'
             inibb = 7
+        elif instr == 'SHFL':
+            iname = 'SHTL'
+            inibb = 7
+            ops.append(0)
+        elif instr == 'SHFR':
+            iname = 'SHTR'
+            inibb = 7
+            ops.append(1)
+        elif instr == 'ROTR':
+            iname = 'ROTR'
+            inibb = 7
+            ops.append(2)
         elif instr == 'LW':
             iname = 'LW'
             inibb = 8

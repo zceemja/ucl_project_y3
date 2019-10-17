@@ -1,9 +1,10 @@
 import project_pkg::*;
 
-module controller(instr, zero, alu_op, mem_wr, reg_wr, pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs);
+module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs);
 	input word instr;
 	input logic zero; // That's from ALU for J instructions
 	output e_alu_op alu_op;
+	output e_alu_ext_op alu_ex;
 	output logic mem_wr, reg_wr, rimm, mem_to_reg, pc_src, alu_src;
 	output e_instr instr_op;
 	output e_reg rs, rd;
@@ -23,7 +24,7 @@ module controller(instr, zero, alu_op, mem_wr, reg_wr, pc_src, rimm, alu_src, me
 	
 	assign alu_src = (instr_op == CPY & rd == rs);	
 	assign rimm = (alu_src) | instr_op == JEQ;	
-
+	assign alu_ex = e_alu_ext_op'(rs);
 endmodule
 
 module controller_tb;

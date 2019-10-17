@@ -11,11 +11,12 @@ module cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem_rd_da
 	e_instr instr_op;
 	e_reg rd, rs;
 	e_alu_op alu_op;
-	
-	controller CTRL(instr, alu_zero, alu_op, mem_wr_en, reg_wr, pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs);
+	e_alu_ext_op alu_ex;
+
+	controller CTRL(instr, alu_zero, alu_op, alu_ex, mem_wr_en, reg_wr, pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs);
 
 	// Datapath
-	datapath DPATH(clk, rst, rd, rs, imm, alu_op, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, mem_addr, mem_rd_data, alu_zero, mem_wr_data);	
+	datapath DPATH(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, mem_addr, mem_rd_data, alu_zero, mem_wr_data);	
 endmodule
 
 module cpu_tb;

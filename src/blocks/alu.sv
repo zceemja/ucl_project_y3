@@ -1,19 +1,15 @@
 import project_pkg::*;
 
-module alu(op, srcA, srcB, result, zero);	
+module alu(op, exop, srcA, srcB, result, zero);
 	
 	input  e_alu_op 	op;
 	input  word			srcA;
 	input  word			srcB;
+	input  e_alu_ext_op exop; 
 	output word			result;
 	output logic		zero;
 	
-	logic [2:0]xop;
-	logic [2:0]shamt;
-	
 	always_comb begin
-	xop = srcB[7:5];
-	shamt = srcB[2:0];
 	case(op)
 		ALU_CPY: result = srcB;
 		ALU_ADD: result = srcA + srcB;
@@ -23,10 +19,10 @@ module alu(op, srcA, srcB, result, zero);
 		ALU_XOR: result = srcA ^ srcB;
 		ALU_GT : result = srcA > srcB;
 		ALU_EXT: begin
-				case(xop)
-						3'b000: result = srcA << shamt;
-						3'b001: result = srcA >> shamt;
-						3'b010: result = srcA >>> shamt;
+				case(exop)
+						AEX_SHFL: result = srcA << 1;
+						AEX_SHFR: result = srcA >> 1;
+						AEX_ROTR: result = {srcA[0], srcA[7:1]};
 						default: result = srcA;
 				endcase
 		end

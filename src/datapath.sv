@@ -1,9 +1,10 @@
 import project_pkg::*;
 
-module datapath(clk, rst, rd, rs, imm, alu_op, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, mem_wr_data);
+module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, mem_wr_data);
 	input logic clk, rst, reg_wr, pc_src, rimm, mem_to_reg, alu_src;
 	input e_reg rd, rs;
 	input e_alu_op alu_op;
+	input e_alu_ext_op alu_ex;
 	input word imm, mem_data;
 	output word pc, alu_out, mem_wr_data;
 	output logic alu_zero;
@@ -24,7 +25,7 @@ module datapath(clk, rst, rd, rs, imm, alu_op, reg_wr, pc_src, rimm, alu_src, me
 	word alu_srcA, alu_srcB;
 	assign alu_srcA = reg_rd_d1;
 	assign alu_srcB = alu_src ? imm : reg_rd_d2;
-	alu ALU(alu_op, alu_srcA, alu_srcB, alu_out, alu_zero);
+	alu ALU(alu_op, alu_ex, alu_srcA, alu_srcB, alu_out, alu_zero);
 	
 	// Program counter
 	word pcn; 	// PC next
