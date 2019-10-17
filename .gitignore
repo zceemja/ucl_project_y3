@@ -1,5 +1,7 @@
 *.bak
 *.rpt
+*.mem
+.idea
 .qsys_edit/
 db/
 output_files/
