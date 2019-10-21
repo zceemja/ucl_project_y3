@@ -136,6 +136,14 @@ def assemble(file):
             iname = 'JUMP'
             rops = 2
             inibb = 11
+        elif instr == 'PUSH':
+            iname = 'PUSH'
+            rops = 2
+            inibb = 14
+        elif instr == 'POP':
+            iname = 'POP'
+            rops = 2
+            inibb = 15
         else:
             if len(ops) == 1:
                 try:
@@ -172,6 +180,10 @@ def assemble(file):
                 imm = decode_byte(ops[2])
                 odata.append((inibb << 4) | (rd << 2) | rd)
                 odata.append(int(imm))
+                continue
+
+            if iname == 'PUSH' or iname == 'POP':
+                odata.append((inibb << 4) | (rd << 2) | rd)
                 continue
 
             rs = decode_reg(ops[2])

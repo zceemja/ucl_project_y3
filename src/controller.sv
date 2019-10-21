@@ -1,6 +1,7 @@
 import project_pkg::*;
 
-module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs);
+module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, 
+		pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs, sp_wr, mem_sp);
 	input word instr;
 	input logic zero; // That's from ALU for J instructions
 	output e_alu_op alu_op;
@@ -8,6 +9,8 @@ module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, pc_src, rimm, alu
 	output logic mem_wr, reg_wr, rimm, mem_to_reg, pc_src, alu_src;
 	output e_instr instr_op;
 	output e_reg rs, rd;
+	output logic sp_wr, mem_sp;
+
 	// Instruction decoding
 	assign instr_op 	= e_instr'(instr[7:4]);
 	assign rd 			= e_reg'(instr[3:2]);
@@ -16,15 +19,19 @@ module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, pc_src, rimm, alu
 	e_alu_op alu_subsel;
 	assign alu_subsel = (instr_op == JEQ) ? ALU_SUB : ALU_CPY;
 	assign alu_op = instr_op[3] ? alu_subsel : e_alu_op'(instr_op[2:0]);
-	assign reg_wr = ~instr_op[3] | instr_op == LW; 
+	assign reg_wr = ~instr_op[3] | instr_op == LW | instr_op == POP; 
 	
-	assign mem_wr = instr_op == SW;
-	assign mem_to_reg = instr_op == LW;
+	assign mem_wr = instr_op == SW | instr_op == PUSH;
+	assign mem_to_reg = instr_op == LW | instr_op == POP;
 	assign pc_src = (zero && instr_op == JEQ) | instr_op == JMP;
 	
 	assign alu_src = (instr_op == CPY & rd == rs);	
 	assign rimm = (alu_src) | instr_op == JEQ;	
 	assign alu_ex = e_alu_ext_op'(rs);
+
+	// Stack instructions
+	assign mem_sp = instr_op[0];
+	assign sp_wr = instr_op == PUSH | instr_op == POP;
 endmodule
 
 module controller_tb;

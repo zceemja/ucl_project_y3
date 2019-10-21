@@ -1,14 +1,18 @@
 import project_pkg::*;
 
-module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, mem_wr_data);
+module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, 
+		rimm, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, 
+		mem_wr_data, sp_wr, mem_sp);
 	input logic clk, rst, reg_wr, pc_src, rimm, mem_to_reg, alu_src;
 	input e_reg rd, rs;
 	input e_alu_op alu_op;
 	input e_alu_ext_op alu_ex;
 	input word imm, mem_data;
+	input logic sp_wr, mem_sp;
 	output word pc, alu_out, mem_wr_data;
 	output logic alu_zero;
 	
+	word sp, sp_next;
 	// Reg File
 	word reg_rd_d1, reg_rd_d2, reg_wr_d;
 	e_reg reg_rd_a1, reg_rd_a2, reg_wr_a;
@@ -23,10 +27,13 @@ module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu
 
 	// ALU
 	word alu_srcA, alu_srcB;
+	word alu_result;
 	assign alu_srcA = reg_rd_d1;
 	assign alu_srcB = alu_src ? imm : reg_rd_d2;
-	alu ALU(alu_op, alu_ex, alu_srcA, alu_srcB, alu_out, alu_zero);
-	
+	word sp_sel;
+	assign sp_sel = (mem_sp) ? sp_next : sp;
+	assign alu_out = (sp_wr) ? sp_sel : alu_result;
+	alu ALU(alu_op, alu_ex, alu_srcA, alu_srcB, alu_result, alu_zero);	
 	// Program counter
 	word pcn; 	// PC next
 	word pcj;   // PC jump, +2 if imm used otherwise +1
@@ -39,6 +46,13 @@ module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu
 	  	if (rst) pc <= 0;
 		else pc <= pcn;
 	end
+	
+	always_ff@(posedge clk) begin
+		if (rst) sp <= 8'hff;
+		if (sp_wr) sp <= sp_next;
+	end
+	// Optimise this
+	assign sp_next = (mem_sp) ? sp + 1 : sp - 1;
 endmodule
 
 module datapath_tb;
