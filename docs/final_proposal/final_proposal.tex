@@ -1,0 +1,268 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{pdflscape}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+
+
+\setcounter{tocdepth}{3}
+\begin{document}
+\begin{titlepage}
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\textsc{\LARGE Finalised Project Proposal}\\[1.5cm]
+	\textsc{\Large University College London}\\[0.5cm]
+	\textsc{\large Department of Electronic \& Electrical Engineering}\\[0.5cm]
+	
+	\HRule \\[0.4cm]
+	\setstretch{1.5}
+	{ \huge \bfseries Performance characterisation of 8-bit RISC and OISC architectures}\\[0.4cm]
+	\setstretch{1.0}
+	\HRule \\[1.0cm]
+	
+	\Large \emph{Author:}\\
+	Minduagas \textsc{Jarmolovicius}\\
+	\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+	
+	\Large \emph{Supervisor:}\\
+	Prof. Robert \textsc{Killey}\\
+	\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+	\vfill
+	{\large October 13, 2019}\\[2cm]
+	
+\end{titlepage}
+
+	
+%\maketitle
+%\tableofcontents
+
+\pagebreak
+\section{About}
+In the past decades some processor architectures become more dominant than others in specific fields. One of noticeable cases is ARM RISC (Reduced Instruction Set Computer) architecture being used in mobile devices instead of more popular and robust x86 CISC (Complex Instruction Set Computer) architecture in favour of simplicity, cost and lower power consumption \cite{risc_vs_cisc,x}. This project will take a step back and investigate benefits of OISC\footnote{Also known as URISC (Ultimate Reduced Instruction Set Computer)} (One Instruction Set Computer) comparing to RISC architecture. 
+
+\section{Aims and Objectives}
+The aim is to compare similar characteristic RISC and OISC architectures to determinate advantages and trade-offs following points:
+\begin{description}
+	\item[$\bullet$] Which processor is easier to implement and expand;
+	\item[$\bullet$] Which processor requires less resources to implement;
+	\item[$\bullet$] Which processor performs on common benchmark;
+\end{description}
+Possible application of both architectures could be use inside of microcontroller or SoC (System on a chip) systems similar to 8bit Atmel AVR or Mirochip PIC microcontrollers, therefore processors must be capable of controlling and communicating with external modules such as UART\footnote{Universal asynchronous receiver-transmitter} and GPIO (General Purpose Input/Output).
+
+\subsection{Objectives}
+In order to achieve defined aims following objectives are required:
+\begin{description}
+	\item[$\bullet$] Design RISC architecture;
+	\item[$\bullet$] Design and implement RISC microarchitecture;
+	\item[$\bullet$] Develop a compiler for assembly and higher level programming language for RISC;
+	\item[$\bullet$] Design OISC architecture;
+	\item[$\bullet$] Design and implement OISC microarchitecture;
+	\item[$\bullet$] Develop a compiler for assembly and higher level programming language for OISC;
+	\item[$\bullet$] Develop a benchmark to test real life performance;
+	\item[$\bullet$] Compile and run benchmark on both processors using written compiler;
+	\item[$\bullet$] Compare power consumption of both systems;
+\end{description}
+\vfill
+
+\pagebreak
+\section{Preliminary Approach to Achieving Objectives}
+In order to compare RISC and OISC architectures the first both architectures need to be designed and implemented. Design will be done using SystemVerilog HDL (Hardware Description Language) and further simulated \& tested using ModelSim. Further on both architectures will be implemented on Terasic DE0-Nano board which is based on Altera Cyclone IV E FPGA (Field Programmable Gate Array). 
+
+Finding which architecture requires less resources can be done by comparing number of LULs (LookUp Tables) in a FPGA, and measuring power consumption of FPGA while running benchmark across different clock frequencies.
+
+\subsection{RISC Design}
+Table \ref{table:risc_instr} represents desired RISC processor instruction set. Whole instruction takes 8 bits, 4 most significant are for instruction, 2 bits after that is source/destination register address (rd) and 2 least significant bits are for source register address (rs). In addition, minor changes may be done to this instruction set during optimisation in order to achieve better performance or easier design.
+
+\begin{table}[h!]
+\centering
+\arrayrulecolor{black}
+\begin{tabular}{| l | p{10cm} | p{6.7cm} |} \hline 
+	\rowcolor[rgb]{0.82,0.82,0.82}
+	Instr. & Description & Operation \\\hline
+	\arrayrulecolor[rgb]{0.82,0.82,0.82}
+	COPY& Copies value from register/immediate to register & \textit{if rs=rd then [rd] = imm else [rd] = [rs]}  \\
+\hline
+	ADD & Arithmetic Addition & \textit{[rd] = [rd] + [rs]}  \\ \hline
+	SUB & Arithmetic Subtraction & \textit{[rd] = [rd] - [rs]} \\ \hline
+	AND & Bitwise AND & \textit{[rd] = [rd] AND [rs]} \\ \hline
+	OR  & Bitwise OR & \textit{[rd] = [rd] OR [rs]} \\ \hline
+	XOR & Bitwise XOR & \textit{[rd] = [rd] XOR [rs]} \\ \hline
+	GT  & Greater Than & \textit{[rd] = [rd] > [rs]} \\ \hline
+	EX  & Extended instruction to perform arithmetic and logical shift and sign/unsigned integer conversions & \textit{[rd] = func([rd], [rs]\{0,2\});} func defined by \textit{[rs]\{7,3\}} \\ \hline
+	LW  & Load word from coprocessor & \textit{[rd] = CP([rs])} \\ \hline
+	SW  & Store word to coprocessor & \textit{CP([rs]) = [rd]} \\ \hline
+	JEQ & Jump on condition & \textit{if [rd]=0h then CP = [rs]} \\ \hline
+	JUMP& Unconditional jump & \textit{CP = [rs]} \\ \hline
+	SMP & Set memory page (allows to extend memory address to 16bit)& \textit{MP = [rd]} \\ \hline
+	SCO & Set coprocessor (allows communication to external modules) & \textit{CP = [rd]} \\ \hline
+	PUSH& Push register on top of stack & \textit{SP + 1; mem(sp) =[rd]; [rd] = 0h} \\ \hline
+	POP & Pop register from top of stack & \textit{[rd] = mem(sp); SP - 1} \\ \arrayrulecolor{black}\hline
+
+
+\end{tabular}
+\caption{Instruction set for RISC processor}
+\label{table:risc_instr}
+\end{table}
+In table \ref{table:risc_instr} operation \textit{[x]} indicates value in address x, \textit{x\{a,b\}} indicates bits from a to b. Other notations \\
+\begin{tabular}{ll}
+	CP & - coprocessor\\
+	MP & - memory page \\
+	SP & - stack pointer \\
+	PC & - program pointer \\
+	mem & - system memory \\
+\end{tabular}\\
+Coprocessor is a general term for anything that process data outside main processor e.g. floating point calculation module, communication block for UART, etc. 
+
+The microarchitecture is shown in figure \ref{fig:risc_block}. This diagram based on MIPS processor described in \cite{harris}. This is only simplified diagram that does not include pipelining, hazard unit and other more complicated structures that may be implemented into microarchitecture.  
+\begin{figure}[h!]
+	\centering
+	\def\svgwidth{16cm}
+	\includesvg{RISC_block.svg}
+	\caption{RISC processor microarchitecture block diagram}
+	\label{fig:risc_block}
+\end{figure}
+
+\pagebreak
+\subsection{OISC Design}
+
+There are multiple implementations of OISC architecture, in this project MOVE variant will be designed. This processor would have separate address and data buses that connect all blocks such as memory, ALU (Arithmetic Logic Unit) or memory, highly simplifying design, see figure \ref{fig:oisc_block}. Instruction timing hazards could be prevented using basic instruction look-ahead checks or implemented into compiler. 
+\begin{figure}[h!]
+	\centering
+	\def\svgwidth{16cm}
+	\includesvg{OISC_block.svg}
+	\caption{OISC processor microarchitecture basic block diagram}
+	\label{fig:oisc_block}
+\end{figure}
+The simplicity should allow implement more straightforward pipelining and/or allow multiple instruction execution at the same clock cycle which is predicted to have better performance than RISC implementation. Design of OISC would be further developed after RISC implementation.  
+
+\subsection{Benchmark}
+Further research will be carried out in order to make suitable benchmark. Benchmark is required to reliably simulate real world scenarios where such processors could be applied. Some of these test may include calculating prime numbers, software cryptography, processing data from/to UART. 
+
+\pagebreak
+\section{Preliminary Assessment of Safety Risks}
+\subsection{Safety Risks}
+
+This project will be mainly carried out in a laboratory and a computer room. Table \ref{table:riskgrid} represents relevant risks.
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{| l | p{4cm} | p{5cm} | p{5cm} |} \hline
+		 Task 		& Hazard 			& Risk 					& Control \\\hline
+		HDL Design & Working in a lab 
+		&	RSI - \textbf{Low}	& Properly use mouse/keyboard \\
+		&	Working on a computer
+		& 	Eye strain - \textbf{Low} & Make constant breaks\\
+		&& 	Bad posture - \textbf{Medium} & Make sure sit properly\\\hline
+		Circuit test & Working with hand tools 
+		&	Skin cuts - \textbf{Medium}& Use proper procedure while handling tools\\
+		& Accident short-circuits & Burns from hot wires/chips  - \textbf{Medium}& Use current limit on power supplies\\
+		& Incorrectly connecting cables &&
+		\\\hline
+		
+	\end{tabular}
+	\caption{Risk Assessment Grid}
+	\label{table:riskgrid}
+\end{table}
+
+Overall risk level is very low / trivial.
+\subsection{Failure Risks}
+Below are possible risks that this project might fail and mitigations to prevent that:
+
+\begin{description}
+	\item[$\bullet$] \textbf{Not having enough time} - ensure project schedule is followed, possibly use already developed publicly available RISC or OISC architecture if deadlines is not met;
+	\item[$\bullet$] \textbf{Damaging FPGA board} - have planned access to other FPGA board;
+	\item[$\bullet$] \textbf{Computer data loss} - use version control (git) with remote server;
+
+\end{description}
+\newpage
+\begin{landscape}
+\section{Expected Schedule}
+\begin{table}[h]
+\centering
+\begin{ganttchart}[
+	y unit title=0.4cm,
+	y unit chart=0.5cm,
+	x unit=1.1mm,
+	hgrid,
+	title height=1,
+	bar/.style={fill=gray!50},
+	time slot format=isodate,
+	]{2019-10-01}{2020-03-31}
+	\gantttitlecalendar{year, month=shortname} \\
+	\gantttitle{40}{6}
+	\gantttitlelist{41,...,52}{7}
+	\gantttitlelist{1,...,13}{7}
+	\gantttitle{}{2} \\
+	\ganttbar{RISC implementation}{2019-10-01}{2019-10-27}\\
+	\ganttbar{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+	\ganttbar{UART and I/O}{2019-10-21}{2019-10-27}
+	\ganttbar{}{2019-11-25}{2019-12-08} \\
+	\ganttbar{RISC Assembler}{2019-10-14}{2019-11-11}\\
+	\ganttbar{RISC Compiler}{2019-11-11}{2019-12-13}\\
+	\ganttbar{Developing benchmark}{2019-11-11}{2019-12-13}
+	\ganttbar{}{2020-02-23}{2020-03-07} \\
+	\ganttbar{OISC Implementation}{2019-12-02}{2019-12-13}
+	\ganttbar{}{2020-01-13}{2020-02-02}\\
+	\ganttbar{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+	\ganttbar{OISC Assembler}{2020-01-20}{2020-02-09}\\
+	\ganttbar{OISC Compiler}{2020-02-09}{2020-03-01}\\
+	\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+	\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+	\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+	\ganttmilestone{December Interim Report}{2019-12-09}\\
+	\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+	\ganttmilestone{Progress Report \#4}{2020-02-14}\\
+	\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+	\ganttmilestone{Poster Presentation}{2020-03-18}\\
+	\ganttmilestone{Final Report}{2020-03-30}\\
+	\ganttvrule{Reading Week}{2019-11-03}
+	\ganttvrule{}{2019-11-10}
+	\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+	\ganttvrule{}{2020-01-12}
+\end{ganttchart}	
+\caption{Project expected schedule Grantt chart}
+\label{table:time}
+\end{table}
+\end{landscape}
+
+\section{Bibliography of Relevant Literature}
+
+List below describes relevant bibliography for this project and why is it used.
+\renewcommand{\refname}{}
+\begin{thebibliography}{9}
+	
+\bibitem{minimalist} W. Gilreath and P. Laplante, \textit{Computer architecture: a minimalist perspective.} [Boston]: Kluwer Academic Publishers, 2003: \\
+\textbf{Book that describes OISC architectures with minimalistic approach.}
+
+\bibitem{harris} D. Money Harris and S. Harris, \textit{Digital design and computer architecture.} Amsterdam: Elsevier, 2013: \\
+\textbf{Book that explains assembly, architecture and in depth of MIPS microarchitecture.}
+
+\bibitem{csynth} T. Ahmed, N. Sakamoto, J. Anderson and Y. Hara-Azumi, "Synthesizable-from-C Embedded Processor Based on MIPS-ISA and OISC", \textit{2015 IEEE 13th International Conference on Embedded and Ubiquitous Computing, 2015}. Available: https://janders.eecg.utoronto.ca/pdfs/euc\_2015.pdf. [Accessed 9 October 2019]: \\
+\textbf{A recent research paper that investigates MIPS tradeoffs by attaching SUBLEQ OISC coprocessor.}
+
+\bibitem{aes} J. Kong, L. Ang, K. Seng and A. Adejo, "Minimal Instruction Set FPGA AES Processor using Handel - C", \textit{2010 International Conference on Computer Applications and Industrial Electronic (ICCAIE 2010)}, p. 340, 2010. Available: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=5735100. [Accessed 9 October 2019]: \\
+\textbf{Further expands on idea of OISC to implement MISC to use it for encryption.}
+
+\bibitem{risc_vs_cisc} E. Blern, J. Menon and K. Sankaralingarn, "Power Struggles: Revisiting the RISC vs. CISC Debate on Contemporary ARM and x86 Architectures", 2013. Available: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=6522302. [Accessed 9 October 2019]: \\
+\textbf{This paper goes though comparison of RISC and CISC in common modern systems.}
+	
+\bibitem{x} T. Jamil, "RISC versus CISC", \textit{IEEE Potentials}, vol. 14, no. 3, pp. 13-16, 1995. Available: https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=464688 [Accessed 9 October 2019]: \\
+\textbf{An article that goes though differences between RISC and CISC in abstract.}
+
+\end{thebibliography}
+
+
+\end{document}

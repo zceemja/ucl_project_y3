@@ -6,7 +6,11 @@
 *.svo
 *.sft
 *.sdo
-*wlf
+*.wlf
+*.aux
+*.log
+*.out
+*.synctex.gz
 msim_transcript
 rtl_work/
 .idea
