@@ -25,7 +25,7 @@ def decode_byte(val: str):
         if i > 127 or i < -128:
             raise ValueError(f"Invalid binary '{val}', signed int out of bounds")
         if i < 0:  # convert to unsigned
-            i += 2**8
+            i += 2 ** 8
         return i
     if len(val) == 3 and ((val[0] == "'" and val[2] == "'") or (val[0] == '"' and val[2] == '"')):
         return ord(val[1])
@@ -74,9 +74,10 @@ def assemble(file):
                 failed = True
                 continue
             if ref in refs:
-                print(f"{file}:{lnum}: Pointer reference '{ref}' is duplicated with {file}:{refs[ref][0]}")
-                failed = True
-                continue
+                if refs[ref][1] is not None:
+                    print(f"{file}:{lnum}: Pointer reference '{ref}' is duplicated with {file}:{refs[ref][0]}")
+                    failed = True
+                    continue
             refs[ref] = [lnum, len(odata)]
             line = rsplit[1]
         line = line.replace('\n', '').replace('\r', '').replace('\t', '')
@@ -225,6 +226,20 @@ def assemble(file):
     return not failed, odata
 
 
+def readable_size(num, disp_bytes=True):
+    num = abs(num)
+    if num < 1024 and disp_bytes:
+        return "[%3.0fB]" % num
+    if num < 1024 and not disp_bytes:
+        return ""
+    num /= 1024.0
+    for unit in ['Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
+        if abs(num) < 1024.0:
+            return "[%3.1f%sB]" % (num, unit)
+        num /= 1024.0
+    return "[%.1f%sB]" % (num, 'Yi')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Assembly compiler', add_help=True)
     parser.add_argument('file', help='Files to compile')
@@ -253,19 +268,18 @@ if __name__ == '__main__':
     success, data = assemble(args.file)
     if success:
         print(f"Saving {args.output_type} data to {output}")
+        print(f"Program size: {len(data)}B {readable_size(len(data), False)}")
         with open(output, 'wb') as of:
             if args.output_type == 'binary':
                 a = '\n'.join([format(i, '08b') for i in data])
                 of.write(a.encode())
             elif args.output_type == 'mem':
                 a = [format(i, '02x') for i in data]
-                for i in range(int(len(a)/8)+1):
-                    of.write((' '.join(a[i*8:(i+1)*8]) + '\n').encode())
+                for i in range(int(len(a) / 8) + 1):
+                    of.write((' '.join(a[i * 8:(i + 1) * 8]) + '\n').encode())
             elif args.output_type == 'bin':
                 of.write(bytes(data))
     else:
         print(f'Failed to compile {args.file}!')
         sys.exit(1)
     sys.exit(0)
-
-
