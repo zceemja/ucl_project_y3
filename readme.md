@@ -14,6 +14,7 @@ Project directories:
 * *src* - HDL files,
 * *tools* - Implemented tools like compiler for designed architecture,
 * *memory* - Instructions and machine code,
-* *docs* - All documentation.
+* *docs* - All documentation,
+* *simulation* - ModelSim simulation files.
 
 

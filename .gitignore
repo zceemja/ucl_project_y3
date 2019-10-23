@@ -1,9 +1,16 @@
 *.bak
+*.bak[0-9]*
 *.rpt
 *.mem
+*.xrf
+*.svo
+*.sft
+*.sdo
+*wlf
+msim_transcript
+rtl_work/
 .idea
 .qsys_edit/
 db/
 output_files/
 incremental_db/
-simulation/
