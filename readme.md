@@ -11,7 +11,10 @@ Possible application of both architectures could be use inside of microcontrolle
 ## Project Structure
 This project based on Intel Quartus. Hardware is implemented in SystemVerilog.
 Project directories:
-* *src* - HDL files,
+* *src* - All HDL files,
+* *src/risc* - HDL files specific to risc processor,
+* *src/oisc* - HDL files specific to oisc processor,
+* *src/blocks* - HDL files that are shared between both processors,
 * *tools* - Implemented tools like compiler for designed architecture,
 * *memory* - Instructions and machine code,
 * *docs* - All documentation,
