@@ -1,3 +1,4 @@
+`timescale 1ns / 1ps
 import project_pkg::*;
 
 module cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem_rd_data);
@@ -26,9 +27,12 @@ module cpu_tb;
 	// Instruction memory
 	instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") IMEM(pc, instr, imm);
 	// System memory
-	memory RAM(clk, mem_wr, mem_addr, mem_data, mem_rd_data);	 word outvalue;
-	always_ff@(negedge mem_wr)
-			if(mem_addr == 8'hFF) outvalue <= mem_data;
+	memory RAM(clk, mem_wr, mem_addr, mem_data, mem_rd_data);
+	word outvalue;
+	always_ff@(posedge clk) begin
+			if(mem_wr & mem_addr == 8'hFF) outvalue <= mem_data;
+			else outvalue <= 0; 
+	end
 
 	initial begin
 		clk = 0;
