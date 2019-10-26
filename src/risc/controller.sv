@@ -1,4 +1,5 @@
-import project_pkg::*;
+import risc_pkg::*;
+import alu_pkg::*;
 
 module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr, 
 		pc_src, rimm, alu_src, mem_to_reg, instr_op, rd, rs, sp_wr, mem_sp);
@@ -17,7 +18,8 @@ module controller(instr, zero, alu_op, alu_ex, mem_wr, reg_wr,
 	assign rs 			= e_reg'(instr[1:0]);
 	
 	e_alu_op alu_subsel;
-	assign alu_subsel = (instr_op == JEQ) ? ALU_SUB : ALU_CPY;
+	//assign alu_subsel = (instr_op == JEQ) ? ALU_SUB : ALU_CPY;
+	assign alu_subsel = (instr_op == JEQ) ? ALU_SUB: ALU_ADD;
 	assign alu_op = instr_op[3] ? alu_subsel : e_alu_op'(instr_op[2:0]);
 	assign reg_wr = ~instr_op[3] | instr_op == LW | instr_op == POP; 
 	

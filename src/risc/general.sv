@@ -1,4 +1,4 @@
-package project_pkg;
+package risc_pkg;
 		
 	localparam word_size = 8;
 	localparam mem_size = 256;
@@ -37,17 +37,6 @@ package project_pkg;
 		PUSH=4'b1110,  // Push $rd to top of stack
 		POP =4'b1111   // Pop stack to $rd
 	} e_instr;
-
-	typedef enum logic [2:0] {
-		ALU_CPY = 3'b000, // TODO: Could be replaced by AEX_3
-		ALU_ADD = 3'b001,
-		ALU_SUB = 3'b010,
-		ALU_AND = 3'b011,
-		ALU_OR  = 3'b100,
-		ALU_XOR = 3'b101,
-		ALU_GT  = 3'b110,
-		ALU_EXT = 3'b111
-	} e_alu_op;
 
 	typedef enum logic [1:0] {
 		AEX_SHFL = 2'b00,

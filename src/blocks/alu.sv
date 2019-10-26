@@ -24,139 +24,184 @@ endpackage
 import alu_pkg::*;
 
 module alu(
-	srcA, srcB, result, op, cin, sign, zero, cout, gt, equal, overflow
+	a, b, r, op, cin, sign, zero, cout, gt, eq, overflow
 );
 	parameter WORD=8;
 	localparam WSIZE=$clog2(WORD);
 
 	input e_alu_op 			op;
 	input logic 			cin, sign;
-	input logic [WORD-1:0] 	srcA, srcB;
+	input logic [WORD-1:0] 	a, b;
 	
-	output logic 			zero, cout, gt, equal, overflow;
-	output logic [WORD-1:0] result;
+	output logic 			zero, cout, gt, eq, overflow;
+	output logic [WORD-1:0] r;
 	
 	logic [WSIZE-1:0] shmt;
-	assign shmt = srcB[WSIZE-1:0];
+	assign shmt = b[WSIZE-1:0];
 	
 	// FIXME: Seems like there's a bug with ModelSim or Verilog
 	// Object must be signed to do arithmetic shift right
 	// casting $signed does not work. Tho folloing passes:
  	// assert(8'sb1000_0100 >>> 2 == 8'sb1110_0001);
 	reg signed [WORD-1:0] signedA, sr;
-	assign signedA = srcA;
+	assign signedA = a;
 	assign sr = signedA >>> shmt;
+	
+	logic arithmeticOp, coutF;
+	assign arithmeticOp = (op == ALU_ADD || op == ALU_SUB || op == ALU_MUL || op == ALU_DIV);
+
+	// Overflow/Underflow flag	
+	logic [1:0] overLSB;
+	logic overFlag;
+	assign overLSB = {a[WORD-1], b[WORD-1], r[WORD-1]};	
+	assign overFlag = overLSB == 3'b110 || overLSB == 3'b001 ? 1 : 0;
+	assign overflow = sign && arithmeticOp ? overFlag : 0;	
+	
+	// Carry out flag
+	assign cout = arithmeticOp && ~sign ? coutF : 0;	
 
 	always_comb begin
 	case(op)
-		ALU_ADD: {cout, result} = (srcA + cin) + srcB;
-		ALU_SUB: {cout, result} = (srcA + cin) - srcB;
-		ALU_AND: result = srcA & srcB;
-		ALU_OR : result = srcA | srcB;
-		ALU_XOR: result = srcA ^ srcB;
-		ALU_NAND: result = ~(srcA & srcB);
-		ALU_NOR : result = ~(srcA | srcB);
-		ALU_XNOR: result = ~(srcA ^ srcB);
-		ALU_SL: result = srcA << shmt;
-		ALU_SR: result = (sign) ? sr : srcA >> shmt;
-		ALU_ROL: result = {srcA[0], srcA[WORD-1:1]};
-		ALU_ROR: result = {srcA[WORD-2:0], srcA[WORD-1]};
-		ALU_MUL: result = srcA * srcB;
-		ALU_DIV: result = srcA / srcB;
-		ALU_MOD: result = srcA % srcB;
-		default: result = 0;
+		ALU_ADD: {coutF, r} = a + b + cin;
+		ALU_SUB: {coutF, r} = a - b - cin;
+		ALU_AND: r = a & b;
+		ALU_OR : r = a | b;
+		ALU_XOR: r = a ^ b;
+		ALU_NAND: r = ~(a & b);
+		ALU_NOR : r = ~(a | b);
+		ALU_XNOR: r = ~(a ^ b);
+		ALU_SL: r = a << shmt;
+		ALU_SR: r = (sign) ? sr : a >> shmt;
+		ALU_ROL: r = {a[0], a[WORD-1:1]};
+		ALU_ROR: r = {a[WORD-2:0], a[WORD-1]};
+		ALU_MUL: r = a * b;
+		ALU_DIV: r = a / b;
+		ALU_MOD: r = a % b;
+		default: r = 0;
 	endcase
 	end
 
-	assign zero = result == 0;
-	assign equal = srcA == srcB;
-	assign gt = srcA > srcB;
+	assign zero = r == 0;
+	assign eq = a == b;
+	assign gt = a > b;
 
 endmodule
 
+`timescale 1ns / 1ns
 module alu_tb;
 	e_alu_op op;
-	logic [7:0]srcA, srcB, result;
-	logic overflow, zero, cin, cout, gt, equal, sign;
+	reg [7:0]a, b, r;
+	logic overflow, zero, cin, cout, gt, eq, sign;
+	
 	
 	alu test_alu(
 		.op(op),
-		.srcA(srcA), 
-		.srcB(srcB),
-		.result(result),
+		.a(a), 
+		.b(b),
+		.r(r),
 		.zero(zero),
 		.cin(cin),
 		.cout(cout),
 		.gt(gt),
-		.equal(equal),
+		.eq(eq),
 		.sign(sign),
 		.overflow(overflow)
 	);
 
-	task test;
+	// Test & print result
+	task testprint;
 		input e_alu_op t_op;
 		input [7:0] t_a, t_b, t_e;
+		input e_c, e_o, binary;
 		begin
+			reg signed [7:0]t_sa, t_sb, t_sr, t_se;
+			string s_a, s_b, s_r, s_e;
 			op = t_op;
-			srcA = t_a;
-			srcB = t_b;
+			a = t_a;
+			b = t_b;	
 			#1
-			$write("ALU Test: %d %8s %d = %d ", 
-				(sign) ? $signed(t_a) : t_a,
-				op.name, 
-				(sign) ? $signed(t_b) : t_b,
-				(sign) ? $signed(result) : result
-			);
-			if (result == t_e) $display("(correct)");
-			else $display("(expected %d)", t_e); 
-			assert(result == t_e);	
+			t_sa = $signed(t_a);		
+			t_sb = $signed(t_b);		
+			t_sr = $signed(r);		
+			t_se = $signed(t_e);
+			if(binary) begin
+			$sformat(s_a,"%b", t_sa);
+			$sformat(s_b,"%b", t_sb);
+			$sformat(s_r,"%b", t_sr);
+			$sformat(s_e,"%b", t_se);
+			end 
+			else if (sign) begin
+			$sformat(s_a,"%d", t_sa);
+			$sformat(s_b,"%d", t_sb);
+			$sformat(s_r,"%d", t_sr);
+			$sformat(s_e,"%d", t_se);
+			end 
+			else begin
+			$sformat(s_a,"%d", t_a);
+			$sformat(s_b,"%d", t_b);
+			$sformat(s_r,"%d", r);
+			$sformat(s_e,"%d", t_e);
+			end
+			
+			$display("ALU Test %4t00ps: %s %8s %s=%s C=%b O=%b", 
+				$time, s_a, "unknown op", s_b, s_r, cout, overflow);
+			if (r != t_e || cout != e_c || overflow != e_o) begin 
+				$error("Incorrect: expected R=%s C=%b O=%b", s_e, e_c, e_o);
+			end
 		end		
 	endtask
 	
+	task test;
+		input e_alu_op t_op;
+		input [7:0] t_a, t_b, t_e;
+		input e_c, e_o;
+		testprint(t_op, t_a, t_b, t_e, e_c, e_o, 0);
+	endtask
+
 	task testb;
 		input e_alu_op t_op;
 		input [7:0] t_a, t_b, t_e;
-		begin
-			op = t_op;
-			srcA = t_a;
-			srcB = t_b;
-			#1
-			$write("ALU Test: %b %8s %b = %b ", t_a, op.name, t_b, result);
-			if (result == t_e) $display("(correct)");
-			else $display("(expected %b)", t_e); 
-			assert(result == t_e);	
-		end		
+		input e_c, e_o;
+		testprint(t_op, t_a, t_b, t_e, e_c, e_o, 1);
 	endtask
 
 	initial begin
 		sign = 0;
 		cin = 0;
-		test(ALU_ADD, 120, 100, 220);
-		test(ALU_SUB, 120, 100, 20);
-		testb(ALU_AND, 120, 100, 96);
-		testb(ALU_NAND, 100, 120, -97);
-		testb(ALU_OR, 100, 120, 124);
-		testb(ALU_NOR, 100, 120, -125);
-		testb(ALU_XOR, 100, 120, 28);
-		testb(ALU_XNOR, 100, 120, -29);
-		testb(ALU_SL, 8'b1111_0111, 2, 8'b1101_1100);
-		testb(ALU_SR, 8'b1110_1111, 2, 8'b0011_1011);
+		test(ALU_ADD, 120, 100, 220, 0, 0);
+		test(ALU_ADD, 255, 255, 254, 1, 0);
+		test(ALU_SUB, 120, 100, 20, 0, 0);
+		test(ALU_SUB, 0, 100, -100, 1, 0); // FIXME: When unsigned probably want underflow flag on.
+		testb(ALU_AND, 120, 100, 96, 0, 0);
+		testb(ALU_NAND, 100, 120, -97, 0, 0);
+		testb(ALU_OR, 100, 120, 124, 0, 0);
+		testb(ALU_NOR, 100, 120, -125, 0, 0);
+		testb(ALU_XOR, 100, 120, 28, 0, 0);
+		testb(ALU_XNOR, 100, 120, -29, 0, 0);
+		testb(ALU_SL, 8'b1111_0111, 2, 8'b1101_1100, 0, 0);
+		testb(ALU_SR, 8'b1110_1111, 2, 8'b0011_1011, 0, 0);
 		sign = 1;
 		$display("ALU Settings: sign = 1");
 		
-		testb(ALU_SR, 8'b1000_0100, 2, 8'b1110_0001);
-		testb(ALU_SR, 8'b0000_0100, 2, 8'b0000_0001);
-		test(ALU_ADD, -10, 20, 10);
-		test(ALU_SUB, -10, -20, 10);
+		testb(ALU_SR, 8'b1000_0100, 2, 8'b1110_0001, 0, 0);
+		testb(ALU_SR, 8'b0000_0100, 2, 8'b0000_0001, 0, 0);
+		test(ALU_ADD, -10, 20, 10, 0, 0);
+		test(ALU_ADD, -10, -20, -30, 0, 0);
+		test(ALU_SUB, -10, -20, 10, 0, 0);
+		test(ALU_SUB, -10, 20, -30, 0, 0);
+		testb(ALU_SUB, -10, 20, -30, 0, 0);
 		
-		testb(ALU_ROR, 8'b1100_0000, 0, 8'b1000_0001);
-		testb(ALU_ROL, 8'b0000_0011, 0, 8'b1000_0001);
-		test(ALU_MUL, 5, 8, 40);
-		test(ALU_DIV, 64, 4, 16);
-		test(ALU_DIV, 65, 4, 16);
-		test(ALU_MOD, 66, 4, 2);
-		test(ALU_MOD, 65, 4, 1);
-		test(ALU_MOD, 64, 4, 0);
+		testb(ALU_ROR, 8'b1100_0000, 0, 8'b1000_0001, 0, 0);
+		testb(ALU_ROL, 8'b0000_0011, 0, 8'b1000_0001, 0, 0);
+		test(ALU_MUL, 5, 8, 40, 0, 0);
+		testb(ALU_MUL, -5, 8, -40, 0, 0);
+		test(ALU_DIV, 64, 4, 16, 0, 0);
+		test(ALU_DIV, 64, -4, -16, 0, 0);
+		test(ALU_DIV, 65, 4, 16, 0, 0);
+		test(ALU_MOD, 66, 4, 2, 0, 0);
+		test(ALU_MOD, 65, 4, 1, 0, 0);
+		test(ALU_MOD, 64, 4, 0, 0, 0);
+		#10
 		$stop;
 	end
 

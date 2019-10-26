@@ -1,12 +1,14 @@
-import project_pkg::*;
+module memory(clk, we, a, wd, rd);
 
-module memory(
-		input 	logic 	clk, we,
-		input 	word 	a, wd, 
-		output 	word 	rd
-	);	
+	parameter WIDTH=8, LENGTH=256;	
+	localparam ADDR_WIDTH = $clog2(LENGTH);
 	
-	logic [word_size-1:0]memory[mem_size-1:0];
+	input  	clk, we;
+	input 	[WIDTH-1:0]	wd;
+	input 	[ADDR_WIDTH-1:0] a;
+	output 	[WIDTH-1:0]	rd;
+	
+	logic [WIDTH-1:0]memory[LENGTH-1:0];
 	assign rd = memory[a];
 	
 	always_ff@(posedge clk) if(we) memory[a] <= wd;

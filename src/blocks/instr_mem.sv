@@ -1,12 +1,13 @@
-import project_pkg::*;
-
 module instr_mem(addr, instr, imm);
 	parameter IMEM_FILE = "";
-	input  word addr;
-	output word	imm;
-	output word	instr;
+	parameter WIDTH=8, LENGTH=256;
+	localparam ADDR_WIDTH = $clog2(LENGTH);
+
+	input  [ADDR_WIDTH-1:0] addr;
+	output [WIDTH-1:0]	imm;
+	output [WIDTH-1:0]	instr;
 	
-	logic [word_size-1:0] rom [rom_size-1:0];
+	logic [WIDTH-1:0] rom [LENGTH-1:0];
 	initial $readmemh(IMEM_FILE, rom);
 	initial begin
 		 $display("Instruction ROM dump");

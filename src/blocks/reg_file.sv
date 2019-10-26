@@ -1,16 +1,19 @@
-import project_pkg::*;
-
 module reg_file(clk, rst, rd_addr1, rd_addr2, rd_data1, rd_data2, wr_addr, wr_data, wr_en);
-	input logic  clk, rst, wr_en;
-	input  e_reg rd_addr1, rd_addr2, wr_addr;
-	input  word		wr_data;
-	output word 	rd_data1;
-	output word 	rd_data2;
+	parameter WIDTH=8, LENGTH=4;
+	localparam ADDR_WIDTH = $clog2(LENGTH);
+
+	input  clk, rst, wr_en;
+	input  [ADDR_WIDTH-1:0] rd_addr1, rd_addr2, wr_addr;
+	input  [WIDTH-1:0] wr_data;
+	output [WIDTH-1:0] rd_data1;
+	output [WIDTH-1:0] rd_data2;
+
 	
-	logic [word_size-1:0] registry [reg_size-1:0];
+	
+	logic [WIDTH-1:0] registry [LENGTH-1:0];
 	
 	always_ff@(posedge clk) begin
-	  	if(rst) for(int i=0;i<reg_size;i++) registry[i] <= '0;
+	  	if(rst) for(int i=0;i<LENGTH;i++) registry[i] <= '0;
 		else if(wr_en) registry[wr_addr] <= wr_data;
 	end
 	

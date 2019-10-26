@@ -1,4 +1,5 @@
-import project_pkg::*;
+import risc_pkg::*;
+import alu_pkg::*;
 
 module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, 
 		rimm, alu_src, mem_to_reg, pc, alu_out, mem_data, alu_zero, 
@@ -33,7 +34,14 @@ module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src,
 	word sp_sel;
 	assign sp_sel = (mem_sp) ? sp_next : sp;
 	assign alu_out = (sp_wr) ? sp_sel : alu_result;
-	alu ALU(alu_op, alu_ex, alu_srcA, alu_srcB, alu_result, alu_zero);	
+	alu alu0(
+		.a(alu_srcA),
+		.b(alu_srcB),
+		.op(alu_op),
+		.r(alu_result),
+		.zero(alu_zero)
+	);
+	//alu_op, alu_ex, alu_srcA, alu_srcB, alu_result, alu_zero);	
 	// Program counter
 	word pcn; 	// PC next
 	word pcj;   // PC jump, +2 if imm used otherwise +1
@@ -75,7 +83,7 @@ module datapath_tb;
 		mem_to_reg = 0;
 		rs = ra;
 		rt = ra;
-		alu_op = ALU_CPY;
+		//alu_op = ALU_CPY;
 		imm = 8'h00;
 		mem_data = 8'h00;
 		#10ns;

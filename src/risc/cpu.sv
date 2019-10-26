@@ -1,7 +1,8 @@
-`timescale 1ns / 1ps
-import project_pkg::*;
+`timescale 1ns / 100ps
+import risc_pkg::*;
+import alu_pkg::*;
 
-module cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem_rd_data);
+module risc8_cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem_rd_data);
 	input logic clk, rst;
 	input word instr, imm, mem_rd_data;
 	output logic mem_wr_en;
@@ -20,7 +21,7 @@ module cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem_rd_da
 	datapath DPATH(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, mem_addr, mem_rd_data, alu_zero, mem_wr_data, sp_wr, mem_sp);	
 endmodule
 
-module cpu_tb;
+module risc8_cpu_tb;
 	logic clk, rst, mem_wr; 
 	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;	
 	cpu CPU(clk, rst, instr, imm, pc, mem_addr, mem_wr, mem_data, mem_rd_data);
