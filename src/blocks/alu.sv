@@ -54,7 +54,7 @@ module alu(
 	logic [1:0] overLSB;
 	logic overFlag;
 	assign overLSB = {a[WORD-1], b[WORD-1], r[WORD-1]};	
-	assign overFlag = overLSB == 3'b110 || overLSB == 3'b001 ? 1 : 0;
+	assign overFlag = (overLSB == 3'b110 || overLSB == 3'b001) ? 1 : 0;
 	assign overflow = sign && arithmeticOp ? overFlag : 0;	
 	
 	// Carry out flag
@@ -62,8 +62,8 @@ module alu(
 
 	always_comb begin
 	case(op)
-		ALU_ADD: {coutF, r} = a + b + cin;
-		ALU_SUB: {coutF, r} = a - b - cin;
+		ALU_ADD: r = a + b + cin;
+		ALU_SUB: r = a - b - cin;
 		ALU_AND: r = a & b;
 		ALU_OR : r = a | b;
 		ALU_XOR: r = a ^ b;

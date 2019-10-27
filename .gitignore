@@ -18,3 +18,4 @@ rtl_work/
 db/
 output_files/
 incremental_db/
+greybox_tmp/

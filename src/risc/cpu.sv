@@ -21,6 +21,20 @@ module risc8_cpu(clk, rst, instr, imm, pc, mem_addr, mem_wr_en, mem_wr_data, mem
 	datapath DPATH(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src, rimm, alu_src, mem_to_reg, pc, mem_addr, mem_rd_data, alu_zero, mem_wr_data, sp_wr, mem_sp);	
 endmodule
 
+module risc8_port(processor_port port);
+	logic clk, rst, mem_wr; 
+	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;
+	
+	assign port.ram_wr_en = mem_wr;
+	assign port.ram_rd_en = ~mem_wr;
+
+	instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") imem0(pc, instr, imm);
+	
+	risc8_cpu cpu0(port.clk, port.rst, instr, imm, pc,
+			port.ram_addr, mem_wr, port.ram_wr_data, port.ram_rd_data);
+
+endmodule
+
 module risc8_cpu_tb;
 	logic clk, rst, mem_wr; 
 	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;	

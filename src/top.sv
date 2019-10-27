@@ -79,13 +79,9 @@ module top(
 
 
 	// Processor
-	wire interrupt;
-	assign interrupt = ~KEY[1];
-
-	processor_port cpu0 (
+	processor_port port0 (
 		.clk(mclk),
 		.rst(rst),
-		.interrupt(interrupt),
 		.ram_addr(ram_addr),
         .ram_wr_data(ram_wr_data),
         .ram_rd_data(ram_rd_data),
@@ -96,45 +92,29 @@ module top(
 		.ram_rd_ack(ram_rd_ack),
 		.com_addr(com0_addr),
 		.com_wr(com0_wr),
-		.com_rd(com0_rd)
+		.com_rd(com0_rd),
+		.com_interrupt(com0_interrupt)
 	);
+
+	risc8_port cpu_port0(port0);
 
 	//Communication block
 	wire [7:0] com0_addr, com0_wr, com0_rd;
+	wire com0_interrupt;
 
 	com_block com0 (
-			.clk(mclk),
-			.rst(rst),
-			.addr(com0_addr),
-			.wr_data(com0_wr),
-			.rd_data(com0_rd),
-			.leds(LED),
-			.switches(SWITCH),
-			.uart0_rx(RX),
-			.uart0_tx(TX)
+		.clk(mclk),
+		.rst(rst),
+		.addr(com0_addr),
+		.in_data(com0_wr),
+		.out_data(com0_rd),
+		.interrupt(com0_interrupt),
+		.leds(LED),
+		.switches(SWITCH),
+		.uart0_rx(RX),
+		.uart0_tx(TX),
+		.key1(~KEY[1])
 	);
-	//assign clk = keys[1];
-	//logic mem_wr;
-	//word pc, instr, imm, mem_addr, mem_data, mem_rd_data;
-	//word ext_rd_data, rd_data;
-	//cpu CPU(clk_slow, rst, instr, imm, pc, mem_addr, mem_wr, mem_data, rd_data);
-	// Instruction memory
-	//instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") IMEM(pc, instr, imm);
-	// System memory
-	//memory RAM(clk, mem_wr, mem_addr, mem_data, mem_rd_data);
-	
-	//assign ext_rd_data = '{0,0,0,0, 0,0,0,is_transmitting};
-	//assign rd_data = (mem_addr == 8'hFF) ? ext_rd_data : mem_rd_data;
-
-	//always_ff@(posedge clk_slow) begin
-	//		if(mem_wr & mem_addr == 8'hFF) begin
-	//			tx_byte <= mem_data;
-	//			transmit <= 1; 
-	//		end
-	//		else begin
-	//			transmit <= 0; 
-	//		end
-	//end
 
 endmodule
 

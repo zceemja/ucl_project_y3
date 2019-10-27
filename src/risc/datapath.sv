@@ -34,7 +34,7 @@ module datapath(clk, rst, rd, rs, imm, alu_op, alu_ex, reg_wr, pc_src,
 	word sp_sel;
 	assign sp_sel = (mem_sp) ? sp_next : sp;
 	assign alu_out = (sp_wr) ? sp_sel : alu_result;
-	alu alu0(
+	alu#(.WORD(8)) alu0(
 		.a(alu_srcA),
 		.b(alu_srcB),
 		.op(alu_op),

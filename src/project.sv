@@ -1,5 +1,5 @@
 interface processor_port(
-	input clk, rst,	interrupt,
+	input clk, rst,
 
 	// RAM
 	output [23:0]	ram_addr,
@@ -14,7 +14,8 @@ interface processor_port(
 	// COM
 	output [7:0]	com_addr,
 	output [7:0]	com_wr,
-	input  [7:0]	com_rd
+	input  [7:0]	com_rd,
+	input  			com_interrupt
 	);
 
 endinterface
@@ -23,18 +24,20 @@ module com_block(
 	input clk, rst,
 	// Communication to processor
 	input  [7:0]	addr,
-	input  [7:0]	wr_data,
-	output [7:0]	rd_data,
+	input  [7:0]	in_data,
+	output [7:0]	out_data,
+	output 			interrupt,
 
 	// IO
 	output [7:0]	leds,
 	input  [3:0]	switches,
 	output 			uart0_tx,
-	input 			uart0_rx
+	input 			uart0_rx,
+	input 			key1
 );
 
 	/* UART */
-	reg [7:0] uart0_reg;
+	reg [2:0] uart0_reg;
 	reg uart0_transmit;
 	wire [7:0] tx_byte, rx_byte;
 	// Clock divide = 1e6 / (9600 * 4)
@@ -50,68 +53,28 @@ module com_block(
 			.is_transmitting(uart0_reg[2]),
 			.transmit(uart0_transmit)
 	);
-	
+
+	always_ff@(posedge clk) begin
+	//	if(addr == 8'h06) leds <= in_data;
+	//end
+
+	//always_comb begin
+	case(addr)
+			8'h04: out_data <= {5'b0, uart0_reg};
+			8'h05: begin
+				tx_byte <= in_data;
+				uart0_transmit <= 1;
+				out_data <= {5'b0, uart0_reg};
+			end
+			8'h07: out_data <= {4'b0, switches};
+			8'h08: leds <= in_data;
+			default: begin 
+				out_data <= 0;
+				uart0_transmit <= 0;
+			end
+	endcase
+	end
 endmodule
-
-interface sdram_ctl_bus;
-	wire [23:0]	ram_addr;
-	wire [15:0] ram_wr_data;
-	wire [15:0] ram_rd_data;
-	wire 		ram_wr_en;
-	wire 		ram_rd_en;
-	wire 		ram_busy;
-	wire 		ram_rd_ready;
-	wire 		ram_rd_ack;
-	
-	modport out(
-		output	ram_addr,
-		output	ram_wr_data,
-		input 	ram_rd_data,
-		output	ram_wr_en,
-		output	ram_rd_en,
-		input	ram_busy,
-		input	ram_rd_ready,
-		input	ram_rd_ack
-	);
-	
-	modport in(
-		input	ram_addr,
-		input	ram_wr_data,
-		output 	ram_rd_data,
-		input	ram_wr_en,
-		input	ram_rd_en,
-		output	ram_busy,
-		output	ram_rd_ready,
-		output	ram_rd_ack
-	);
-endinterface
-
-interface sdram_io_bus(
-	inout  [15:0]	DRAM_DQ,	// Data
-	output [12:0] 	DRAM_ADDR,	// Address
-	output [1:0]	DRAM_DQM,	// Byte Data Mask
-	output    		DRAM_CLK,	// Clock
-	output    		DRAM_CKE,	// Clock Enable
-	output    		DRAM_WE_N,	// Write Enable
-	output    		DRAM_CAS_N, // Column Address Strobe
-	output    		DRAM_RAS_N, // Row Address Strobe
-	output    		DRAM_CS_N,	// Chip Select
-	output [1:0] 	DRAM_BA		// Bank Address
-	);
-//	
-//	modport out (
-//		inout  DRAM_DQ,	
-//		output DRAM_ADDR,	
-//		output DRAM_DQM,	
-//		output DRAM_CLK,	
-//		output DRAM_CKE,	
-//		output DRAM_WE_N,	
-//		output DRAM_CAS_N, 
-//		output DRAM_RAS_N, 
-//		output DRAM_CS_N,	
-//		output DRAM_BA			
-//	);
-endinterface
 
 module sdram_block(
 	input mclk, fclk, rst,
