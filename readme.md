@@ -3,9 +3,9 @@
 ## Performance characterisation of 8-bit RISC and OISC architectures
 
 The aim is to compare similar characteristic RISC and OISC architectures to determinate advantages and trade-offs following points:
-* Which processor is easier to implement and expand;
-* Which processor requires less resources to implement;
-* Which processor performs on common benchmark;
+* Which processor is easier to implement and expand,
+* Which processor requires less resources to implement,
+* Which processor performs better on common benchmark.
 
 Possible application of both architectures could be use inside of microcontroller or SoC (System on a chip) systems similar to 8bit Atmel AVR or Mirochip PIC microcontrollers,
 therefore processors must be capable of controlling and communicating with external modules such as UART and GPIO.
@@ -24,27 +24,22 @@ Project directories:
 * *simulation* - ModelSim simulation files.
 
 ## Hardware Structure
-The top level has 4 block:
+The top level has 4 main blocks, that can be found in *src/top.sv* file. 
 
-_PLL_ 
 
+#### PLL
 Generates various frequences from main 50MHz crystal. Currenty 3 clock are generated:
-* mclk - 1MHz master clock for processor and uart,
-* fclk - 100MHz fast clock for sdram controller,
-* aclk - 32,768kHz auxiliary clock for timers (to be implemented).
+* _mclk_ 	- 1MHz master clock for processor and uart,
+* _fclk_ 	- 100MHz fast clock for sdram controller,
+* _aclk_ 	- 32,768kHz auxiliary clock for timers (to be implemented).
 
-
-_SDRAM Block_ 
-
+#### SDRAM Block
 Includes sdram controller and fifo queues to synchonise data between mclk and fclk. It communicates with processor using 24bit address bus and 16bit data bus. It is up to processor to decide how to efficiantly store data in this memory.
 
-
-_COM Block_
-
+#### COM Block
 This include all external functions that might be useful for processor, e.g. UART, on board LED and DIP switch control. In future this might include timers or other communication methods. Processor communicates to this block via 8bit address bus and 8bit data bus. The table of addresses to function map will be added in the future. 
 
-_Processor_ 
-
+#### Processor
 The processor itself. This desiged to have common interface so RISC and OISC processor and their variations could be simply swapped between without need to rewrite all project.
 
 
