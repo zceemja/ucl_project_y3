@@ -26,7 +26,6 @@ module top(
 	output			DRAM_RAS_N, // Row Address Strobe
 	output			DRAM_CS_N,	// Chip Select
 	output [1:0] 	DRAM_BA		// Bank Address
-
 	);
 	
 	assign rst = ~KEY[0];
@@ -96,7 +95,7 @@ module top(
 		.com_interrupt(com0_interrupt)
 	);
 
-	risc8_port cpu_port0(port0);
+	risc8_cpu cpu_block0(port0);
 
 	//Communication block
 	wire [7:0] com0_addr, com0_wr, com0_rd;

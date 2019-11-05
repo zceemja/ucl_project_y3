@@ -11,9 +11,9 @@ module instr_mem(addr, instr, imm);
 	initial $readmemh(IMEM_FILE, rom);
 	initial begin
 		 $display("Instruction ROM dump");
-		 for (int i=0; i < rom_size; i+=16) begin
+		 for (int i=0; i < LENGTH; i+=16) begin
 			$write("%h:", i);
-			for(int j=0; j<16 && j+i < rom_size; j++)
+			for(int j=0; j<16 && j+i < LENGTH; j++)
 		 		$write(" %h", rom[i+j]);
 			$display(" :%h", i);
 		end

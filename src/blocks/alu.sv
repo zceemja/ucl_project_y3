@@ -1,6 +1,7 @@
 package alu_pkg;
 
 	typedef enum logic [3:0] {
+		 ALU_NONE= 4'bxxxx, 
 		 ALU_ADD = 4'd0, 
 		 ALU_SUB = 4'd1,
 		 ALU_AND = 4'd2,
@@ -11,8 +12,8 @@ package alu_pkg;
 		 ALU_XNOR= 4'd7,
 		 ALU_SL  = 4'd8,
 		 ALU_SR  = 4'd9,
-		 ALU_ROR = 4'd10,
-		 ALU_ROL = 4'd11,
+		 ALU_RA  = 4'd10,
+		 ALU_RAS = 4'd11,
 		 ALU_MUL = 4'd12,
 		 ALU_DIV = 4'd13,
 		 ALU_MOD = 4'd14
@@ -24,7 +25,7 @@ endpackage
 import alu_pkg::*;
 
 module alu(
-	a, b, r, op, cin, sign, zero, cout, gt, eq, overflow
+	a, b, r, r_high, op, cin, sign, zero, cout, gt, eq, overflow
 );
 	parameter WORD=8;
 	localparam WSIZE=$clog2(WORD);
@@ -34,7 +35,7 @@ module alu(
 	input logic [WORD-1:0] 	a, b;
 	
 	output logic 			zero, cout, gt, eq, overflow;
-	output logic [WORD-1:0] r;
+	output logic [WORD-1:0] r, r_high;
 	
 	logic [WSIZE-1:0] shmt;
 	assign shmt = b[WSIZE-1:0];
@@ -62,8 +63,8 @@ module alu(
 
 	always_comb begin
 	case(op)
-		ALU_ADD: r = a + b + cin;
-		ALU_SUB: r = a - b - cin;
+		ALU_ADD: {r,cout} = a + b + cin;
+		ALU_SUB: {r,cout} = a - b - cin;
 		ALU_AND: r = a & b;
 		ALU_OR : r = a | b;
 		ALU_XOR: r = a ^ b;
@@ -72,10 +73,10 @@ module alu(
 		ALU_XNOR: r = ~(a ^ b);
 		ALU_SL: r = a << shmt;
 		ALU_SR: r = (sign) ? sr : a >> shmt;
-		ALU_ROL: r = {a[0], a[WORD-1:1]};
-		ALU_ROR: r = {a[WORD-2:0], a[WORD-1]};
-		ALU_MUL: r = a * b;
-		ALU_DIV: r = a / b;
+		ALU_RA: r = {a[0], a[WORD-1:1]};
+		ALU_RAS: r = {a[WORD-2:0], a[WORD-1]};
+		ALU_MUL: {r_high, r} = a * b;
+		ALU_DIV: {r, r_high} = {a / b, a % b};
 		ALU_MOD: r = a % b;
 		default: r = 0;
 	endcase
@@ -191,8 +192,8 @@ module alu_tb;
 		test(ALU_SUB, -10, 20, -30, 0, 0);
 		testb(ALU_SUB, -10, 20, -30, 0, 0);
 		
-		testb(ALU_ROR, 8'b1100_0000, 0, 8'b1000_0001, 0, 0);
-		testb(ALU_ROL, 8'b0000_0011, 0, 8'b1000_0001, 0, 0);
+		testb(ALU_RA, 8'b1100_0000, 0, 8'b1000_0001, 0, 0);
+		testb(ALU_RAS, 8'b0000_0011, 0, 8'b1000_0001, 0, 0);
 		test(ALU_MUL, 5, 8, 40, 0, 0);
 		testb(ALU_MUL, -5, 8, -40, 0, 0);
 		test(ALU_DIV, 64, 4, 16, 0, 0);
