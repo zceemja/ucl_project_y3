@@ -25,7 +25,7 @@ endpackage
 import alu_pkg::*;
 
 module alu(
-	a, b, r, r_high, op, cin, sign, zero, cout, gt, eq, overflow
+	a, b, r, r_high, op, cin, sign, zero, cout, gt, eq, overflow, r_high_en
 );
 	parameter WORD=8;
 	localparam WSIZE=$clog2(WORD);
@@ -34,7 +34,7 @@ module alu(
 	input logic 			cin, sign;
 	input logic [WORD-1:0] 	a, b;
 	
-	output logic 			zero, cout, gt, eq, overflow;
+	output logic 			zero, cout, gt, eq, overflow, r_high_en;
 	output logic [WORD-1:0] r, r_high;
 	
 	logic [WSIZE-1:0] shmt;
@@ -54,31 +54,42 @@ module alu(
 	// Overflow/Underflow flag	
 	logic [1:0] overLSB;
 	logic overFlag;
-	assign overLSB = {a[WORD-1], b[WORD-1], r[WORD-1]};	
+	//assign overLSB = {a[WORD-1:WORD-1], b[WORD-1:WORD-1], r[WORD-1:WORD-1]};	
 	assign overFlag = (overLSB == 3'b110 || overLSB == 3'b001) ? 1 : 0;
 	assign overflow = sign && arithmeticOp ? overFlag : 0;	
 	
 	// Carry out flag
-	assign cout = arithmeticOp && ~sign ? coutF : 0;	
+	logic cout0, cout1;
+	assign cout = (op == ALU_ADD || op == ALU_SUB) && ~sign ? coutF : 0;
+	assign coutF = (op == ALU_ADD) ? cout0 : cout1;
+
+	logic [WORD-1:0] radd, rsub, r_low;
+	logic [WORD*2-1:0] rmul, rdiv;
+	assign {radd,cout0} = a + b + cin;
+	assign {rsub,cout1} = a - b - cin;
+	assign rmul = a * b;
+	assign rdiv = {a/b,a%b};
+  	assign r_high = (op == ALU_MUL) ? rmul[15:8] : rdiv[15:8];
+	assign r_high_en = (op == ALU_MUL || op == ALU_DIV);
 
 	always_comb begin
 	case(op)
-		ALU_ADD: {r,cout} = a + b + cin;
-		ALU_SUB: {r,cout} = a - b - cin;
-		ALU_AND: r = a & b;
-		ALU_OR : r = a | b;
-		ALU_XOR: r = a ^ b;
+		ALU_ADD:  r = radd;
+		ALU_SUB:  r = rsub;
+		ALU_AND:  r = a & b;
+		ALU_OR :  r = a | b;
+		ALU_XOR:  r = a ^ b;
 		ALU_NAND: r = ~(a & b);
 		ALU_NOR : r = ~(a | b);
 		ALU_XNOR: r = ~(a ^ b);
-		ALU_SL: r = a << shmt;
-		ALU_SR: r = (sign) ? sr : a >> shmt;
-		ALU_RA: r = {a[0], a[WORD-1:1]};
-		ALU_RAS: r = {a[WORD-2:0], a[WORD-1]};
-		ALU_MUL: {r_high, r} = a * b;
-		ALU_DIV: {r, r_high} = {a / b, a % b};
-		ALU_MOD: r = a % b;
-		default: r = 0;
+		ALU_SL:   r = a << shmt;
+		ALU_SR:   r = (sign) ? sr : a >> shmt;
+		ALU_RA:   r = {a[0], a[WORD-1:1]};
+		ALU_RAS:  r = {a[WORD-2:0], a[WORD-1]};
+		ALU_MUL:  r = rmul[WORD*2-1:WORD];
+		ALU_DIV:  r = rdiv[WORD*2-1:WORD];
+		ALU_MOD:  r = rdiv[WORD-1:0];
+		default:  r = 0;
 	endcase
 	end
 

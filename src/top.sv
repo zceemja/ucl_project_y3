@@ -76,6 +76,23 @@ module top(
 		.DRAM_BA(DRAM_BA)	
 	);
 
+	//Communication block
+	wire [7:0] com0_addr, com0_wr, com0_rd;
+	wire com0_interrupt;
+
+	com_block com0 (
+		.clk(mclk),
+		.rst(rst),
+		.addr(com0_addr),
+		.in_data(com0_wr),
+		.out_data(com0_rd),
+		.interrupt(com0_interrupt),
+		.leds(LED),
+		.switches(SWITCH),
+		.uart0_rx(RX),
+		.uart0_tx(TX),
+		.key1(~KEY[1])
+	);
 
 	// Processor
 	processor_port port0 (
@@ -96,24 +113,6 @@ module top(
 	);
 
 	risc8_cpu cpu_block0(port0);
-
-	//Communication block
-	wire [7:0] com0_addr, com0_wr, com0_rd;
-	wire com0_interrupt;
-
-	com_block com0 (
-		.clk(mclk),
-		.rst(rst),
-		.addr(com0_addr),
-		.in_data(com0_wr),
-		.out_data(com0_rd),
-		.interrupt(com0_interrupt),
-		.leds(LED),
-		.switches(SWITCH),
-		.uart0_rx(RX),
-		.uart0_tx(TX),
-		.key1(~KEY[1])
-	);
 
 endmodule
 

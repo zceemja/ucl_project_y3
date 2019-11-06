@@ -23,23 +23,23 @@ endinterface
 module com_block(
 	input clk, rst,
 	// Communication to processor
-	input  [7:0]	addr,
-	input  [7:0]	in_data,
-	output [7:0]	out_data,
-	output 			interrupt,
+	input  wire [7:0]	addr,
+	input  reg  [7:0]	in_data,
+	output reg  [7:0]	out_data,
+	output wire			interrupt,
 
 	// IO
-	output [7:0]	leds,
-	input  [3:0]	switches,
-	output 			uart0_tx,
-	input 			uart0_rx,
-	input 			key1
+	output reg  [7:0]	leds,
+	input  wire  [3:0]	switches,
+	output wire			uart0_tx,
+	input  wire			uart0_rx,
+	input  wire			key1
 );
 
 	/* UART */
 	reg [2:0] uart0_reg;
 	reg uart0_transmit;
-	wire [7:0] tx_byte, rx_byte;
+	reg [7:0] tx_byte, rx_byte;
 	// Clock divide = 1e6 / (9600 * 4)
 	uart#(.CLOCK_DIVIDE(26)) uart0(
 			.clk(clk), 
@@ -55,23 +55,18 @@ module com_block(
 	);
 
 	always_ff@(posedge clk) begin
-	//	if(addr == 8'h06) leds <= in_data;
-	//end
+		if(addr == 8'h06) leds <= in_data;
+		if(addr == 8'h05) tx_byte <= in_data;
+		if(addr == 8'h05) uart0_transmit <= 1;
+		else uart0_transmit <= 0; 
+	end
 
-	//always_comb begin
+	always_comb begin
 	case(addr)
-			8'h04: out_data <= {5'b0, uart0_reg};
-			8'h05: begin
-				tx_byte <= in_data;
-				uart0_transmit <= 1;
-				out_data <= {5'b0, uart0_reg};
-			end
-			8'h07: out_data <= {4'b0, switches};
-			8'h08: leds <= in_data;
-			default: begin 
-				out_data <= 0;
-				uart0_transmit <= 0;
-			end
+			8'h04: out_data = {5'b0, uart0_reg};
+			8'h05: out_data = {5'b0, uart0_reg};
+			8'h07: out_data = {4'b0, switches};
+			default: out_data = 0;
 	endcase
 	end
 endmodule

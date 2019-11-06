@@ -1,4 +1,4 @@
- instr_op, cdi.alu_op, cdi.selb, cdi.rw_en, cdi.selr, mem_rd, mem_wr
+ instr, cdi.alu_op, cdi.selb, cdi.rw_en, cdi.selr, mem_rd, mem_wr
      MOVE,   ALU_NONE,      SB_NONE,         1,     SR_COM,      0,      0
      CPY0,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0
      CPY1,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0

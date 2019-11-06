@@ -1,4 +1,3 @@
-`timescale 1ns / 100ps
 import risc8_pkg::*;
 import alu_pkg::*;
 
@@ -50,6 +49,7 @@ module risc8_cpu(processor_port port);
 
 endmodule
 
+`timescale 1ns / 1ns
 module risc8_cpu_tb;
 	logic clk, rst, mem_wr; 
 	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;	
