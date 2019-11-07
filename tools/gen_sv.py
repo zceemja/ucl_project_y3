@@ -77,6 +77,8 @@ if __name__ == '__main__':
         idata.append(f'\t\t{case.ljust(max_case, " ")}: begin')
         for i, head in enumerate(header):
             idata.append(f'\t\t\t{head.ljust(max_header, " ")} = {value[i]};')
+        if case != 'default':
+            idata.append(f'\t\t\t`ifdef ADDOP\n\t\t\top = {case};\n\t\t\t`endif')
         idata.append('\t\tend')
     idata.append('\tendcase')
     idata.append('\tend')

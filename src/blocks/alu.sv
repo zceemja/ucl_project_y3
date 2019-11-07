@@ -65,8 +65,8 @@ module alu(
 
 	logic [WORD-1:0] radd, rsub, r_low;
 	logic [WORD*2-1:0] rmul, rdiv;
-	assign {radd,cout0} = a + b + cin;
-	assign {rsub,cout1} = a - b - cin;
+	assign {cout0,radd} = a + b + cin;
+	assign {cout1,rsub} = a - b - cin;
 	assign rmul = a * b;
 	assign rdiv = {a/b,a%b};
   	assign r_high = (op == ALU_MUL) ? rmul[15:8] : rdiv[15:8];
@@ -102,7 +102,7 @@ endmodule
 `timescale 1ns / 1ns
 module alu_tb;
 	e_alu_op op;
-	reg [7:0]a, b, r;
+	reg [7:0]a, b, r, rh, rhe;
 	logic overflow, zero, cin, cout, gt, eq, sign;
 	
 	
@@ -117,7 +117,9 @@ module alu_tb;
 		.gt(gt),
 		.eq(eq),
 		.sign(sign),
-		.overflow(overflow)
+		.overflow(overflow),
+		.r_high(rh),
+		.r_high_en(rhe)
 	);
 
 	// Test & print result
@@ -156,7 +158,7 @@ module alu_tb;
 			end
 			
 			$display("ALU Test %4t00ps: %s %8s %s=%s C=%b O=%b", 
-				$time, s_a, "unknown op", s_b, s_r, cout, overflow);
+				$time, s_a, t_op.name(), s_b, s_r, cout, overflow);
 			if (r != t_e || cout != e_c || overflow != e_o) begin 
 				$error("Incorrect: expected R=%s C=%b O=%b", s_e, e_c, e_o);
 			end

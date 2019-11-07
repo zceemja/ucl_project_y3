@@ -1,0 +1,4 @@
+COPY 0 15
+COPY 1 10
+ADD  0 1
+

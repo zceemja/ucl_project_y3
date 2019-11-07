@@ -1,3 +1,5 @@
+`define ADDOP
+
 import risc8_pkg::*;
 import alu_pkg::*;
 
@@ -11,19 +13,13 @@ module controller8(
 	assign cdi.a2		= e_reg_addr'(instr[1:0]);
 	assign cdi.a3 		= cdi.a1; // Assuming destination always first operand
 	
+	`ifdef ADDOP 
 	e_instr op;
+	`endif
 
 	// generated table
     always_comb begin
     casez(instr)
-        MOVE   : begin
-            cdi.alu_op = ALU_NONE;
-            cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1;
-            cdi.selr   = SR_COM;
-            mem_rd     = 0;
-            mem_wr     = 0;
-        end
         CPY0   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_IMM;
@@ -31,6 +27,10 @@ module controller8(
             cdi.selr   = SR_IMM;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = CPY0;
+            `endif
         end
         CPY1   : begin
             cdi.alu_op = ALU_NONE;
@@ -39,6 +39,10 @@ module controller8(
             cdi.selr   = SR_IMM;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = CPY1;
+            `endif
         end
         CPY2   : begin
             cdi.alu_op = ALU_NONE;
@@ -47,6 +51,10 @@ module controller8(
             cdi.selr   = SR_IMM;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = CPY2;
+            `endif
         end
         CPY3   : begin
             cdi.alu_op = ALU_NONE;
@@ -55,6 +63,22 @@ module controller8(
             cdi.selr   = SR_IMM;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = CPY3;
+            `endif
+        end
+        MOVE   : begin
+            cdi.alu_op = ALU_NONE;
+            cdi.selb   = SB_NONE;
+            cdi.rw_en  = 1;
+            cdi.selr   = SR_COM;
+            mem_rd     = 0;
+            mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = MOVE;
+            `endif
         end
         ADD    : begin
             cdi.alu_op = ALU_ADD;
@@ -63,6 +87,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = ADD;
+            `endif
         end
         SUB    : begin
             cdi.alu_op = ALU_SUB;
@@ -71,6 +99,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SUB;
+            `endif
         end
         AND    : begin
             cdi.alu_op = ALU_AND;
@@ -79,6 +111,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = AND;
+            `endif
         end
         OR     : begin
             cdi.alu_op = ALU_OR;
@@ -87,6 +123,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = OR;
+            `endif
         end
         XOR    : begin
             cdi.alu_op = ALU_XOR;
@@ -95,6 +135,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = XOR;
+            `endif
         end
         MUL    : begin
             cdi.alu_op = ALU_MUL;
@@ -103,6 +147,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = MUL;
+            `endif
         end
         DIV    : begin
             cdi.alu_op = ALU_DIV;
@@ -111,14 +159,22 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = DIV;
+            `endif
         end
         BR     : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 2;
+            `ifdef ADDOP
+            op = BR;
+            `endif
         end
         SLL    : begin
             cdi.alu_op = ALU_SL;
@@ -127,6 +183,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SLL;
+            `endif
         end
         SRL    : begin
             cdi.alu_op = ALU_SR;
@@ -135,6 +195,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SRL;
+            `endif
         end
         SRA    : begin
             cdi.alu_op = ALU_RA;
@@ -143,6 +207,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SRA;
+            `endif
         end
         SRAS   : begin
             cdi.alu_op = ALU_RAS;
@@ -151,6 +219,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SRAS;
+            `endif
         end
         LWHI   : begin
             cdi.alu_op = ALU_NONE;
@@ -159,6 +231,10 @@ module controller8(
             cdi.selr   = SR_MEMH;
             mem_rd     = 0;
             mem_wr     = 1;
+            cdi.isize  = 3;
+            `ifdef ADDOP
+            op = LWHI;
+            `endif
         end
         SWHI   : begin
             cdi.alu_op = ALU_NONE;
@@ -167,6 +243,10 @@ module controller8(
             cdi.selr   = SR_NONE;
             mem_rd     = 1;
             mem_wr     = 0;
+            cdi.isize  = 3;
+            `ifdef ADDOP
+            op = SWHI;
+            `endif
         end
         LWLO   : begin
             cdi.alu_op = ALU_NONE;
@@ -175,6 +255,10 @@ module controller8(
             cdi.selr   = SR_MEML;
             mem_rd     = 0;
             mem_wr     = 1;
+            cdi.isize  = 3;
+            `ifdef ADDOP
+            op = LWLO;
+            `endif
         end
         SWLO   : begin
             cdi.alu_op = ALU_NONE;
@@ -183,6 +267,10 @@ module controller8(
             cdi.selr   = SR_NONE;
             mem_rd     = 1;
             mem_wr     = 0;
+            cdi.isize  = 3;
+            `ifdef ADDOP
+            op = SWLO;
+            `endif
         end
         INC    : begin
             cdi.alu_op = ALU_ADD;
@@ -191,6 +279,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = INC;
+            `endif
         end
         DEC    : begin
             cdi.alu_op = ALU_SUB;
@@ -199,6 +291,10 @@ module controller8(
             cdi.selr   = SR_ALUL;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = DEC;
+            `endif
         end
         GETAH  : begin
             cdi.alu_op = ALU_NONE;
@@ -207,6 +303,10 @@ module controller8(
             cdi.selr   = SR_ALUH;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = GETAH;
+            `endif
         end
         GETIF  : begin
             cdi.alu_op = ALU_NONE;
@@ -215,150 +315,223 @@ module controller8(
             cdi.selr   = SR_INTR;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = GETIF;
+            `endif
         end
         PUSH   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = PUSH;
+            `endif
         end
         POP    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 1;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = POP;
+            `endif
         end
         COM    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 1;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = COM;
+            `endif
         end
         CALL   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 2;
+            `ifdef ADDOP
+            op = CALL;
+            `endif
         end
         RET    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = RET;
+            `endif
         end
         JUMP   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 2;
+            `ifdef ADDOP
+            op = JUMP;
+            `endif
         end
         RETI   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = RETI;
+            `endif
         end
         CLC    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = CLC;
+            `endif
         end
         SETC   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SETC;
+            `endif
         end
         CLS    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = CLS;
+            `endif
         end
         SETS   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SETS;
+            `endif
         end
         SSETS  : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SSETS;
+            `endif
         end
         CLN    : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = CLN;
+            `endif
         end
         SETN   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SETN;
+            `endif
         end
         SSETN  : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
+            `ifdef ADDOP
+            op = SSETN;
+            `endif
         end
         RJUMP  : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 2;
+            `ifdef ADDOP
+            op = RJUMP;
+            `endif
         end
         RBWI   : begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 1;
+            `ifdef ADDOP
+            op = RBWI;
+            `endif
         end
         default: begin
             cdi.alu_op = ALU_NONE;
             cdi.selb   = SB_NONE;
-            cdi.rw_en  = 1'bx;
+            cdi.rw_en  = 0;
             cdi.selr   = SR_NONE;
             mem_rd     = 0;
             mem_wr     = 0;
+            cdi.isize  = 0;
         end
     endcase
     end

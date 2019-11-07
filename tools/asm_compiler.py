@@ -35,10 +35,16 @@ def decode_byte(val: str):
 def is_reg(r):
     if r.startswith('$'):
         r = r[1:]
-    return len(r) == 2 and (r == 'ra' or r == 'rb' or r == 'rc' or r == 're')
+    if r.isnumeric() and 0 <= int(r) <= 3:
+        return True
+    elif len(r) == 2 and (r == 'ra' or r == 'rb' or r == 'rc' or r == 're'):
+        return True
+    return False
 
 
 def decode_reg(r):
+    if r.isnumeric():
+        r = int(r)
     if isinstance(r, int):
         if 0 <= r <= 3:
             return r

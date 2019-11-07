@@ -5,10 +5,12 @@ import alu_pkg::*;
 module datapath8(
 		input logic clk, rst, interrupt,
 		risc8_cdi.datapath cdi,
-		input  word imm, com_rd,
+		input  word com_rd,
+		input  wire [23:0] imm,
 		output word com_wr, com_addr,
 		input  [15:0] mem_rd,
-		output [15:0] mem_wr
+		output [15:0] mem_wr,
+		output reg [15:0] pc
 );
 	
 	word r1, r2, reg_wr;
@@ -24,22 +26,48 @@ module datapath8(
 	);
 
 	word srcA, srcB, alu_rlo, alu_rhi;
-	logic cout, cin, alu_eq, alu_gt, alu_zero;
+	logic cout, cin, alu_eq, alu_gt, alu_zero, alu_sign;
 	assign cdi.alu_comp = {alu_eq, alu_gt, alu_zero};
+	assign alu_sign = 0;
+	always_ff@(posedge clk) begin
+			if(rst) cin <= 0;
+			else if(cdi.alu_op == ALU_ADD || cdi.alu_op == ALU_SUB)
+					cin <= cout;
+	end
 
 	alu#(.WORD(8)) alu0(
-		.a(alu_srcA),
-		.b(alu_srcB),
-		.op(e_alu_op'(alu_op)),
+		.a(srcA),
+		.b(srcB),
+		.op(cdi.alu_op),
 		.r(alu_rlo),
 		.r_high(alu_rhi),
 		.zero(alu_zero),
 		.eq(alu_eq),
 		.gt(alu_gt),
 		.cin(cin), .cout(cout),
-		.sign(cdi.sign)
+		.sign(alu_sign)
 		// TODO: missing overflow
 	);
+
+	// Program counter
+	logic bconst; // Use immediate to branch
+	word pc_off; // Program counter offset
+	reg [15:0] pcn, pca; // Program Counter Previous, to add
+	always_ff@(posedge clk) begin
+			if(rst) pc <= '0; 
+			else pc <= pcn;
+	end
+
+	assign bconst = 0;  // FIXME: temporary
+	assign pca = (bconst) ? imm[15:0] : pc;
+	assign pc_off = { 
+			5'b0000_0, 
+			cdi.isize[0]&cdi.isize[1], 
+			cdi.isize[0]^cdi.isize[1], 
+			(~cdi.isize[1]&~cdi.isize[0])|(cdi.isize[1]&~cdi.isize[0])
+	}; // Adding 1 to 2bit value.
+	assign pcn = pca + pc_off;
+
 	
 	word interrupt_flag;
 	always_ff@(posedge clk) begin
@@ -53,7 +81,7 @@ module datapath8(
 			SB_REG : srcB = r2;
 			SB_0   : srcB = 8'h00;
 			SB_1   : srcB = 8'h01;
-			SB_IMM : srcB = imm;
+			SB_IMM : srcB = imm[7:0];
 			default: srcB = r2;
 		endcase
 
@@ -62,7 +90,7 @@ module datapath8(
 			SR_MEMH: reg_wr = mem_rd[15:8];
 			SR_ALUL: reg_wr = alu_rlo;
 			SR_ALUH: reg_wr = alu_rhi;
-			SR_IMM : reg_wr = imm;
+			SR_IMM : reg_wr = imm[7:0];
 			SR_COM : reg_wr = com_rd;
 			SR_INTR: reg_wr = interrupt_flag;
 			default: reg_wr = alu_rlo;

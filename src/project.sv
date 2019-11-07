@@ -56,18 +56,17 @@ module com_block(
 
 	always_ff@(posedge clk) begin
 		if(addr == 8'h06) leds <= in_data;
-		if(addr == 8'h05) tx_byte <= in_data;
-		if(addr == 8'h05) uart0_transmit <= 1;
-		else uart0_transmit <= 0; 
 	end
 
 	always_comb begin
-	case(addr)
+		uart0_transmit = (addr == 8'h05) ? 1 : 0;
+		tx_byte = in_data;
+		case(addr)
 			8'h04: out_data = {5'b0, uart0_reg};
 			8'h05: out_data = {5'b0, uart0_reg};
 			8'h07: out_data = {4'b0, switches};
 			default: out_data = 0;
-	endcase
+		endcase
 	end
 endmodule
 

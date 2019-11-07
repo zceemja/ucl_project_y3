@@ -16,24 +16,22 @@ import alu_pkg::*;
 //endmodule
 
 module risc8_cpu(processor_port port);
-	//logic clk, rst, mem_wr; 
-	//word pc, instr, imm, mem_addr, mem_data, mem_rd_data;
-	
-	//assign port.ram_wr_en = mem_wr;
-	//assign port.ram_rd_en = ~mem_wr;
-
-	//instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") imem0(pc, instr, imm);
+	parameter PROGRAM="";
+	reg [31:0] instr; // Fetching 4x8bit instruction
+	reg [15:0] pc; // Instruction memory is 16bit in length
+	initial $display("RISC8 program: %s", PROGRAM);	
+	instr_rom #(.FILE(PROGRAM),
+				.LENGTH(256),
+				.OUTMUL(4),
+				.ADDR_WIDTH(16)
+		) rom0 (pc, instr);
 	
 	//risc8_cpu cpu0(port.clk, port.rst, instr, imm, pc,
 	//		port.ram_addr, mem_wr, port.ram_wr_data, port.ram_rd_data);
 	
-	word instr, imm0, imm1, imm2;
-	assign imm0 = 8'h00;
-	assign instr = 8'h00;
-
 	risc8_cdi cdi0();
 	controller8 ctrl0(
-			.instr(instr),
+			.instr(instr[7:0]),
 			.cdi(cdi0),
 			.mem_wr(port.ram_wr_en),
 			.mem_rd(port.ram_rd_en)
@@ -42,27 +40,47 @@ module risc8_cpu(processor_port port);
 			.clk(port.clk),
 			.rst(port.rst),
 			.cdi(cdi0),
-			.imm(imm0),
+			.imm(instr[31:8]),
 			.mem_rd(port.ram_rd_data),
-			.mem_wr(port.ram_wr_data)
+			.mem_wr(port.ram_wr_data),
+			.pc(pc)
 	);
 
 endmodule
 
 `timescale 1ns / 1ns
 module risc8_cpu_tb;
-	logic clk, rst, mem_wr; 
-	word pc, instr, imm, mem_addr, mem_data, mem_rd_data;	
-	cpu CPU(clk, rst, instr, imm, pc, mem_addr, mem_wr, mem_data, mem_rd_data);
-	// Instruction memory
-	instr_mem #("/home/min/devel/fpga/ucl_project_y3/memory/test.mem") IMEM(pc, instr, imm);
-	// System memory
-	memory RAM(clk, mem_wr, mem_addr, mem_data, mem_rd_data);
-	word outvalue;
-	always_ff@(posedge clk) begin
-			if(mem_wr & mem_addr == 8'hFF) outvalue <= mem_data;
-			else outvalue <= 0; 
-	end
+
+	logic clk, rst;
+	logic [23:0] ram_addr;
+	logic [15:0] ram_wr;
+	logic [15:0] ram_rd;
+	logic ram_wr_en;
+	logic ram_rd_en;
+
+	processor_port port0(
+		.clk(clk),
+		.rst(rst),
+		.ram_addr(ram_addr),
+		.ram_wr_data(ram_wr),
+		.ram_rd_data(ram_rd),
+		.ram_wr_en(ram_wr_en),
+		.ram_rd_en(ram_rd_en)
+	);
+	
+	risc8_cpu #(.PROGRAM("../../memory/risc8_test.mem")) cpu0(port0);
+	
+	memory #(
+			.WIDTH(16),
+			.LENGTH(2**24)
+	) ram0 (
+			clk,
+			ram_wr_en,
+			ram_rd_en,
+			ram_addr,
+			ram_wr,
+			ram_rd
+	);
 
 	initial begin
 		clk = 0;

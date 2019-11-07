@@ -1,50 +1,50 @@
- instr, cdi.alu_op, cdi.selb, cdi.rw_en, cdi.selr, mem_rd, mem_wr
-     MOVE,   ALU_NONE,      SB_NONE,         1,     SR_COM,      0,      0
-     CPY0,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0
-     CPY1,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0
-     CPY2,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0
-     CPY3,   ALU_NONE,       SB_IMM,         1,     SR_IMM,      0,      0
-         ,           ,             ,          ,           ,      0,      0
-      ADD,    ALU_ADD,       SB_REG,         1,    SR_ALUL,      0,      0
-      SUB,    ALU_SUB,       SB_REG,         1,    SR_ALUL,      0,      0
-      AND,    ALU_AND,       SB_REG,         1,    SR_ALUL,      0,      0
-       OR,     ALU_OR,       SB_REG,         1,    SR_ALUL,      0,      0
-      XOR,    ALU_XOR,       SB_REG,         1,    SR_ALUL,      0,      0
-      MUL,    ALU_MUL,       SB_REG,         1,    SR_ALUL,      0,      0
-      DIV,    ALU_DIV,       SB_REG,         1,    SR_ALUL,      0,      0
-       BR,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-         ,           ,             ,          ,           ,      0,      0
-      SLL,     ALU_SL,       SB_REG,         1,    SR_ALUL,      0,      0
-      SRL,     ALU_SR,       SB_REG,         1,    SR_ALUL,      0,      0
-      SRA,     ALU_RA,       SB_REG,         1,    SR_ALUL,      0,      0
-     SRAS,    ALU_RAS,       SB_REG,         1,    SR_ALUL,      0,      0
-         ,           ,             ,          ,           ,      0,      0
-     LWHI,   ALU_NONE,      SB_NONE,         1,    SR_MEMH,      0,      1
-     SWHI,   ALU_NONE,      SB_NONE,         0,    SR_NONE,      1,      0
-     LWLO,   ALU_NONE,      SB_NONE,         1,    SR_MEML,      0,      1
-     SWLO,   ALU_NONE,      SB_NONE,         0,    SR_NONE,      1,      0
-         ,           ,             ,          ,           ,      0,      0
-      INC,    ALU_ADD,         SB_1,         1,    SR_ALUL,      0,      0
-      DEC,    ALU_SUB,         SB_1,         1,    SR_ALUL,      0,      0
-    GETAH,   ALU_NONE,      SB_NONE,         1,    SR_ALUH,      0,      0
-    GETIF,   ALU_NONE,      SB_NONE,         1,    SR_INTR,      0,      0
-         ,           ,             ,          ,           ,      0,      0
-     PUSH,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      POP,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      COM,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-         ,           ,             ,          ,           ,      0,      0
-     CALL,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      RET,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     JUMP,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     RETI,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      CLC,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     SETC,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      CLS,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     SETS,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-    SSETS,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-      CLN,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     SETN,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-    SSETN,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-    RJUMP,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-     RBWI,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
-  default,   ALU_NONE,      SB_NONE,         x,    SR_NONE,      0,      0
+instr,cdi.alu_op,cdi.selb,cdi.rw_en,cdi.selr,mem_rd,mem_wr,cdi.isize
+CPY0,ALU_NONE,SB_IMM,1,SR_IMM,0,0,1
+CPY1,ALU_NONE,SB_IMM,1,SR_IMM,0,0,1
+CPY2,ALU_NONE,SB_IMM,1,SR_IMM,0,0,1
+CPY3,ALU_NONE,SB_IMM,1,SR_IMM,0,0,1
+MOVE,ALU_NONE,SB_NONE,1,SR_COM,0,0,0
+,,,,,,,
+ADD,ALU_ADD,SB_REG,1,SR_ALUL,0,0,0
+SUB,ALU_SUB,SB_REG,1,SR_ALUL,0,0,0
+AND,ALU_AND,SB_REG,1,SR_ALUL,0,0,0
+OR,ALU_OR,SB_REG,1,SR_ALUL,0,0,0
+XOR,ALU_XOR,SB_REG,1,SR_ALUL,0,0,0
+MUL,ALU_MUL,SB_REG,1,SR_ALUL,0,0,0
+DIV,ALU_DIV,SB_REG,1,SR_ALUL,0,0,0
+BR,ALU_NONE,SB_NONE,0,SR_NONE,0,0,2
+,,,,,,,
+SLL,ALU_SL,SB_REG,1,SR_ALUL,0,0,0
+SRL,ALU_SR,SB_REG,1,SR_ALUL,0,0,0
+SRA,ALU_RA,SB_REG,1,SR_ALUL,0,0,0
+SRAS,ALU_RAS,SB_REG,1,SR_ALUL,0,0,0
+,,,,,,,
+LWHI,ALU_NONE,SB_NONE,1,SR_MEMH,0,1,3
+SWHI,ALU_NONE,SB_NONE,0,SR_NONE,1,0,3
+LWLO,ALU_NONE,SB_NONE,1,SR_MEML,0,1,3
+SWLO,ALU_NONE,SB_NONE,0,SR_NONE,1,0,3
+,,,,,,,
+INC,ALU_ADD,SB_1,1,SR_ALUL,0,0,0
+DEC,ALU_SUB,SB_1,1,SR_ALUL,0,0,0
+GETAH,ALU_NONE,SB_NONE,1,SR_ALUH,0,0,0
+GETIF,ALU_NONE,SB_NONE,1,SR_INTR,0,0,0
+,,,,,,,
+PUSH,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+POP,ALU_NONE,SB_NONE,1,SR_NONE,0,0,0
+COM,ALU_NONE,SB_NONE,1,SR_NONE,0,0,1
+,,,,,,,
+CALL,ALU_NONE,SB_NONE,0,SR_NONE,0,0,2
+RET,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+JUMP,ALU_NONE,SB_NONE,0,SR_NONE,0,0,2
+RETI,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+CLC,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+SETC,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+CLS,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+SETS,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+SSETS,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+CLN,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+SETN,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+SSETN,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0
+RJUMP,ALU_NONE,SB_NONE,0,SR_NONE,0,0,2
+RBWI,ALU_NONE,SB_NONE,0,SR_NONE,0,0,1
+default,ALU_NONE,SB_NONE,0,SR_NONE,0,0,0

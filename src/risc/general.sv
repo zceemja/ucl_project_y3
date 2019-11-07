@@ -92,6 +92,36 @@ package risc8_pkg;
 
 endpackage
 
+interface risc8_cdi;  // Control Datapath interface	
+	import risc8_pkg::*;
+	import alu_pkg::*;
+
+	// ALU
+	e_alu_op alu_op;
+	logic sign, alu_not;
+	e_selb selb;
+	logic [2:0] alu_comp;
+	
+	// Register
+	reg_addr a1, a2, a3;
+	logic rw_en, mem_h;
+	e_selr selr;
+	logic [1:0] isize; // instruction size between 1 and 4
+	
+	modport datapath(
+		input alu_op, selb, sign, alu_not,
+		output alu_comp,
+		input a1, a2, a3, rw_en, selr, mem_h, isize
+	);
+	
+	modport control(
+		output alu_op, selb, sign, alu_not,
+		input alu_comp,
+		output a1, a2, a3, rw_en, selr, mem_h, isize
+	);
+
+endinterface
+
 package risc8x_pkg;
 		
 	localparam word_size = 8;
@@ -190,34 +220,4 @@ package risc8x_pkg;
 	} e_instr;
 
 endpackage
-
-
-interface risc8_cdi;  // Control Datapath interface	
-	import risc8_pkg::*;
-	import alu_pkg::*;
-
-	// ALU
-	e_alu_op alu_op;
-	logic sign, alu_not;
-	e_selb selb;
-	logic [2:0] alu_comp;
-	
-	// Register
-	reg_addr a1, a2, a3;
-	logic rw_en, mem_h;
-	e_selr selr;
-	
-	modport datapath(
-		input alu_op, selb, sign, alu_not,
-		output alu_comp,
-		input a1, a2, a3, rw_en, selr, mem_h
-	);
-	
-	modport control(
-		output alu_op, selb, sign, alu_not,
-		input alu_comp,
-		output a1, a2, a3, rw_en, selr, mem_h
-	);
-
-endinterface
 
