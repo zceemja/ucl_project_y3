@@ -1,13 +1,14 @@
 module instr_rom(addr, instr);
-	parameter FILE = "";
+	parameter FILE = "";	
 	parameter WIDTH=8, LENGTH=256, OUTMUL=2;
 	parameter ADDR_WIDTH = $clog2(LENGTH);
 
 	input  wire [ADDR_WIDTH-1:0]   addr;
 	output reg  [WIDTH*OUTMUL-1:0] instr;
 	
+	initial $display("Instruction ROM %0dx%0dbit, size of %0dB loaded from %s ...", WIDTH, ADDR_WIDTH, LENGTH*WIDTH/8, FILE);
 	logic [WIDTH-1:0] rom [LENGTH-1:0];
-	initial $readmemh(FILE, rom);
+	initial if(FILE != "") $readmemh(FILE, rom);
 	initial begin
 		 $display("Instruction ROM dump");
 		 for (int i=0; i < LENGTH; i+=32) begin
