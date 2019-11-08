@@ -1,0 +1,138 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{pdflscape}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+
+
+\setcounter{tocdepth}{3}
+\begin{document}
+\begin{titlepage}
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\textsc{\Large University College London}\\[0.5cm]
+	\textsc{\large Department of Electronic \& Electrical Engineering}\\[0.5cm]
+	
+	\HRule \\[0.4cm]
+	\setstretch{1.5}
+	{ \huge \bfseries Project Progress Report No. 1}\\[0.4cm]
+	\setstretch{1.0}
+	\HRule \\[1.0cm]
+	
+	\Large \emph{Author:}\\
+	Minduagas \textsc{Jarmolovicius}\\
+	\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+	
+	\Large \emph{Supervisor:}\\
+	Prof. Robert \textsc{Killey}\\
+	\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+	\vfill
+	{\large November 8, 2019}\\[2cm]
+	
+\end{titlepage}
+
+	
+%\maketitle
+%\tableofcontents
+
+\pagebreak
+\section{Progress}
+The following points have been done so far:
+\begin{description}
+	\item[$\bullet$] Finalised RISC instruction set;
+	\item[$\bullet$] Have fundamental instructions implemented to RISC;
+	\item[$\bullet$] Have working assembly compiler (not all instructions yet implemented);
+	\item[$\bullet$] Implemented HDL interface allowing connecting different processors without needing to change or rewrite top level code;
+	\item[$\bullet$] Implemented UART;
+	\item[$\bullet$] Implemented SDRAM controller;
+
+Project schedule as Grantt chart has been updated in the next page in table \ref{table:time}. 
+
+\end{description}
+\section{Difficulties encountered}
+Main difficulties are inexperience with SystemVerilog and structuring large hierarchical HDL code. 
+One of more specific examples having different effects between Verilog's "wire" and "reg" or "logic" definitions causing issues between combination and sequential logics. These difficulties have been slowly resolved by learning and practising on writing code. 
+
+\section{Failure Risk Assessment}
+There are no updated on failure risk assessment. One of the most dominant failure risk is running out of time project is a bit behind schedule. 
+
+See table \ref{table:time} for schedule. Next week is scheduled RISC compiler and benchmark development, however, the RISC processor is not fully implemented which would allow writing more complicated programs, including benchmark. Therefore it is expected RISC compiler and benchmark development to be delayed by anywhere from few days up to a week.  
+
+\section{Updated Safety Risk Assessment}
+There are no updates on safety risk assessment.
+
+\section{Help and Advice Needed}
+At this state no help is needed, and any small issues and advices are sorted out in weekly supervisor meetings.
+
+\newpage
+\begin{landscape}
+\section{Updated Schedule}
+\begin{table}[h]
+\centering
+\begin{ganttchart}[
+	y unit title=0.4cm,
+	y unit chart=0.5cm,
+	x unit=1.1mm,
+	hgrid,
+	today=2019-11-08,
+	today label node/.append style={below=12pt},
+	today label font=\itshape\color{blue},
+	today rule/.style={draw=blue, ultra thick},
+	title height=1,
+	bar/.append style={fill=blue!50},
+	bar incomplete/.append style={fill=gray!50},
+	progress label text={$\displaystyle{#1\%}$},
+	time slot format=isodate
+	]{2019-10-01}{2020-03-31}
+	\gantttitlecalendar{year, month=shortname} \\
+	\gantttitle{40}{6}
+	\gantttitlelist{41,...,52}{7}
+	\gantttitlelist{1,...,13}{7}
+	\gantttitle{}{2} \\
+	\ganttbar[progress=100]{RISC implementation}{2019-10-01}{2019-10-27}\\
+	\ganttbar[progress=50]{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+	\ganttbar[progress=100]{UART and I/O}{2019-10-21}{2019-10-27}
+	\ganttbar[progress=50]{}{2019-11-25}{2019-12-08} \\
+	\ganttbar[progress=70]{RISC Assembler}{2019-10-14}{2019-11-11}\\
+	\ganttbar[progress=0]{RISC Compiler}{2019-11-11}{2019-12-13}\\
+	\ganttbar[progress=0]{Developing benchmark}{2019-11-11}{2019-12-13}
+	\ganttbar[progress=0]{}{2020-02-23}{2020-03-07} \\
+	\ganttbar[progress=0]{OISC Implementation}{2019-12-02}{2019-12-13}
+	\ganttbar[progress=0]{}{2020-01-13}{2020-02-02}\\
+	\ganttbar[progress=0]{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+	\ganttbar[progress=0]{OISC Assembler}{2020-01-20}{2020-02-09}\\
+	\ganttbar[progress=0]{OISC Compiler}{2020-02-09}{2020-03-01}\\
+	\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+	\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+	\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+	\ganttmilestone{December Interim Report}{2019-12-09}\\
+	\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+	\ganttmilestone{Progress Report \#4}{2020-02-14}\\
+	\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+	\ganttmilestone{Poster Presentation}{2020-03-18}\\
+	\ganttmilestone{Final Report}{2020-03-30}\\
+	\ganttvrule{Reading Week}{2019-11-03}
+	\ganttvrule{}{2019-11-10}
+	\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+	\ganttvrule{}{2020-01-12}
+\end{ganttchart}	
+\caption{Updated project schedule Grantt chart}
+\label{table:time}
+\end{table}
+\end{landscape}
+
+\end{document}
