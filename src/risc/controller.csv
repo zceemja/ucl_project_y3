@@ -27,10 +27,15 @@
     PUSH,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB, PC_NONE 
      POP,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         0,SO_MEML ,  ST_ADD, PC_NONE 
      COM,   ALU_NONE,  SB_NONE,         1,   SR_COM,      0,      0,         1, SO_COM , ST_SKIP, PC_NONE 
-    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         1,SO_MEML ,  ST_SUB, PC_CALL 
-     RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_RET 
-    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_NONE, PC_JUMP 
-    RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_RET 
+    SETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
+     BEQ,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b10)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b10)?PC_IMM2:PC_NONE
+     BGT,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b01)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b01)?PC_IMM2:PC_NONE
+     BGE,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2]|cdi.alu_comp[1])?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2]|cdi.alu_comp[1])?PC_IMM2:PC_NONE
+      BZ,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
+    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         1,SO_MEML ,  ST_SUB,  PC_IMM 
+     RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_MEM 
+    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_NONE,  PC_IMM
+    RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_MEM 
      CLC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
     SETC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
      CLS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 

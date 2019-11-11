@@ -24,7 +24,7 @@ package risc8_pkg;
 		XOR  =8'b0101_????,  // &rd = &rd ^ &rs
 		MUL  =8'b0110_????,  // {&ah,  &rd} = &rd * &rs
 		DIV  =8'b0111_????,  // &rd = &rd / &rs, &ah = &rd % &rs 
-		BR   =8'b1000_????,  // Conditional branch
+		BR   =8'b1000_????,  // FIXME: Conditional branch
 		
 		SLL  =8'b1001_??00,  // i9-0 shift left logical
 		SRL  =8'b1001_??01,  // i9-1 shift right logical
@@ -43,8 +43,14 @@ package risc8_pkg;
 		
 		PUSH =8'b1100_??00,  // i12-0
         POP  =8'b1100_??01,  // i12-1 
-        COM  =8'b1100_??10,  // i12-2 
+        COM  =8'b1100_??10,  // i12-2
+		SETI =8'b1100_??11,  // i12-3 Set next immidate
 		
+		BEQ  =8'b1101_??00,  // i13-0 Branch to imm[24:8] if imm[7:0] == rd
+		BGT  =8'b1101_??01,  // i13-1 Branch greater than
+		BGE  =8'b1101_??10,  // i13-2 Branch greater equal than
+		BZ   =8'b1101_0011,  // i13-3 Branch to imm[15:0] if rd == zero
+
 		CALL =8'b1111_0000,  // i15-0
         RET  =8'b1111_0001,  // i15-1
         JUMP =8'b1111_0010,  // i15-2
@@ -109,10 +115,11 @@ package risc8_pkg;
 
 	typedef enum logic [2:0] {
 		PC_NONE= 3'b000,
-		PC_CALL= 3'b001,
-		PC_RET = 3'b010,
-		PC_RETI= 3'b011,
-		PC_JUMP= 3'b100
+		PC_MEM = 3'b001,
+		PC_IMM = 3'b010,
+		PC_IMM2= 3'b011,
+		PC_MEMI= 3'b100   // TODO: Maybe Memory + interrupt flag?
+
 	} e_pcop;
 
 endpackage

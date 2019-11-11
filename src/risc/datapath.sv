@@ -73,9 +73,9 @@ module datapath8(
 		bconst = 0;  // FIXME: temporary
 		case(cdi.pcop)
 			PC_NONE: pca = pc;
-			PC_CALL: pca = {imm[7:0], imm[15:8]};
-			PC_RET : pca = mem_rd;
-			PC_JUMP: pca = {imm[7:0], imm[15:8]};
+			PC_MEM : pca = mem_rd;
+			PC_IMM : pca = {imm[7:0], imm[15:8]};
+			PC_IMM2: pca = {imm[15:8], imm[23:16]};
 			default: pca = pc;
 		endcase
 		//pca = (bconst) ? {imm[7:0], imm[15:8]} : pc;
@@ -107,7 +107,7 @@ module datapath8(
 		sp_next = sp + sp_add;
 		sp_addr = {9'b1111_1111_1, (cdi.stackop == ST_ADD) ? sp_next[15:1] : sp[15:1]};
 		st_rd = {mem_rd[7:0]};
-		st_wr = (cdi.pcop == PC_CALL) ? pc : {8'h00, r1};
+		st_wr = (cdi.pcop == PC_IMM) ? pc : {8'h00, r1};
 		//if(sp[0]) begin
 			//st_wr = {'h00, r1};
 			//st_rd = {mem_rd[7:0]};
