@@ -5,46 +5,47 @@ import argparse
 from os import path
 
 
-def decode_byte(val: str):
+def decode_bytes(val: str):
     try:
         if val.endswith('h'):
-            return int(val[:-1], 16)
+            return [int(val[i:i+2], 16) for i in range(0, len(val)-1, 2)]
         if val.startswith('0x'):
-            return int(val[2:], 16)
+            return [int(val[i:i+2], 16) for i in range(2, len(val), 2)]
         if val.startswith('b'):
-            return int(val.replace('_', '')[1:], 2)
+            val = val.replace('_', '')[1:]
+            return [int(val[i:i+8], 2) for i in range(0, len(val), 8)]
     except ValueError:
         raise ValueError(f"Invalid binary '{val}'")
     if val.isdigit():
         i = int(val)
         if i > 255 or i < 0:
             raise ValueError(f"Invalid binary '{val}', unsigned int out of bounds")
-        return i
+        return [i]
     if (val.startswith('+') or val.startswith('-')) and val[1:].isdigit():
         i = int(val)
         if i > 127 or i < -128:
             raise ValueError(f"Invalid binary '{val}', signed int out of bounds")
         if i < 0:  # convert to unsigned
             i += 2 ** 8
-        return i
+        return [i]
     if len(val) == 3 and ((val[0] == "'" and val[2] == "'") or (val[0] == '"' and val[2] == '"')):
-        return ord(val[1])
+        return [ord(val[1])]
     raise ValueError(f"Invalid binary '{val}'")
 
 
 def is_reg(r):
     if r.startswith('$'):
         r = r[1:]
-    if r.isnumeric() and 0 <= int(r) <= 3:
-        return True
-    elif len(r) == 2 and (r == 'ra' or r == 'rb' or r == 'rc' or r == 're'):
+        if r.isnumeric() and 0 <= int(r) <= 3:
+            return True
+    elif len(r) == 2 and r[0] == 'r' and r[1] in {'0', '1', '2', '3', 'a', 'b', 'c', 'e'}:
         return True
     return False
 
 
 def decode_reg(r):
-    if r.isnumeric():
-        r = int(r)
+    if r.startswith('$') and r[1:].isnumeric():
+        r = int(r[1:])
     if isinstance(r, int):
         if 0 <= r <= 3:
             return r
@@ -52,13 +53,13 @@ def decode_reg(r):
     rl = r.lower()
     if rl.startswith('$'):
         rl = rl[1:]
-    if rl == 'ra':
+    if rl == 'ra' or rl == 'r0':
         return 0
-    if rl == 'rb':
+    if rl == 'rb' or rl == 'r1':
         return 1
-    if rl == 'rc':
+    if rl == 'rc' or rl == 'r2':
         return 2
-    if rl == 're':
+    if rl == 're' or rl == 'r3':
         return 3
     raise ValueError(f"Invalid register name '{r}'")
 
@@ -111,16 +112,15 @@ def assemble(file):
         elif instr == 'XOR':
             iname = 'XOR'
             inibb = 5
-        elif instr == 'GT' or instr == 'GRT':
-            iname = 'GT'
+        elif instr == 'MUL':
+            iname = 'MUL'
             inibb = 6
-        elif instr == 'EX' or instr == 'EXT':
-            iname = 'EXT'
+        elif instr == 'DIV':
+            iname = 'DIV'
             inibb = 7
-        elif instr == 'SHFL':
-            iname = 'SHTL'
-            inibb = 7
-            ops.append(0)
+        elif instr == 'SLL':
+            iname = 'SLL'
+            inibb = 9
         elif instr == 'SHFR':
             iname = 'SHTR'
             inibb = 7
@@ -154,7 +154,7 @@ def assemble(file):
         else:
             if len(ops) == 1:
                 try:
-                    odata.append(decode_byte(ops[0]))
+                    odata += decode_bytes(ops[0])
                     continue
                 except ValueError:
                     pass
@@ -169,7 +169,7 @@ def assemble(file):
             if iname == 'JUMP':
                 odata.append(inibb << 4)
                 try:
-                    odata.append(decode_byte(ops[1]))
+                    odata += decode_bytes(ops[1])
                 except ValueError:
                     if not ops[1].isalnum():
                         print(f"{file}:{lnum}: Invalid pointer reference '{ops[1]}'")
@@ -184,7 +184,7 @@ def assemble(file):
 
             rd = decode_reg(ops[1])
             if iname == 'COPY' and not is_reg(ops[2]):
-                imm = decode_byte(ops[2])
+                imm = decode_bytes(ops[2])[0]
                 odata.append((inibb << 4) | (rd << 2) | rd)
                 odata.append(int(imm))
                 continue
@@ -202,7 +202,7 @@ def assemble(file):
             odata.append((inibb << 4) | (rd << 2) | rs)
             if iname == 'JEQ':
                 try:
-                    odata.append(decode_byte(ops[3]))
+                    odata += decode_bytes(ops[3])
                 except ValueError:
                     if not ops[3].isalnum():
                         print(f"{file}:{lnum}: Invalid pointer reference '{ops[3]}'")

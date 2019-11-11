@@ -72,8 +72,17 @@ package risc8_pkg;
 		SB_IMM = 2'b11
 	} e_selb;
 
+	typedef enum logic [1:0] {
+		SO_NONE= 2'bxx,
+		SO_COM = 2'b00,
+		SO_MEMH= 2'b01,
+		SO_MEML= 2'b10
+		//SO_= 2'b11
+	} e_selo;
+
 	typedef enum logic [2:0] {
 		SR_NONE= 3'bxxx,
+		SR_REG = 3'b000,
 		SR_MEML= 3'b001,
 		SR_MEMH= 3'b010,
 		SR_ALUL= 3'b011,
@@ -90,6 +99,13 @@ package risc8_pkg;
 		REG3  = 2'b11
 	} e_reg_addr;
 
+	typedef enum logic [1:0] {
+		ST_SKIP= 2'b00,
+		ST_ADD = 2'b01,
+		ST_SUB = 2'b10,
+		ST_3   = 2'b11
+	} e_stackop;
+
 endpackage
 
 interface risc8_cdi;  // Control Datapath interface	
@@ -100,6 +116,8 @@ interface risc8_cdi;  // Control Datapath interface
 	e_alu_op alu_op;
 	logic sign, alu_not;
 	e_selb selb;
+	e_selo selo;
+	e_stackop stackop;
 	logic [2:0] alu_comp;
 	
 	// Register
@@ -109,13 +127,13 @@ interface risc8_cdi;  // Control Datapath interface
 	logic [1:0] isize; // instruction size between 1 and 4
 	
 	modport datapath(
-		input alu_op, selb, sign, alu_not,
+		input alu_op, selb, sign, alu_not, selo, stackop,
 		output alu_comp,
 		input a1, a2, a3, rw_en, selr, mem_h, isize
 	);
 	
 	modport control(
-		output alu_op, selb, sign, alu_not,
+		output alu_op, selb, sign, alu_not, selo, stackop,
 		input alu_comp,
 		output a1, a2, a3, rw_en, selr, mem_h, isize
 	);

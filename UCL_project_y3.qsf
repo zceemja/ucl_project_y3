@@ -136,7 +136,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE src/blocks/reg_file.sv
 set_global_assignment -name SYSTEMVERILOG_FILE src/blocks/memory.sv
 set_global_assignment -name QIP_FILE quartus/pll_clk.qip
 set_global_assignment -name SYSTEMVERILOG_FILE src/blocks/alu.sv
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
 set_global_assignment -name EDA_TEST_BENCH_FILE src/blocks/alu.sv -section_id testbench_1
 set_global_assignment -name EDA_TEST_BENCH_FILE src/blocks/instr_mem.sv -section_id testbench_1
 set_global_assignment -name EDA_TEST_BENCH_FILE src/blocks/memory.sv -section_id testbench_1
@@ -145,3 +144,4 @@ set_global_assignment -name EDA_TEST_BENCH_FILE src/risc/general.sv -section_id 
 set_global_assignment -name EDA_TEST_BENCH_FILE src/risc/controller.sv -section_id testbench_1
 set_global_assignment -name EDA_TEST_BENCH_FILE src/risc/datapath.sv -section_id testbench_1
 set_global_assignment -name EDA_TEST_BENCH_FILE src/risc/cpu.sv -section_id testbench_1
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

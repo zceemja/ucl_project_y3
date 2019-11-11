@@ -43,6 +43,10 @@ module risc8_cpu(processor_port port);
 			.imm(instr[31:8]),
 			.mem_rd(port.ram_rd_data),
 			.mem_wr(port.ram_wr_data),
+			.mem_addr(port.ram_addr),
+			.com_addr(port.com_addr),
+			.com_rd(port.com_rd),
+			.com_wr(port.com_wr),
 			.pc(pc)
 	);
 
@@ -58,6 +62,8 @@ module risc8_cpu_tb;
 	logic ram_wr_en;
 	logic ram_rd_en;
 
+	word com_addr, com_wr, com_rd;
+
 	processor_port port0(
 		.clk(clk),
 		.rst(rst),
@@ -65,8 +71,17 @@ module risc8_cpu_tb;
 		.ram_wr_data(ram_wr),
 		.ram_rd_data(ram_rd),
 		.ram_wr_en(ram_wr_en),
-		.ram_rd_en(ram_rd_en)
+		.ram_rd_en(ram_rd_en),
+		.com_addr(com_addr),
+		.com_wr(com_wr),
+		.com_rd(com_rd)
 	);
+
+	always_comb begin
+		if(com_addr != 'h00) begin
+			com_rd = com_addr^com_wr;
+		end else com_rd = 'h00;
+	end
 	
 	risc8_cpu #(.PROGRAM("../../memory/risc8_test.mem")) cpu0(port0);
 	
@@ -91,5 +106,11 @@ module risc8_cpu_tb;
 		rst = 1;
 		#10ns;
 		rst = 0;
+		if (cpu0.instr === 'x) $stop;
 	end
 endmodule
+
+module cpu_tb;
+	risc8_cpu_tb cpu_tb0();
+endmodule
+

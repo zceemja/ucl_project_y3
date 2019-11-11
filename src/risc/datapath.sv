@@ -10,7 +10,8 @@ module datapath8(
 		output word com_wr, com_addr,
 		input  [15:0] mem_rd,
 		output [15:0] mem_wr,
-		output reg [15:0] pc
+		output reg [15:0] pc,
+		output reg [23:0] mem_addr
 );
 	
 	word r1, r2, reg_wr;
@@ -25,14 +26,21 @@ module datapath8(
 			.wr_en(cdi.rw_en)
 	);
 
-	word srcA, srcB, alu_rlo, alu_rhi;
+	word srcA, srcB, alu_rlo, alu_rhi, alu_rhit;
 	logic cout, cin, alu_eq, alu_gt, alu_zero, alu_sign;
 	assign cdi.alu_comp = {alu_eq, alu_gt, alu_zero};
 	assign alu_sign = 0;
 	always_ff@(posedge clk) begin
-			if(rst) cin <= 0;
-			else if(cdi.alu_op == ALU_ADD || cdi.alu_op == ALU_SUB)
+			if(rst) begin
+					cin <= '0;
+					alu_rhi <= '0;
+			end else begin
+
+			if((cdi.alu_op == ALU_ADD)||(cdi.alu_op == ALU_SUB))
 					cin <= cout;
+			if((cdi.alu_op == ALU_MUL)||(cdi.alu_op == ALU_DIV))
+					alu_rhi <= alu_rhit;
+			end
 	end
 
 	alu#(.WORD(8)) alu0(
@@ -40,7 +48,7 @@ module datapath8(
 		.b(srcB),
 		.op(cdi.alu_op),
 		.r(alu_rlo),
-		.r_high(alu_rhi),
+		.r_high(alu_rhit),
 		.zero(alu_zero),
 		.eq(alu_eq),
 		.gt(alu_gt),
@@ -75,6 +83,48 @@ module datapath8(
 		else if(interrupt) interrupt_flag <= com_rd;
 	end
 	
+	
+	// ======================== //
+	// 			Stack 			//
+	// ======================== //
+
+	logic [15:0] sp, sp_add, sp_next, sp_data;  // Stack pointer 
+	word st_lo, st_rd, st_wr;  // Stack data low byte reg
+	logic [23:0] sp_addr;
+	always_comb begin
+		sp_add = (cdi.stackop == ST_ADD) ? 'h0001 : 'hffff;
+		sp_next = sp + sp_add;
+		sp_addr = {9'b1111_1111_1, (cdi.stackop == ST_ADD) ? sp_next[15:1] : sp[15:1]};
+		st_rd = (sp[0]) ? mem_rd[7:0] : mem_rd[15:8];
+		st_wr = (sp[0]) ? r1 : st_lo;
+	end
+	
+	always_ff@(posedge clk) begin
+			if(rst)	sp <= 'hffff;
+			else begin
+				if(cdi.stackop != ST_SKIP) sp <= sp_next;
+				if(sp[0]) st_lo <= r1; 
+			end
+	end
+
+	// ======================== //
+	// 			Memory 			//
+	// ======================== //
+
+	word mem_wr_hi; // High byte of memory store
+	always_ff@(posedge clk) begin
+			if(rst) mem_wr_hi <= '0; 
+			else if(cdi.selo == SO_MEMH) mem_wr_hi <= r1;
+	end
+
+	assign mem_wr[7:0] = r1;
+	assign mem_wr[15:8] = (cdi.stackop == ST_SUB) ? st_wr : mem_wr_hi;
+	assign mem_addr = (cdi.stackop != ST_SKIP) ? sp_addr : imm;
+
+	// COM Write
+	assign com_wr = (cdi.selo == SO_COM) ? r1 : '0;
+	assign com_addr = imm[7:0];
+
 	assign srcA = r1;
 	always_comb begin
 		case(cdi.selb)
@@ -86,7 +136,8 @@ module datapath8(
 		endcase
 
 		case(cdi.selr)
-			SR_MEML: reg_wr = mem_rd[7:0];
+			SR_REG : reg_wr = r2;
+			SR_MEML: reg_wr = (cdi.stackop == ST_ADD) ? st_rd : mem_rd[7:0];
 			SR_MEMH: reg_wr = mem_rd[15:8];
 			SR_ALUL: reg_wr = alu_rlo;
 			SR_ALUH: reg_wr = alu_rhi;
