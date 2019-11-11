@@ -57,7 +57,10 @@ module datapath8(
 		// TODO: missing overflow
 	);
 
-	// Program counter
+	// ======================== //
+	// 		Program Counter 	//
+	// ======================== //
+
 	logic bconst; // Use immediate to branch
 	word pc_off; // Program counter offset
 	reg [15:0] pcn, pca; // Program Counter Previous, to add
@@ -65,17 +68,25 @@ module datapath8(
 			if(rst) pc <= '0; 
 			else pc <= pcn;
 	end
-
-	assign bconst = 0;  // FIXME: temporary
-	assign pca = (bconst) ? imm[15:0] : pc;
-	assign pc_off = { 
+	
+	always_comb begin
+		bconst = 0;  // FIXME: temporary
+		case(cdi.pcop)
+			PC_NONE: pca = pc;
+			PC_CALL: pca = {imm[7:0], imm[15:8]};
+			PC_RET : pca = mem_rd;
+			PC_JUMP: pca = {imm[7:0], imm[15:8]};
+			default: pca = pc;
+		endcase
+		//pca = (bconst) ? {imm[7:0], imm[15:8]} : pc;
+		pc_off = { 
 			5'b0000_0, 
 			cdi.isize[0]&cdi.isize[1], 
 			cdi.isize[0]^cdi.isize[1], 
 			(~cdi.isize[1]&~cdi.isize[0])|(cdi.isize[1]&~cdi.isize[0])
-	}; // Adding 1 to 2bit value.
-	assign pcn = pca + pc_off;
-
+		}; // Adding 1 to 2bit value.
+		pcn = pca + pc_off;
+	end
 	
 	word interrupt_flag;
 	always_ff@(posedge clk) begin
@@ -88,22 +99,29 @@ module datapath8(
 	// 			Stack 			//
 	// ======================== //
 
-	logic [15:0] sp, sp_add, sp_next, sp_data;  // Stack pointer 
-	word st_lo, st_rd, st_wr;  // Stack data low byte reg
+	logic [15:0] sp, sp_add, sp_next, st_wr;  // Stack pointer 
+	word st_reg, st_rd;  // Stack data low byte reg
 	logic [23:0] sp_addr;
 	always_comb begin
-		sp_add = (cdi.stackop == ST_ADD) ? 'h0001 : 'hffff;
+		sp_add = (cdi.stackop == ST_ADD) ? 'h0002 : 'hfffe;
 		sp_next = sp + sp_add;
 		sp_addr = {9'b1111_1111_1, (cdi.stackop == ST_ADD) ? sp_next[15:1] : sp[15:1]};
-		st_rd = (sp[0]) ? mem_rd[7:0] : mem_rd[15:8];
-		st_wr = (sp[0]) ? r1 : st_lo;
+		st_rd = {mem_rd[7:0]};
+		st_wr = (cdi.pcop == PC_CALL) ? pc : {8'h00, r1};
+		//if(sp[0]) begin
+			//st_wr = {'h00, r1};
+			//st_rd = {mem_rd[7:0]};
+		//end else begin
+			//st_wr = {st_reg, r1};
+			//st_rd = {mem_rd[15:8]};
+		//end
 	end
 	
 	always_ff@(posedge clk) begin
 			if(rst)	sp <= 'hffff;
 			else begin
 				if(cdi.stackop != ST_SKIP) sp <= sp_next;
-				if(sp[0]) st_lo <= r1; 
+				if(sp[0]) st_reg <= r1; 
 			end
 	end
 
@@ -116,9 +134,8 @@ module datapath8(
 			if(rst) mem_wr_hi <= '0; 
 			else if(cdi.selo == SO_MEMH) mem_wr_hi <= r1;
 	end
-
-	assign mem_wr[7:0] = r1;
-	assign mem_wr[15:8] = (cdi.stackop == ST_SUB) ? st_wr : mem_wr_hi;
+	
+	assign mem_wr = (cdi.stackop == ST_SUB) ? st_wr : {mem_wr_hi, r1};
 	assign mem_addr = (cdi.stackop != ST_SKIP) ? sp_addr : imm;
 
 	// COM Write

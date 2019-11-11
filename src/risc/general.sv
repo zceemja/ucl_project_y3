@@ -100,11 +100,20 @@ package risc8_pkg;
 	} e_reg_addr;
 
 	typedef enum logic [1:0] {
+		ST_NONE= 2'bxx,
 		ST_SKIP= 2'b00,
 		ST_ADD = 2'b01,
 		ST_SUB = 2'b10,
 		ST_3   = 2'b11
 	} e_stackop;
+
+	typedef enum logic [2:0] {
+		PC_NONE= 3'b000,
+		PC_CALL= 3'b001,
+		PC_RET = 3'b010,
+		PC_RETI= 3'b011,
+		PC_JUMP= 3'b100
+	} e_pcop;
 
 endpackage
 
@@ -118,6 +127,7 @@ interface risc8_cdi;  // Control Datapath interface
 	e_selb selb;
 	e_selo selo;
 	e_stackop stackop;
+	e_pcop pcop;
 	logic [2:0] alu_comp;
 	
 	// Register
@@ -127,13 +137,13 @@ interface risc8_cdi;  // Control Datapath interface
 	logic [1:0] isize; // instruction size between 1 and 4
 	
 	modport datapath(
-		input alu_op, selb, sign, alu_not, selo, stackop,
+		input alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		output alu_comp,
 		input a1, a2, a3, rw_en, selr, mem_h, isize
 	);
 	
 	modport control(
-		output alu_op, selb, sign, alu_not, selo, stackop,
+		output alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		input alu_comp,
 		output a1, a2, a3, rw_en, selr, mem_h, isize
 	);

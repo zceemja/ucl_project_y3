@@ -30,6 +30,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CPY0;
             `endif
@@ -44,6 +45,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CPY1;
             `endif
@@ -58,6 +60,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CPY2;
             `endif
@@ -72,6 +75,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CPY3;
             `endif
@@ -86,6 +90,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = MOVE;
             `endif
@@ -100,6 +105,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = ADD;
             `endif
@@ -114,6 +120,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SUB;
             `endif
@@ -128,6 +135,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = AND;
             `endif
@@ -142,6 +150,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = OR;
             `endif
@@ -156,6 +165,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = XOR;
             `endif
@@ -170,6 +180,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = MUL;
             `endif
@@ -184,6 +195,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = DIV;
             `endif
@@ -198,6 +210,7 @@ module controller8(
             cdi.isize   = 2;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = BR;
             `endif
@@ -212,6 +225,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SLL;
             `endif
@@ -226,6 +240,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SRL;
             `endif
@@ -240,6 +255,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SRA;
             `endif
@@ -254,6 +270,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SRAS;
             `endif
@@ -268,6 +285,7 @@ module controller8(
             cdi.isize   = 3;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = LWHI;
             `endif
@@ -282,6 +300,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEMH;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SWHI;
             `endif
@@ -296,6 +315,7 @@ module controller8(
             cdi.isize   = 3;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = LWLO;
             `endif
@@ -310,6 +330,7 @@ module controller8(
             cdi.isize   = 3;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SWLO;
             `endif
@@ -324,6 +345,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = INC;
             `endif
@@ -338,6 +360,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = DEC;
             `endif
@@ -352,6 +375,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = GETAH;
             `endif
@@ -366,6 +390,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = GETIF;
             `endif
@@ -380,6 +405,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SUB;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = PUSH;
             `endif
@@ -394,6 +420,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_ADD;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = POP;
             `endif
@@ -408,6 +435,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_COM;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = COM;
             `endif
@@ -418,10 +446,11 @@ module controller8(
             cdi.rw_en   = 0;
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
-            mem_wr      = 0;
-            cdi.isize   = 2;
+            mem_wr      = 1;
+            cdi.isize   = 0;
             cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
+            cdi.stackop = ST_SUB;
+            cdi.pcop    = PC_CALL;
             `ifdef ADDOP
             op = CALL;
             `endif
@@ -431,11 +460,12 @@ module controller8(
             cdi.selb    = SB_NONE;
             cdi.rw_en   = 0;
             cdi.selr    = SR_NONE;
-            mem_rd      = 0;
+            mem_rd      = 1;
             mem_wr      = 0;
-            cdi.isize   = 0;
+            cdi.isize   = 2;
             cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
+            cdi.stackop = ST_ADD;
+            cdi.pcop    = PC_RET;
             `ifdef ADDOP
             op = RET;
             `endif
@@ -447,9 +477,10 @@ module controller8(
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 0;
-            cdi.isize   = 2;
+            cdi.isize   = 0;
             cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
+            cdi.stackop = ST_NONE;
+            cdi.pcop    = PC_JUMP;
             `ifdef ADDOP
             op = JUMP;
             `endif
@@ -459,11 +490,12 @@ module controller8(
             cdi.selb    = SB_NONE;
             cdi.rw_en   = 0;
             cdi.selr    = SR_NONE;
-            mem_rd      = 0;
+            mem_rd      = 1;
             mem_wr      = 0;
-            cdi.isize   = 0;
+            cdi.isize   = 2;
             cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
+            cdi.stackop = ST_SUB;
+            cdi.pcop    = PC_RET;
             `ifdef ADDOP
             op = RETI;
             `endif
@@ -478,6 +510,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CLC;
             `endif
@@ -492,6 +525,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SETC;
             `endif
@@ -506,6 +540,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CLS;
             `endif
@@ -520,6 +555,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SETS;
             `endif
@@ -534,6 +570,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SSETS;
             `endif
@@ -548,6 +585,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = CLN;
             `endif
@@ -562,6 +600,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SETN;
             `endif
@@ -576,6 +615,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = SSETN;
             `endif
@@ -590,6 +630,7 @@ module controller8(
             cdi.isize   = 2;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = RJUMP;
             `endif
@@ -604,6 +645,7 @@ module controller8(
             cdi.isize   = 1;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
             `ifdef ADDOP
             op = RBWI;
             `endif
@@ -618,6 +660,7 @@ module controller8(
             cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
         end
     endcase
     end
