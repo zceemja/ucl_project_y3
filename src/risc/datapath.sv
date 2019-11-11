@@ -136,7 +136,7 @@ module datapath8(
 	end
 	
 	assign mem_wr = (cdi.stackop == ST_SUB) ? st_wr : {mem_wr_hi, r1};
-	assign mem_addr = (cdi.stackop != ST_SKIP) ? sp_addr : imm;
+	assign mem_addr = (cdi.stackop != ST_SKIP) ? sp_addr : {imm[7:0], imm[15:8], imm[23:16]};
 
 	// COM Write
 	assign com_wr = (cdi.selo == SO_COM) ? r1 : '0;

@@ -35,6 +35,19 @@ b1011_0000 // &r0++
 b1011_0001 // &r0--
 b1011_0001 // &r0--
 
+COPY r0 32h 
+COPY r1 4fh
+b1010_0001  // Store 32 to high memory
+b1010_0111  // Store 4f to low 000001h
+0x000001
+COPY r0 0
+COPY r1 r0
+b1010_0000
+0x000001
+b1010_0010
+0x000001
+
+
 b1101_0000 // Branch to 0x000f if r1 == 0
 0x00000f   
 COPY r3 40h
@@ -45,17 +58,6 @@ b1101_1101 // Branch to 0x000f if r1 > 40h
 b1101_1110 // Branch to 0x000f if r1 >= 40h
 0x40000f   
 
-COPY r0 32h 
-COPY r1 4fh
-b1010_0001  // Store 32 to high memory
-b1010_0111  // Store 4f to low 000001h
-0x010000
-COPY r0 0
-COPY r1 r0
-b1010_0000
-0x010000
-b1010_0010
-0x010000
 
 // Testing COM
 b1100_0010
