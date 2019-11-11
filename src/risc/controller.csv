@@ -27,9 +27,9 @@
     PUSH,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB, PC_NONE 
      POP,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         0,SO_MEML ,  ST_ADD, PC_NONE 
      COM,   ALU_NONE,  SB_NONE,         1,   SR_COM,      0,      0,         1, SO_COM , ST_SKIP, PC_NONE 
-    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB, PC_CALL 
+    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         1,SO_MEML ,  ST_SUB, PC_CALL 
      RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_RET 
-    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_NONE, PC_JUMP 
+    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_NONE, PC_JUMP 
     RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_RET 
      CLC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
     SETC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
