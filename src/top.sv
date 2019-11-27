@@ -28,6 +28,12 @@ module top(
 	output [1:0] 	DRAM_BA		// Bank Address
 	);
 	
+	`ifdef SYNTHESIS
+		initial $display("Assuming this is synthesis");
+	`else
+		initial $display("Assuming this is simulation");
+	`endif
+
 	assign rst = ~KEY[0];
 	
 	/* Clocks */
@@ -37,11 +43,14 @@ module top(
 	
 	pll_clk pll_clk0 (
 			.inclk0(CLK50),
-			.areset(rst),
+			.areset(0),
 			.c0(fclk),
 			.c1(mclk),
 			.c2(aclk)
 	);
+	//clk_dive#(28'd50) clk_div_mclk(CLK50, mclk);
+	//assign mclk = ~KEY[1];	
+	//assign mclk = CLK50;	
 
 	wire [23:0]	ram_addr;
     wire [15:0] ram_wr_data;
@@ -51,7 +60,7 @@ module top(
     wire  		ram_busy;
 	wire  		ram_rd_ready;
 	wire  		ram_rd_ack;
-
+	
 	sdram_block sdram0(
 		.mclk(mclk), 
 		.fclk(fclk), 
@@ -116,3 +125,73 @@ module top(
 
 endmodule
 
+
+module clk_dive(clock_in,clock_out);
+input clock_in; // input clock on FPGA
+output clock_out; // output clock after dividing the input clock by divisor
+reg[27:0] counter=28'd0;
+parameter DIVISOR = 28'd2;
+always @(posedge clock_in)
+begin
+ counter <= counter + 28'd1;
+ if(counter>=(DIVISOR-1))
+  counter <= 28'd0;
+end
+assign clock_out = (counter<DIVISOR/2)?1'b0:1'b1;
+endmodule
+
+`timescale 1ns/1ns
+module top_tb;
+
+	logic 		 CLK50;		// Clock 50MHz
+	logic [3:0]	 SWITCH;		// 4 Dip switches
+	logic [1:0]	 KEY;		// 2 Keys
+	wire  [7:0]	 LED;		// 8 LEDs
+	logic 		 RX;			// UART Receive
+	logic 		 TX;			// UART Transmit
+	wire  [15:0] DRAM_DQ;	// Data
+	logic [12:0] DRAM_ADDR;	// Address
+	logic [1:0]	 DRAM_DQM;	// Byte Data Mask
+	logic  		 DRAM_CLK;	// Clock
+	logic  		 DRAM_CKE;	// Clock Enable
+	logic  		 DRAM_WE_N;	// Write Enable
+	logic  		 DRAM_CAS_N; // Column Address Strobe
+	logic  		 DRAM_RAS_N; // Row Address Strobe
+	logic  		 DRAM_CS_N;	// Chip Select
+	logic [1:0]  DRAM_BA;		// Bank Address
+
+	top top0(
+				CLK50,		
+				SWITCH,	
+				KEY,		
+				LED,		
+				RX,		
+				TX,		
+				DRAM_DQ,	
+				DRAM_ADDR,	
+				DRAM_DQM,	
+				DRAM_CLK,	
+				DRAM_CKE,	
+				DRAM_WE_N,	
+				DRAM_CAS_N,
+				DRAM_RAS_N,
+				DRAM_CS_N,	
+				DRAM_BA	
+				);
+
+	initial begin
+			CLK50 = 0;
+			KEY[0] = 0;
+			KEY[1] = 1;
+			SWITCH = 4'b0110;
+			RX = 0;
+
+			#1100ns;
+			KEY[0] = 1;
+			#10us;
+			$stop;
+	end
+	initial forever #10ns CLK50 = ~CLK50;
+	
+
+endmodule

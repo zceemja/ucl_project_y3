@@ -30,7 +30,7 @@ module com_block(
 
 	// IO
 	output reg  [7:0]	leds,
-	input  wire  [3:0]	switches,
+	input  wire [3:0]	switches,
 	output wire			uart0_tx,
 	input  wire			uart0_rx,
 	input  wire			key1
@@ -38,32 +38,55 @@ module com_block(
 
 	/* UART */
 	reg [2:0] uart0_reg;
+	reg received;
 	reg uart0_transmit;
 	reg [7:0] tx_byte, rx_byte;
 	// Clock divide = 1e6 / (9600 * 4)
-	uart#(.CLOCK_DIVIDE(26)) uart0(
+	//uart#(.CLOCK_DIVIDE(26)) uart0(
+	uart#(.CLOCK_DIVIDE(1302)) uart0(
 			.clk(clk), 
 			.rst(rst), 
 			.rx(uart0_rx),
 			.tx(uart0_tx),
 			.tx_byte(tx_byte),
 			.rx_byte(rx_byte),
-			.received(uart0_reg[0]),
+			.received(received),
 			.is_receiving(uart0_reg[1]),
 			.is_transmitting(uart0_reg[2]),
 			.transmit(uart0_transmit)
 	);
-
+	
+	
+	//reg [7:0] reset_str [7];
+	//reg [2:0] reset_seq;
+	//always_comb begin
+	//		reset_str[0] = 8'h72;
+	//		reset_str[1] = 8'h65;
+	//		reset_str[2] = 8'h73;
+	//		reset_str[3] = 8'h65;
+	//		reset_str[4] = 8'h74;
+	//		reset_str[5] = 8'h2e;
+	//		reset_str[6] = 8'h10;
+	//end
+	
 	always_ff@(posedge clk) begin
-		if(addr == 8'h06) leds <= in_data;
+		if(rst) begin 
+			//reset_seq <= 0;
+			leds <= 'b0000_0000;
+		end
+		//else if(~uart0_reg[2] && reset_seq != 7) reset_seq <= reset_seq + 1;
+		else if(addr == 8'h06) leds <= in_data;
 	end
 
 	always_comb begin
-		uart0_transmit = (addr == 8'h05) ? 1 : 0;
-		tx_byte = in_data;
+		//tx_byte = 8'h23;
+		//uart0_transmit = 1;
+		uart0_transmit = (addr == 8'h05) || (received);
+		tx_byte = (received) ? rx_byte : in_data;
+		//tx_byte = in_data;
 		case(addr)
-			8'h04: out_data = {5'b0, uart0_reg};
-			8'h05: out_data = {5'b0, uart0_reg};
+			8'h04: out_data = {6'b0, uart0_reg};
+			8'h05: out_data = {6'b0, uart0_reg};
 			8'h07: out_data = {4'b0, switches};
 			default: out_data = 0;
 		endcase
@@ -76,7 +99,7 @@ module sdram_block(
 	// SDRAM Control
 	input [23:0]	ram_addr,
 	input [15:0] 	ram_wr_data,
-	output  [15:0] 	ram_rd_data,
+	output[15:0] 	ram_rd_data,
 	input 			ram_wr_en,
 	input			ram_rd_en,
 	output			ram_busy,

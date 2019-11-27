@@ -1,4 +1,6 @@
-`define ADDOP
+`ifndef SYNTHESIS
+	`define ADDOP
+`endif
 
 import risc8_pkg::*;
 import alu_pkg::*;
@@ -13,9 +15,11 @@ module controller8(
 	assign cdi.a2		= e_reg_addr'(instr[1:0]);
 	assign cdi.a3 		= cdi.a1; // Assuming destination always first operand
 	
-	`ifdef ADDOP 
-	e_instr op;
+	`ifdef ADDOP
+		initial $display("Control adding 'op' reg");
+		e_instr op;
 	`endif
+
 
 	// generated table
     always_comb begin

@@ -32,7 +32,7 @@
      BGT,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b01)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b01)?PC_IMM2:PC_NONE
      BGE,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2]|cdi.alu_comp[1])?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2]|cdi.alu_comp[1])?PC_IMM2:PC_NONE
       BZ,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
-    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         1,SO_MEML ,  ST_SUB,  PC_IMM 
+    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         2,SO_MEML ,  ST_SUB,  PC_IMM 
      RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_MEM 
     JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_NONE,  PC_IMM
     RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_MEM 

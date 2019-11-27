@@ -1,7 +1,6 @@
 *.bak
 *.bak[0-9]*
 *.rpt
-*.mem
 *.xrf
 *.svo
 *.sft

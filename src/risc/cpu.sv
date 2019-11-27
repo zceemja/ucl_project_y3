@@ -16,19 +16,11 @@ import alu_pkg::*;
 //endmodule
 
 module risc8_cpu(processor_port port);
-	parameter PROGRAM="";
 	reg [31:0] instr; // Fetching 4x8bit instruction
 	reg [15:0] pc; // Instruction memory is 16bit in length
-	initial $display("RISC8 program: %s", PROGRAM);	
-	instr_rom #(.FILE(PROGRAM),
-				.LENGTH(256),
-				.OUTMUL(4),
-				.ADDR_WIDTH(16)
-		) rom0 (pc, instr);
 	
-	//risc8_cpu cpu0(port.clk, port.rst, instr, imm, pc,
-	//		port.ram_addr, mem_wr, port.ram_wr_data, port.ram_rd_data);
-	
+	rom#("../../memory/risc8") rom_block0(pc[11:0],  port.clk, instr);	
+
 	risc8_cdi cdi0();
 	controller8 ctrl0(
 			.instr(instr[7:0]),

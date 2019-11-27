@@ -6,7 +6,7 @@ module instr_rom(addr, instr);
 	input  wire [ADDR_WIDTH-1:0]   addr;
 	output reg  [WIDTH*OUTMUL-1:0] instr;
 	
-	initial $display("Instruction ROM %0dx%0dbit, size of %0dB loaded from %s ...", WIDTH, ADDR_WIDTH, LENGTH*WIDTH/8, FILE);
+	initial $display("Instruction ROM %0dx%0dbit, size of %0dB loaded from %s", WIDTH, ADDR_WIDTH, LENGTH*WIDTH/8, FILE);
 	logic [WIDTH-1:0] rom [LENGTH-1:0];
 	initial if(FILE != "") $readmemh(FILE, rom);
 	initial begin
