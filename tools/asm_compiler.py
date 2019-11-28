@@ -155,10 +155,14 @@ class CompObject:
         self.line_num = line_num
         self.code = []
         self.code_ref = 0
-
-    def compile(self):
         self.code = self.instr.compile(self.operands)
-        return self.code
+
+    def instr_len(self):
+        if hasattr(self.instr, 'get_imm_operands'):
+            o = getattr(self.instr, 'get_imm_operands')
+            return o(self.operands)
+        else:
+            return self.instr.length
 
 
 class Compiler:
@@ -308,7 +312,7 @@ class Compiler:
             label = linespl[0]
             if label in self.labels:
                 raise CompilingError(f"Label {label} duplicate")
-            self.labels[label] = (self.caddress).to_bytes(self.address_size, self.order)
+            self.labels[label] = self.caddress.to_bytes(self.address_size, self.order)
         if line.startswith('%define'):
             sp = list(filter(None, line.split(' ', 3)))
             if len(sp) != 3:
@@ -339,14 +343,14 @@ class Compiler:
                 co = self.__precompile(line)
                 if co is not None:
                     co.line_num = lnum
-                    self.caddress += co.instr.length
+                    self.caddress += co.instr_len()
                     instr.append(co)
             except CompilingError as e:
                 failure = True
                 print(f"ERROR {file}:{lnum}: {e.message}")
         for co in instr:
             try:
-                binary += co.compile()
+                binary += co.code
             except CompilingError as e:
                 failure = True
                 print(f"ERROR {file}:{co.line_num}: {e.message}")
@@ -379,12 +383,12 @@ def convert_to_binary(data):
 
 def convert_to_mem(data):
     x = b''
-    fa = f'0{math.ceil(int(math.log2(len(data)))/4)}x'
+    fa = f'0{math.ceil(math.ceil(math.log2(len(data)))/4)}x'
     a = [format(d, '02x') for d in data]
     for i in range(int(len(a) / 8) + 1):
         y = a[i * 8:(i + 1) * 8]
         if len(y) > 0:
-            x += (' '.join(y) + '  // ' + format(i*8, fa) + '\n').encode()
+            x += (' '.join(y) + ' '*((8-len(y))*3) + '  // ' + format((i*8-1)+len(y), fa) + '\n').encode()
     return x
 
 

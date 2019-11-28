@@ -10,8 +10,14 @@
 *.log
 *.out
 *.synctex.gz
+*.mem
+*.mif
+*.ver
+modelsim.ini
+__pycache__
 msim_transcript
 rtl_work/
+simulation/
 .idea
 .qsys_edit/
 db/

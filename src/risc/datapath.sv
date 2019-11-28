@@ -63,11 +63,12 @@ module datapath8(
 
 	logic bconst; // Use immediate to branch
 	word pc_off; // Program counter offset
-	reg [15:0] pcn, pca; // Program Counter Previous, to add
+	reg [15:0] pcn, pca, pcx; // Program Counter Previous, to add
 	always_ff@(posedge clk) begin
-			if(rst) pc <= 0; 
-			else pc <= pcn;
+			if(rst) pcx <= 0; 
+			else pcx <= pcn;
 	end
+	assign pc = (rst) ? 0 : pcn;
 	
 	always_comb begin
 		bconst = 0;  // FIXME: temporary
@@ -78,11 +79,11 @@ module datapath8(
 			(~cdi.isize[1]&~cdi.isize[0])|(cdi.isize[1]&~cdi.isize[0])
 		}; // Adding 1 to 2bit value.
 		case(cdi.pcop)
-			PC_NONE: pcn = pc + pc_off;
+			PC_NONE: pcn = pcx + pc_off;
 			PC_MEM : pcn = mem_rd;
 			PC_IMM : pcn = {imm[7:0], imm[15:8]};
 			PC_IMM2: pcn = {imm[15:8], imm[23:16]};
-			default: pcn = pc;
+			default: pcn = pcx;
 		endcase
 		//pca = (bconst) ? {imm[7:0], imm[15:8]} : pc;
 		//pcn = pca + pc_off;
@@ -140,7 +141,7 @@ module datapath8(
 
 	// COM Write
 	assign com_wr = (cdi.selo == SO_COM) ? r1 : '0;
-	assign com_addr = imm[7:0];
+	assign com_addr = (cdi.selo == SO_COM) ? imm[7:0] : '0;
 	//assign com_addr = 8'h06;
 	//assign com_wr = pc[7:0];
 

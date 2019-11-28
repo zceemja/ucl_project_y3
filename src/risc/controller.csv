@@ -34,7 +34,7 @@
       BZ,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
     CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         2,SO_MEML ,  ST_SUB,  PC_IMM 
      RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_MEM 
-    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_NONE,  PC_IMM
+    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_NONE,  PC_IMM
     RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_MEM 
      CLC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 
     SETC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE 

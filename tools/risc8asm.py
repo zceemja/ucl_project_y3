@@ -13,13 +13,20 @@ asmc.add_reg('r3', 3)
 
 
 class MoveInstr(compiler.Instruction):
+    def get_imm_operands(self, operands):
+        try:
+            self.compiler.decode_reg(operands[1])
+            return 1
+        except compiler.CompilingError:
+            return 2
+
     def compile(self, operands):
         regs = [0, 0]
         imm = []
         regs[0] = self.compiler.decode_reg(operands[0])
         try:
             regs[1] = self.compiler.decode_reg(operands[1])
-            self.imm_operands = 0
+            self.imm_operands = 0   # Assuming this gonna be changed every time
         except compiler.CompilingError:
             regs[1] = regs[0]
             self.imm_operands = 1

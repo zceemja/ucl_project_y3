@@ -136,6 +136,9 @@ module rom (
 		pseudo_rom#({PROGRAM, "_1.mem"}) rom1(addr1, clock, q1);
 		pseudo_rom#({PROGRAM, "_2.mem"}) rom2(addr2, clock, q2);
 		pseudo_rom#({PROGRAM, "_3.mem"}) rom3(addr3, clock, q3);
+		// Currently read address (for debugging)
+		reg [11:0] ff_addr;
+		always_ff@(posedge clock) ff_addr <= address;
 	`endif
 
 endmodule

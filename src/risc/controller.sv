@@ -526,7 +526,7 @@ module controller8(
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 1;
-            cdi.isize   = 1;
+            cdi.isize   = 2;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SUB;
             cdi.pcop    = PC_IMM;
@@ -556,7 +556,7 @@ module controller8(
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 0;
-            cdi.isize   = 1;
+            cdi.isize   = 3;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_NONE;
             cdi.pcop    = PC_IMM;
