@@ -35,6 +35,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CPY0;
             `endif
@@ -50,6 +52,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CPY1;
             `endif
@@ -65,6 +69,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CPY2;
             `endif
@@ -80,6 +86,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CPY3;
             `endif
@@ -95,6 +103,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = MOVE;
             `endif
@@ -110,6 +120,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = ADD;
             `endif
@@ -125,6 +137,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SUB;
             `endif
@@ -140,6 +154,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = AND;
             `endif
@@ -155,6 +171,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = OR;
             `endif
@@ -170,8 +188,95 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = XOR;
+            `endif
+        end
+        ADDI   : begin
+            cdi.alu_op  = ALU_ADD;
+            cdi.selb    = SB_IMM;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 1;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = ADDI;
+            `endif
+        end
+        SUBI   : begin
+            cdi.alu_op  = ALU_SUB;
+            cdi.selb    = SB_IMM;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 1;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = SUBI;
+            `endif
+        end
+        ANDI   : begin
+            cdi.alu_op  = ALU_AND;
+            cdi.selb    = SB_IMM;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 1;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = ANDI;
+            `endif
+        end
+        ORI    : begin
+            cdi.alu_op  = ALU_OR;
+            cdi.selb    = SB_IMM;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 1;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = ORI;
+            `endif
+        end
+        XORI   : begin
+            cdi.alu_op  = ALU_XOR;
+            cdi.selb    = SB_IMM;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 1;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = XORI;
             `endif
         end
         MUL    : begin
@@ -185,6 +290,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = MUL;
             `endif
@@ -200,23 +307,95 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = DIV;
             `endif
         end
-        BR     : begin
+        CI0    : begin
             cdi.alu_op  = ALU_NONE;
             cdi.selb    = SB_NONE;
             cdi.rw_en   = 0;
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 0;
-            cdi.isize   = 2;
+            cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_0;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
-            op = BR;
+            op = CI0;
+            `endif
+        end
+        CI1    : begin
+            cdi.alu_op  = ALU_NONE;
+            cdi.selb    = SB_NONE;
+            cdi.rw_en   = 0;
+            cdi.selr    = SR_NONE;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 0;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_1;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = CI1;
+            `endif
+        end
+        CI2    : begin
+            cdi.alu_op  = ALU_NONE;
+            cdi.selb    = SB_NONE;
+            cdi.rw_en   = 0;
+            cdi.selr    = SR_NONE;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 0;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_2;
+            cdi.aluf    = 2'b00;
+            `ifdef ADDOP
+            op = CI2;
+            `endif
+        end
+        ADDC   : begin
+            cdi.alu_op  = ALU_ADD;
+            cdi.selb    = SB_0;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 0;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b01;
+            `ifdef ADDOP
+            op = ADDC;
+            `endif
+        end
+        SUBC   : begin
+            cdi.alu_op  = ALU_SUB;
+            cdi.selb    = SB_0;
+            cdi.rw_en   = 1;
+            cdi.selr    = SR_ALUL;
+            mem_rd      = 0;
+            mem_wr      = 0;
+            cdi.isize   = 0;
+            cdi.selo    = SO_MEML;
+            cdi.stackop = ST_SKIP;
+            cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b01;
+            `ifdef ADDOP
+            op = SUBC;
             `endif
         end
         SLL    : begin
@@ -230,6 +409,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SLL;
             `endif
@@ -245,6 +426,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SRL;
             `endif
@@ -260,23 +443,10 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SRA;
-            `endif
-        end
-        SRAS   : begin
-            cdi.alu_op  = ALU_RAS;
-            cdi.selb    = SB_REG;
-            cdi.rw_en   = 1;
-            cdi.selr    = SR_ALUL;
-            mem_rd      = 0;
-            mem_wr      = 0;
-            cdi.isize   = 0;
-            cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
-            cdi.pcop    = PC_NONE;
-            `ifdef ADDOP
-            op = SRAS;
             `endif
         end
         LWHI   : begin
@@ -290,6 +460,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = LWHI;
             `endif
@@ -305,6 +477,8 @@ module controller8(
             cdi.selo    = SO_MEMH;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SWHI;
             `endif
@@ -320,6 +494,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = LWLO;
             `endif
@@ -335,6 +511,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SWLO;
             `endif
@@ -350,6 +528,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = INC;
             `endif
@@ -365,6 +545,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = DEC;
             `endif
@@ -380,6 +562,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = GETAH;
             `endif
@@ -395,6 +579,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = GETIF;
             `endif
@@ -410,6 +596,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SUB;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = PUSH;
             `endif
@@ -425,6 +613,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_ADD;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = POP;
             `endif
@@ -440,23 +630,10 @@ module controller8(
             cdi.selo    = SO_COM;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = COM;
-            `endif
-        end
-        SETI   : begin
-            cdi.alu_op  = ALU_NONE;
-            cdi.selb    = SB_NONE;
-            cdi.rw_en   = 0;
-            cdi.selr    = SR_NONE;
-            mem_rd      = 0;
-            mem_wr      = 0;
-            cdi.isize   = 0;
-            cdi.selo    = SO_MEML;
-            cdi.stackop = ST_SKIP;
-            cdi.pcop    = PC_NONE;
-            `ifdef ADDOP
-            op = SETI;
             `endif
         end
         BEQ    : begin
@@ -470,6 +647,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = (cdi.alu_comp[2:1] == 'b10)?PC_IMM2:PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = BEQ;
             `endif
@@ -485,6 +664,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = (cdi.alu_comp[2:1] == 'b01)?PC_IMM2:PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = BGT;
             `endif
@@ -500,21 +681,25 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = (cdi.alu_comp[2]|cdi.alu_comp[1])?PC_IMM2:PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = BGE;
             `endif
         end
         BZ     : begin
-            cdi.alu_op  = ALU_NONE;
-            cdi.selb    = SB_NONE;
+            cdi.alu_op  = ALU_OR;
+            cdi.selb    = SB_0;
             cdi.rw_en   = 0;
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 0;
-            cdi.isize   = 0;
+            cdi.isize   = (cdi.alu_comp[0])?1:2;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
-            cdi.pcop    = PC_NONE;
+            cdi.pcop    = (cdi.alu_comp[0])?PC_IMM:PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = BZ;
             `endif
@@ -526,10 +711,12 @@ module controller8(
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 1;
-            cdi.isize   = 2;
+            cdi.isize   = 0;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SUB;
             cdi.pcop    = PC_IMM;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CALL;
             `endif
@@ -545,6 +732,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_ADD;
             cdi.pcop    = PC_MEM;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = RET;
             `endif
@@ -556,10 +745,12 @@ module controller8(
             cdi.selr    = SR_NONE;
             mem_rd      = 0;
             mem_wr      = 0;
-            cdi.isize   = 3;
+            cdi.isize   = 2;
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_NONE;
             cdi.pcop    = PC_IMM;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = JUMP;
             `endif
@@ -575,6 +766,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SUB;
             cdi.pcop    = PC_MEM;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = RETI;
             `endif
@@ -590,6 +783,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CLC;
             `endif
@@ -605,6 +800,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SETC;
             `endif
@@ -620,6 +817,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CLS;
             `endif
@@ -635,6 +834,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SETS;
             `endif
@@ -650,6 +851,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SSETS;
             `endif
@@ -665,6 +868,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = CLN;
             `endif
@@ -680,6 +885,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SETN;
             `endif
@@ -695,6 +902,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = SSETN;
             `endif
@@ -710,6 +919,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = RJUMP;
             `endif
@@ -725,6 +936,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
             `ifdef ADDOP
             op = RBWI;
             `endif
@@ -740,6 +953,8 @@ module controller8(
             cdi.selo    = SO_MEML;
             cdi.stackop = ST_SKIP;
             cdi.pcop    = PC_NONE;
+            cdi.imoctl  = IMO_NONE;
+            cdi.aluf    = 2'b00;
         end
     endcase
     end

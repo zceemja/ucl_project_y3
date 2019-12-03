@@ -19,7 +19,7 @@ module risc8_cpu(processor_port port);
 	reg [31:0] instr; // Fetching 4x8bit instruction
 	reg [15:0] pc; // Instruction memory is 16bit in length
 	
-	rom#("../../memory/risc8") rom_block0(pc[11:0],  port.clk, instr);	
+	rom#("../../memory/risc8.text") rom_block0(pc[11:0],  port.clk, instr);	
 
 	risc8_cdi cdi0();
 	controller8 ctrl0(
@@ -32,7 +32,7 @@ module risc8_cpu(processor_port port);
 			.clk(port.clk),
 			.rst(port.rst),
 			.cdi(cdi0),
-			.imm(instr[31:8]),
+			.immr(instr[31:8]),
 			.mem_rd(port.ram_rd_data),
 			.mem_wr(port.ram_wr_data),
 			.mem_addr(port.ram_addr),

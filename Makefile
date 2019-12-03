@@ -19,9 +19,15 @@ GENTABLE_BIN = python3 tools/gen_sv.py
 ASMC = python3 tools/risc8asm.py
 
 MEMSIZE ?= 4096
+RAMSIZE ?= -1
 MEMDEP := $(shell find memory -name '*.asm')
 MEMSLICES = 0 1 2 3
-MEMRES = $(foreach i,$(MEMSLICES),$(MEMDEP:.asm=_$(i).mem)) $(foreach i,$(MEMSLICES),$(MEMDEP:.asm=_$(i).mif))
+MEMRES = $(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).mem)) \
+		$(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).mif)) \
+		$(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).uhex)) \
+		$(MEMDEP:.asm=.data.mem) \
+		$(MEMDEP:.asm=.data.uhex) \
+		$(MEMDEP:.asm=.data.mif)
 
 VERILOG ?= $(wildcard src/*/*.sv) 
 
@@ -79,17 +85,26 @@ testbench: compile
 
 compile_mem: $(MEMRES)
 
-%_0.mem %_1.mem %_2.mem %_3.mem: %.asm
-	$(ASMC) -t mem -f $< -S $(words $(MEMSLICES)) -l $(MEMSIZE)
+%.text_0.mem %.text_1.mem %.text_2.mem %.text_3.mem: %.asm
+	$(ASMC) -t mem -f $< -S $(words $(MEMSLICES)) .text
 
-%_0.mif %_1.mif %_2.mif %_3.mif: %.asm
-	$(ASMC) -t mif -f $< -S $(words $(MEMSLICES)) -l $(MEMSIZE)
+%.text_0.mif %.text_1.mif %.text_2.mif %.text_3.mif: %.asm
+	$(ASMC) -t mif -f $< -S $(words $(MEMSLICES)) .text
 
-%.mem: %.asm
-	$(ASMC) -t mem -o $@ -f $< -l $(MEMSIZE)
+%.text_0.uhex %.text_1.uhex %.text_2.uhex %.text_3.uhex: %.asm
+	$(ASMC) -t uhex -f $< -S $(words $(MEMSLICES)) .text
 
-%.mif: %.asm
-	$(ASMC) -t mif -o $@ -f $< -l $(MEMSIZE)
+%.data.mem: %.asm
+	$(ASMC) -t mem -f $< .data
+
+%.data.mif: %.asm
+	$(ASMC) -t mif -f $< .data
+
+%.data.uhex: %.asm
+	$(ASMC) -t uhex -f $< .data
+
+flash: $(MEMRES)
+	$(QUARTUS_DIR)/bin/quartus_stp -t ./scripts/update_risc8.tcl
 
 clean:
 	rm -f $(MEMRES)

@@ -41,13 +41,14 @@ module top(
 	wire fclk; // Fast clock 		100MHz 		(for sdram)
 	wire aclk; // Auxiliary clock 	32,768kHz 	(for timers)
 	
-	pll_clk pll_clk0 (
+	pll_clkpll_clk0 (
 			.inclk0(CLK50),
 			.areset(0),
 			.c0(fclk),
 			.c1(mclk),
 			.c2(aclk)
 	);
+
 	//clk_dive#(28'd50) clk_div_mclk(CLK50, mclk);
 	//assign mclk = ~KEY[1];	
 	//assign mclk = CLK50;	
@@ -61,29 +62,31 @@ module top(
 	wire  		ram_rd_ready;
 	wire  		ram_rd_ack;
 	
-	sdram_block sdram0(
-		.mclk(mclk), 
-		.fclk(fclk), 
-		.rst(rst), 
-		.ram_addr(ram_addr),
-		.ram_wr_data(ram_wr_data),
-		.ram_rd_data(ram_rd_data),
-		.ram_wr_en(ram_wr_en),
-		.ram_rd_en(ram_rd_en),
-		.ram_busy(ram_busy),
-		.ram_rd_ready(ram_rd_ready),
-		.ram_rd_ack(ram_rd_ack),
-		.DRAM_DQ(DRAM_DQ),	
-		.DRAM_ADDR(DRAM_ADDR),	
-		.DRAM_DQM(DRAM_DQM),	
-		.DRAM_CLK(DRAM_CLK),	
-		.DRAM_CKE(DRAM_CKE),	
-		.DRAM_WE_N(DRAM_WE_N),	
-		.DRAM_CAS_N(DRAM_CAS_N),
-		.DRAM_RAS_N(DRAM_RAS_N),
-		.DRAM_CS_N(DRAM_CS_N),	
-		.DRAM_BA(DRAM_BA)	
-	);
+	ram#("../../memory/risc8.data") ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
+	
+	//sdram_block sdram0(
+	//	.mclk(mclk), 
+	//	.fclk(fclk), 
+	//	.rst_n(~rst), 
+	//	.ram_addr(racm_addr),
+	//	.ram_wr_data(ram_wr_data),
+	//	.ram_rd_data(ram_rd_data),
+	//	.ram_wr_en(ram_wr_en),
+	//	.ram_rd_en(ram_rd_en),
+	//	.ram_busy(ram_busy),
+	//	.ram_rd_ready(ram_rd_ready),
+	//	.ram_rd_ack(ram_rd_ack),
+	//	.DRAM_DQ(DRAM_DQ),	
+	//	.DRAM_ADDR(DRAM_ADDR),	
+	//	.DRAM_DQM(DRAM_DQM),	
+	//	.DRAM_CLK(DRAM_CLK),	
+	//	.DRAM_CKE(DRAM_CKE),	
+	//	.DRAM_WE_N(DRAM_WE_N),	
+	//	.DRAM_CAS_N(DRAM_CAS_N),
+	//	.DRAM_RAS_N(DRAM_RAS_N),
+	//	.DRAM_CS_N(DRAM_CS_N),	
+	//	.DRAM_BA(DRAM_BA)	
+	//);
 
 	//Communication block
 	wire [7:0] com0_addr, com0_wr, com0_rd;
@@ -179,6 +182,9 @@ module top_tb;
 				DRAM_BA	
 				);
 
+	initial if(top0.com0_addr == 8'h05) $display("%t UART0 send: %s", $time, top0.com0_wr); 
+
+
 	initial begin
 			CLK50 = 0;
 			KEY[0] = 0;
@@ -188,7 +194,7 @@ module top_tb;
 
 			#1100ns;
 			KEY[0] = 1;
-			#10us;
+			#300us;
 			$stop;
 	end
 	initial forever #10ns CLK50 = ~CLK50;

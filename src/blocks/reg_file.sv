@@ -17,8 +17,8 @@ module reg_file(clk, rst, rd_addr1, rd_addr2, rd_data1, rd_data2, wr_addr, wr_da
 		else if(wr_en) registry[wr_addr] <= wr_data;
 	end
 	
-	assign rd_data1 = registry[rd_addr1];
-	assign rd_data2 = registry[rd_addr2];
+	assign rd_data1 = ((rd_addr1 == wr_addr) & wr_en) ? wr_data : registry[rd_addr1];
+	assign rd_data2 = ((rd_addr2 == wr_addr) & wr_en) ? wr_data : registry[rd_addr2];
 	
 endmodule
 

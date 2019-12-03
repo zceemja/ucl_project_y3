@@ -11,25 +11,29 @@ package risc8_pkg;
 		// [ xxxx xx xx ] => [ inst rd rs ]
 		// mp: Memory page
 		// cp: Co-processor, 0x00 = RAM, 0x01 = ROM, 0x02 = FPU, 0x03 = GPIO
-		MOVE =8'b0000_????,  // &rd = &rs
-		CPY0 =8'b0000_0000,  // &rd = imm
-		CPY1 =8'b0000_0101,  // &rd = imm
-		CPY2 =8'b0000_1010,  // &rd = imm
-		CPY3 =8'b0000_1111,  // &rd = imm
+		MOVE =8'b0000_????,  // i0 &rd = &rs
+		CPY0 =8'b0000_0000,  // i0 &rd = imm
+		CPY1 =8'b0000_0101,  // i0 &rd = imm
+		CPY2 =8'b0000_1010,  // i0 &rd = imm
+		CPY3 =8'b0000_1111,  // i0 &rd = imm
 
-		ADD  =8'b0001_????,  // &rd = &rd + &rs
-		SUB  =8'b0010_????,  // &rd = &rd - &rs
-		AND  =8'b0011_????,  // &rd = &rd & &rsgt
-		OR   =8'b0100_????,  // &rd = &rd | &rs
-		XOR  =8'b0101_????,  // &rd = &rd ^ &rs
-		MUL  =8'b0110_????,  // {&ah,  &rd} = &rd * &rs
-		DIV  =8'b0111_????,  // &rd = &rd / &rs, &ah = &rd % &rs 
-		BR   =8'b1000_????,  // FIXME: Conditional branch
+		ADD  =8'b0001_????,  // i1 &rd = &rd + &rs
+		SUB  =8'b0010_????,  // i2 &rd = &rd - &rs
+		AND  =8'b0011_????,  // i3 &rd = &rd & &rsgt
+		OR   =8'b0100_????,  // i4 &rd = &rd | &rs
+		XOR  =8'b0101_????,  // i5 &rd = &rd ^ &rs
+		MUL  =8'b0110_????,  // i6 {&ah,  &rd} = &rd * &rs
+		DIV  =8'b0111_????,  // i7 &rd = &rd / &rs, &ah = &rd % &rs
+
+		CI0  =8'b1000_??00,  // i8-0
+		CI1  =8'b1000_??01,  // i8-1
+		CI2  =8'b1000_??10,  // i8-2
+		ADDC =8'b1000_??11,  // i8-3 
 		
 		SLL  =8'b1001_??00,  // i9-0 shift left logical
 		SRL  =8'b1001_??01,  // i9-1 shift right logical
 		SRA  =8'b1001_??10,  // i9-2 shift right arithmetic
-		SRAS =8'b1001_??11,  // i9-3 shift rigth arithmetic signed
+		SUBC =8'b1001_??11,  // i9-3 Low value from instruction mem
 
 		LWHI =8'b1010_??00,  // i10-0 
 		SWHI =8'b1010_??01,  // i10-1 
@@ -44,13 +48,18 @@ package risc8_pkg;
 		PUSH =8'b1100_??00,  // i12-0
         POP  =8'b1100_??01,  // i12-1 
         COM  =8'b1100_??10,  // i12-2
-		SETI =8'b1100_??11,  // i12-3 Set next immidate
+		XORI =8'b1100_??11,  // i12-3 Set next immidate
 		
 		BEQ  =8'b1101_??00,  // i13-0 Branch to imm[24:8] if imm[7:0] == rd
 		BGT  =8'b1101_??01,  // i13-1 Branch greater than
 		BGE  =8'b1101_??10,  // i13-2 Branch greater equal than
-		BZ   =8'b1101_0011,  // i13-3 Branch to imm[15:0] if rd == zero
+		BZ   =8'b1101_??11,  // i13-3 Branch to imm[15:0] if rd == zero
 
+		ADDI =8'b1110_??00,  // i14-0 
+		SUBI =8'b1110_??01,  // i14-1 
+		ANDI =8'b1110_??10,  // i14-2 
+		ORI  =8'b1110_0011,  // i14-3 
+		
 		CALL =8'b1111_0000,  // i15-0
         RET  =8'b1111_0001,  // i15-1
         JUMP =8'b1111_0010,  // i15-2
@@ -121,6 +130,14 @@ package risc8_pkg;
 		PC_MEMI= 3'b100   // TODO: Maybe Memory + interrupt flag?
 
 	} e_pcop;
+	
+	typedef enum logic [1:0] {
+		IMO_NONE = 2'b00,
+		IMO_0  	 = 2'b01,
+		IMO_1  	 = 2'b10,
+		IMO_2 	 = 2'b11
+	} e_imo_ctl;
+
 
 endpackage
 
@@ -136,23 +153,25 @@ interface risc8_cdi;  // Control Datapath interface
 	e_stackop stackop;
 	e_pcop pcop;
 	logic [2:0] alu_comp;
+	logic [1:0] aluf;
 	
 	// Register
 	reg_addr a1, a2, a3;
-	logic rw_en, mem_h;
+	e_imo_ctl imoctl;
+	logic rw_en, mem_h, pc_halt;
 	e_selr selr;
 	logic [1:0] isize; // instruction size between 1 and 4
 	
 	modport datapath(
 		input alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		output alu_comp,
-		input a1, a2, a3, rw_en, selr, mem_h, isize
+		input a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf
 	);
 	
 	modport control(
 		output alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		input alu_comp,
-		output a1, a2, a3, rw_en, selr, mem_h, isize
+		output a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf
 	);
 
 endinterface
