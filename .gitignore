@@ -13,6 +13,7 @@
 *.mem
 *.mif
 *.ver
+*~
 modelsim.ini
 __pycache__
 msim_transcript
