@@ -1,0 +1,234 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{pdflscape}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+
+
+\setcounter{tocdepth}{3}
+\begin{document}
+\begin{titlepage}
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\center
+	\textsc{\Large University College London}\\[0.5cm]
+	\textsc{\large Department of Electronic \& Electrical Engineering}\\[0.5cm]
+	
+	\HRule \\[0.4cm]
+	\setstretch{1.5}
+	{ \huge \bfseries Project Progress Report No. 2}\\[0.4cm]
+	\setstretch{1.0}
+	\HRule \\[1.0cm]
+	
+	\Large \emph{Author:}\\
+	Minduagas \textsc{Jarmolovicius}\\
+	\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+	
+	\Large \emph{Supervisor:}\\
+	Prof. Robert \textsc{Killey}\\
+	\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+	\vfill
+	{\large November 24, 2019}\\[2cm]
+	
+\end{titlepage}
+
+	
+%\maketitle
+%\tableofcontents
+
+\pagebreak
+\section{Progress}
+The following points have been done since last report:
+\begin{description}
+	\item[$\bullet$] Upgraded assembler to support more complex operations, also changed syntax to comply with NASM;
+	\item[$\bullet$] Upgraded automatisation using MakeFile;
+	\item[$\bullet$] Implemented instruction memory using FPGA's M9K Memory;
+	\item[$\bullet$] Have functional communication block, see Table \ref{table:com_instr};
+	\item[$\bullet$] Implemented most of the instructions, see Table  \ref{table:risc_instr};
+\end{description}
+
+\begin{table}[h!]
+	\centering
+	\arrayrulecolor{black}
+	\begin{tabular}{| l | p{8cm} | l | l | } \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Address & Function & Send & Return \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}
+		0x04 & Read UART0 flags 		& - 	& UART0 flags 	\\\hline
+		0x05 & Transmit to UART0 		& TX byte 	& UART0 flags 	\\\hline
+		0x06 & Set DE0-Nano board LEDs	& LED byte 	& - 		\\\hline
+		0x07 & Read DE0-Nano DIP switches & - & Lower DIP nibble	\\\hline
+		\arrayrulecolor{black}\hline
+		
+	\end{tabular}
+	\caption{Addresses and functions for communication block}
+	\label{table:com_instr}
+\end{table}
+
+Project schedule as Grantt chart has been updated in the next page in table \ref{table:time}. 
+
+\begin{table}[h!]
+	\centering
+	\arrayrulecolor{black}
+	\begin{tabular}{| l | p{13cm} | c |} \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Instr. & Description & Completed \\\hline
+		
+		\rowcolor[rgb]{0.7,0.7,1}
+		\multicolumn{3}{|c|}{\textit{2 register instructions}} \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}
+		
+		MOVE & Copy intimidate or register & x \\\hline
+		
+		ADD  & Arithmetical addition & x \\
+		SUB  & Arithmetical subtraction & x \\
+		AND  & Logical AND & x \\
+		OR   & Logical OR & x \\
+		XOR  & Logical XOR & x \\
+		MUL  & Arithmetical multiplication & x \\
+		DIV  & Arithmetical division (inc. modulus) & x \\
+		BR   & Branch on registers equal & \\
+		
+		\rowcolor[rgb]{0.7,0.7,1}\arrayrulecolor{black}\hline
+		\multicolumn{3}{|c|}{\textit{1 register instructions}} \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}
+		
+		SLL  & Shift left logical & \\
+		SRL  & Shift right logical & \\
+		SRA  & Shift right arithmetical & \\
+		SRAS & Shift right arithmetical signed & \\\hline
+		
+		LWHI & Load word (high byte) & x \\
+		SWHI & Store word (high byte, reg. only) & x \\
+		LWLO & Load word (low byte) & x \\
+		SWLO & Store word (low byte, stores high byte reg.) & x \\\hline
+		
+		INC  & Increase by 1 & x \\
+		DEC  & Decrease by 1  & x \\
+		GETAH& Get ALU high byte reg. (only for MUL \& DIV) & x \\
+		GETIF& Get interrupt flags & \\\hline
+		
+		PUSH & Push to stack & x \\
+		POP  & Pop from stack & x \\
+		COM  & Send/Receive to/from com. block & x \\
+		SETI & Set immediate from register & \\\hline
+		
+		BEQ  & Branch on equal & x \\
+		BGT  & Branch on greater than & x \\
+		BGE  & Branch on greater equal than & x \\
+		BZ   & Branch on zero & x \\
+		
+		\rowcolor[rgb]{0.7,0.7,1}\arrayrulecolor{black}\hline
+		\multicolumn{3}{|c|}{\textit{0 register instructions}} \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82} 
+		
+		CALL & Call function, put return to stack & x \\
+		RET  & Return from function & x \\
+		JUMP & Jump to address & x \\
+		RETI & Return from interrupt & \\
+		CLC  & Clear ALU carry-in & \\
+		SETC & Set ALU carry-in & \\
+		CLS  & Clear ALU sign & \\
+		SETS & Set ALU sign & \\
+		SSETS& Enable ALU sign & \\
+		CLN  & Clear ALU negative & \\
+		SETN & Set ALU negative & \\
+		SSETN& Enable ALU negative & \\
+		RJUMP& Relative jump & \\
+		RBWI & Replace ALU src. B with immediate & \\
+		\arrayrulecolor{black}\hline
+		
+	\end{tabular}
+	\caption{Instruction set for RISC processor}
+	\label{table:risc_instr}
+\end{table}
+
+\section{Difficulties encountered}
+Instruction memory (ROM) has been replaced with M9K memory instead of LC (logic cell), however, as this memory is clocked it caused further problems with program counter timings. 
+
+NASM-like assembler can have multiple very useful functions such as pre-compiler, macros, imports, db instruction (stores strings) etc. It is difficult to implement all these advanced functions. 
+
+Due to scale of project, byte order has been mixed (internally processor operates at little-endian, however addresses in instructions are written as big-endian), this needs to be sorted out.
+
+\section{Failure Risk Assessment}
+There are no updates on failure risk assessment. As before, the most dominant failure risk is running out of time project is behind schedule. 
+
+See table \ref{table:time} for schedule. In 2 weeks is scheduled to start consider OISC architecture, however, the RISC processor is still far from completion. Benchmark development might need to extended to be completed during winter holidays. Higher level RISC compiler might be replaced by advanced functions in NASM-like compiler. 
+
+\section{Updated Safety Risk Assessment}
+There are no updates on safety risk assessment.
+
+\section{Help and Advice Needed}
+At this state no help is needed, and any issues and advices are sorted out and discussed in weekly supervisor meetings.
+
+\newpage
+\begin{landscape}
+\section{Updated Schedule}
+\begin{table}[h]
+\centering
+\begin{ganttchart}[
+	y unit title=0.4cm,
+	y unit chart=0.5cm,
+	x unit=1.1mm,
+	hgrid,
+	today=2019-11-24,
+	today label node/.append style={below=12pt},
+	today label font=\itshape\color{blue},
+	today rule/.style={draw=blue, ultra thick},
+	title height=1,
+	bar/.append style={fill=blue!50},
+	bar incomplete/.append style={fill=gray!50},
+	progress label text={$\displaystyle{#1\%}$},
+	time slot format=isodate
+	]{2019-10-01}{2020-03-31}
+	\gantttitlecalendar{year, month=shortname} \\
+	\gantttitle{40}{6}
+	\gantttitlelist{41,...,52}{7}
+	\gantttitlelist{1,...,13}{7}
+	\gantttitle{}{2} \\
+	\ganttbar[progress=100]{RISC implementation}{2019-10-01}{2019-10-27}\\
+	\ganttbar[progress=70]{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+	\ganttbar[progress=100]{UART and I/O}{2019-10-21}{2019-10-27}
+	\ganttbar[progress=50]{}{2019-11-25}{2019-12-08} \\
+	\ganttbar[progress=90]{RISC Assembler}{2019-10-14}{2019-11-11}\\
+	\ganttbar[progress=10]{RISC Compiler}{2019-11-11}{2019-12-13}\\
+	\ganttbar[progress=10]{Developing benchmark}{2019-11-11}{2019-12-13}
+	\ganttbar[progress=0]{}{2020-02-23}{2020-03-07} \\
+	\ganttbar[progress=0]{OISC Implementation}{2019-12-02}{2019-12-13}
+	\ganttbar[progress=0]{}{2020-01-13}{2020-02-02}\\
+	\ganttbar[progress=0]{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+	\ganttbar[progress=0]{OISC Assembler}{2020-01-20}{2020-02-09}\\
+	\ganttbar[progress=0]{OISC Compiler}{2020-02-09}{2020-03-01}\\
+	\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+	\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+	\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+	\ganttmilestone{December Interim Report}{2019-12-09}\\
+	\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+	\ganttmilestone{Progress Report \#4}{2020-02-14}\\
+	\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+	\ganttmilestone{Poster Presentation}{2020-03-18}\\
+	\ganttmilestone{Final Report}{2020-03-30}\\
+	\ganttvrule{Reading Week}{2019-11-03}
+	\ganttvrule{}{2019-11-10}
+	\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+	\ganttvrule{}{2020-01-12}
+\end{ganttchart}	
+\caption{Updated project schedule Grantt chart}
+\label{table:time}
+\end{table}
+\end{landscape}
+
+\end{document}
