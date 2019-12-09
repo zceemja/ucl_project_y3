@@ -74,7 +74,7 @@ package risc8_pkg;
         SSETN=8'b1111_1011,  // i15-11
         RJUMP=8'b1111_1100,  // i15-12
         RBWI =8'b1111_1101,  // i15-13 Replace ALU src B with immediate
-        i254 =8'b1111_1110,  // i15-14
+        INTRE=8'b1111_1110,  // i15-14 Interrupt entry
         i255 =8'b1111_1111   // i15-15
 		
 	} e_instr;               
@@ -138,6 +138,11 @@ package risc8_pkg;
 		IMO_2 	 = 2'b11
 	} e_imo_ctl;
 
+	typedef enum logic [1:0] {
+		INTR_NONE = 2'b0?,
+		INTR_WE   = 2'b10,
+		INTR_RE	  = 2'b11
+	} e_intr_ctl;
 
 endpackage
 
@@ -152,6 +157,7 @@ interface risc8_cdi;  // Control Datapath interface
 	e_selo selo;
 	e_stackop stackop;
 	e_pcop pcop;
+	e_intr_ctl intr_ctl;
 	logic [2:0] alu_comp;
 	logic [1:0] aluf;
 	
@@ -165,13 +171,15 @@ interface risc8_cdi;  // Control Datapath interface
 	modport datapath(
 		input alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		output alu_comp,
-		input a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf
+		input a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf,
+		intr_ctl
 	);
 	
 	modport control(
 		output alu_op, selb, sign, alu_not, selo, stackop, pcop,
 		input alu_comp,
-		output a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf
+		output a1, a2, a3, rw_en, selr, mem_h, isize, pc_halt, imoctl, aluf,
+		intr_ctl
 	);
 
 endinterface

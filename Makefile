@@ -37,7 +37,7 @@ define execute-gentable
 $(GENTABLE_BIN) $(1) $(1:.csv=.sv)
 endef
 
-analysis: compile_mem
+analysis: compile
 	${QUARTUS_DIR}/bin/quartus_map --read_settings_files=on --write_settings_files=off ${QUARTUS_MACROS} ${PROJECT_NAME} -c ${PROJECT_NAME} --analysis_and_elaboration
 
 $(OUT_ASM): $(MEMDEP)
@@ -76,14 +76,15 @@ compile_all:
 gentable:
 	$(foreach x,$(CSVS),$(call execute-gentable,./$(x)))
 
-compile: $(VERILOG)
+simulate: $(VERILOG)
 	@echo ${MODELSIM_BIN} -c -do "vlog -sv -work work +incdir+$(abspath $(dir $<)) $(abspath $<)" -do exit
+
 .PHONY: compile
 
 testbench: compile
 	${MODELSIM_BIN} -c -do "vsim work.$(basename $(notdir $(VERILOG)))_tb" -do "run -all" -do exit
 
-compile_mem: $(MEMRES)
+compile: $(MEMRES)
 
 %.text_0.mem %.text_1.mem %.text_2.mem %.text_3.mem: %.asm
 	$(ASMC) -t mem -f $< -S $(words $(MEMSLICES)) .text

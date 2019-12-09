@@ -1,56 +1,57 @@
-   instr, cdi.alu_op, cdi.selb, cdi.rw_en, cdi.selr, mem_rd, mem_wr, cdi.isize,cdi.selo ,cdi.stackop,cdi.pcop ,cdi.imoctl,cdi.aluf 
-    CPY0,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00 
-    CPY1,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    CPY2,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    CPY3,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    MOVE,   ALU_NONE,  SB_NONE,         1,   SR_REG,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     ADD,    ALU_ADD,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     SUB,    ALU_SUB,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     AND,    ALU_AND,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-      OR,     ALU_OR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     XOR,    ALU_XOR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    ADDI,    ALU_ADD,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SUBI,    ALU_SUB,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    ANDI,    ALU_AND,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     ORI,     ALU_OR,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    XORI,    ALU_XOR,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     MUL,    ALU_MUL,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     DIV,    ALU_DIV,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     CI0,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_0,2'b00  
-     CI1,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_1,2'b00  
-     CI2,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_2,2'b00  
-    ADDC,    ALU_ADD,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 
-    SUBC,    ALU_SUB,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 
-     SLL,     ALU_SL,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     SRL,     ALU_SR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     SRA,     ALU_RA,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    LWHI,   ALU_NONE,  SB_NONE,         1,  SR_MEMH,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SWHI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEMH , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    LWLO,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SWLO,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     INC,    ALU_ADD,     SB_1,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     DEC,    ALU_SUB,     SB_1,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-   GETAH,   ALU_NONE,  SB_NONE,         1,  SR_ALUH,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-   GETIF,   ALU_NONE,  SB_NONE,         1,  SR_INTR,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    PUSH,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB, PC_NONE ,IMO_NONE,2'b00  
-     POP,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         0,SO_MEML ,  ST_ADD, PC_NONE ,IMO_NONE,2'b00  
-     COM,   ALU_NONE,  SB_NONE,         1,   SR_COM,      0,      0,         1, SO_COM , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     BEQ,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b10)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b10)?PC_IMM2:PC_NONE,IMO_NONE,2'b00  
-     BGT,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b01)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b01)?PC_IMM2:PC_NONE,IMO_NONE,2'b00  
-     BGE,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2]|cdi.alu_comp[1])?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2]|cdi.alu_comp[1])?PC_IMM2:PC_NONE,IMO_NONE,2'b00  
-      BZ,     ALU_OR,     SB_0,         0,  SR_NONE,      0,      0,(cdi.alu_comp[0])?1:2,SO_MEML , ST_SKIP,(cdi.alu_comp[0])?PC_IMM:PC_NONE,IMO_NONE,2'b00  
-    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB,  PC_IMM ,IMO_NONE,2'b00  
-     RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_MEM ,IMO_NONE,2'b00  
-    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_NONE,  PC_IMM,IMO_NONE,2'b00  
-    RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_MEM ,IMO_NONE,2'b00  
-     CLC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SETC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     CLS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SETS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-   SSETS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-     CLN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    SETN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-   SSETN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-   RJUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
-    RBWI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
- default,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  
+   instr, cdi.alu_op, cdi.selb, cdi.rw_en, cdi.selr, mem_rd, mem_wr, cdi.isize,cdi.selo ,cdi.stackop,cdi.pcop ,cdi.imoctl,cdi.aluf ,cdi.intr_ctl
+    CPY0,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00 , INTR_NONE
+    CPY1,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    CPY2,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    CPY3,   ALU_NONE,   SB_IMM,         1,   SR_IMM,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    MOVE,   ALU_NONE,  SB_NONE,         1,   SR_REG,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     ADD,    ALU_ADD,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SUB,    ALU_SUB,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     AND,    ALU_AND,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+      OR,     ALU_OR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     XOR,    ALU_XOR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    ADDI,    ALU_ADD,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SUBI,    ALU_SUB,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    ANDI,    ALU_AND,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     ORI,     ALU_OR,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    XORI,    ALU_XOR,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     MUL,    ALU_MUL,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     DIV,    ALU_DIV,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     CI0,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_0,2'b00  , INTR_NONE
+     CI1,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_1,2'b00  , INTR_NONE
+     CI2,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_2,2'b00  , INTR_NONE
+    ADDC,    ALU_ADD,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 , INTR_NONE
+    SUBC,    ALU_SUB,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 , INTR_NONE
+     SLL,     ALU_SL,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SRL,     ALU_SR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SRA,     ALU_RA,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    LWHI,   ALU_NONE,  SB_NONE,         1,  SR_MEMH,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SWHI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEMH , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    LWLO,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SWLO,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     INC,    ALU_ADD,     SB_1,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     DEC,    ALU_SUB,     SB_1,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   GETAH,   ALU_NONE,  SB_NONE,         1,  SR_ALUH,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   GETIF,   ALU_NONE,  SB_NONE,         1,  SR_INTR,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    PUSH,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     POP,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         0,SO_MEML ,  ST_ADD, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     COM,   ALU_NONE,  SB_NONE,         1,   SR_COM,      0,      0,         1, SO_COM , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     BEQ,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b10)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b10)?PC_IMM2:PC_NONE,IMO_NONE,2'b00  , INTR_NONE
+     BGT,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2:1] == 'b01)?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2:1] == 'b01)?PC_IMM2:PC_NONE,IMO_NONE,2'b00  , INTR_NONE
+     BGE,   ALU_NONE,   SB_IMM,         0,  SR_NONE,      0,      0,(cdi.alu_comp[2]|cdi.alu_comp[1])?1:3,SO_MEML , ST_SKIP,(cdi.alu_comp[2]|cdi.alu_comp[1])?PC_IMM2:PC_NONE,IMO_NONE,2'b00  , INTR_NONE
+      BZ,     ALU_OR,     SB_0,         0,  SR_NONE,      0,      0,(cdi.alu_comp[0])?1:2,SO_MEML , ST_SKIP,(cdi.alu_comp[0])?PC_IMM:PC_NONE,IMO_NONE,2'b00  , INTR_NONE
+    CALL,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      1,         0,SO_MEML ,  ST_SUB,  PC_IMM ,IMO_NONE,2'b00  , INTR_NONE
+     RET,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_ADD,  PC_MEM ,IMO_NONE,2'b00  , INTR_NONE
+    JUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_NONE,  PC_IMM ,IMO_NONE,2'b00  , INTR_NONE
+    RETI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      1,      0,         2,SO_MEML ,  ST_SUB,  PC_MEM ,IMO_NONE,2'b00  , INTR_RE
+     CLC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SETC,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     CLS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SETS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   SSETS,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     CLN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    SETN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   SSETN,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   RJUMP,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+    RBWI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+   INTRE,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         2,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_WE
+ default,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE

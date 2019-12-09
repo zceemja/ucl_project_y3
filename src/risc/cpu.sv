@@ -39,7 +39,8 @@ module risc8_cpu(processor_port port);
 			.com_addr(port.com_addr),
 			.com_rd(port.com_rd),
 			.com_wr(port.com_wr),
-			.pc(pc)
+			.pc(pc),
+			.interrupt(port.com_interrupt)
 	);
 
 endmodule

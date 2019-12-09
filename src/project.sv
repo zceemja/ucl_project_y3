@@ -26,7 +26,7 @@ module com_block(
 	input  wire [7:0]	addr,
 	input  reg  [7:0]	in_data,
 	output reg  [7:0]	out_data,
-	output wire			interrupt,
+	output reg			interrupt,
 
 	// IO
 	output reg  [7:0]	leds,
@@ -71,18 +71,24 @@ module com_block(
 	//		reset_str[6] = 8'h10;
 	//end
 	
+	reg interrupt_reg;
+	assign interrupt = (key1 & interrupt_reg);
 	always_ff@(posedge clk) begin
 		if(rst) begin 
 			//reset_seq <= 0;
 			uart0_reg[2] <= 0;
+			//interrupt <= 0;
+			interrupt_reg <= 0;
 			leds <= 'b0000_0000;
 		end
 		//else if(~uart0_reg[2] && reset_seq != 7) reset_seq <= reset_seq + 1;
-		else begin 
+		else begin
 			case(addr)
 				8'h03: uart0_reg[2] <= in_data[2]; 
 				//8'h06: leds <= in_data;
 			endcase
+			if(~key1) interrupt_reg <= 1;
+			if(interrupt) interrupt_reg <= 0;
 			leds <= {5'b0, uart0_reg};
 		end
 	end

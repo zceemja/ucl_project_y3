@@ -3,7 +3,7 @@ import sys
 import math
 from os import path, mkdir
 
-import nasm_compiler as compiler
+import asm_compiler as compiler
 
 asmc = compiler.Compiler(byte_order='big')
 asmc.add_reg('r0', 0)
@@ -59,6 +59,7 @@ asmc.add_instr(compiler.Instruction('BZ   ', '1101_??11', 2))
 asmc.add_instr(compiler.Instruction('CALL ', '1111_0000', 2))
 asmc.add_instr(compiler.Instruction('RET  ', '1111_0001'))
 asmc.add_instr(compiler.Instruction('JUMP ', '1111_0010', 2))
+asmc.add_instr(compiler.Instruction('INTRE', '1111_1110', 2))
 asmc.add_instr(compiler.Instruction('RETI ', '1111_0011'))
 asmc.add_instr(compiler.Instruction('CLC  ', '1111_0100'))
 asmc.add_instr(compiler.Instruction('SETC ', '1111_0101'))

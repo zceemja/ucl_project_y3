@@ -18,9 +18,9 @@ module datapath8(
 	
 	// immidate overrride
 	word imo0, imo1, imo2;
-	reg imo0_en, imo1_en, imo2_en, imo_en;
-	
+	reg imo0_en, imo1_en, imo2_en, imo_en;	
 	reg [23:0] imm;
+
 	always_comb begin
 		imm[7:0] = (imo_en & imo2_en) ? imo2 : immr[7:0];
 		imm[15:8] = (imo_en & imo1_en) ? imo1 : immr[15:8];
@@ -87,55 +87,74 @@ module datapath8(
 	);
 
 	// ======================== //
+	// 		  Interrupt	 		//
+	// ======================== //
+
+	word interrupt_flag, intre, intrr;
+	always_ff@(posedge clk) begin
+		if(rst) begin
+			interrupt_flag <= 0;
+			intre <= 0;
+			intrr <= 0;
+		end
+		else begin 
+			if(interrupt) begin
+				interrupt_flag <= com_rd;
+				intrr <= pc;
+			end
+			if(cdi.intr_ctl == INTR_WE) intre <= imm[7:0];
+		end
+	end
+	
+	
+	// ======================== //
 	// 		Program Counter 	//
 	// ======================== //
 
-	logic bconst, pc_halted, pchf; // Use immediate to branch
+	logic pc_halted, intr_re, pcs, pchf; // Use immediate to branch
 	word pc_off; // Program counter offset
-	reg [15:0] pcn, pca, pcx, pch, pcp, pcn0; // Program Counter Previous, to add
+	reg [15:0] pcn, pch, pca, pcb, pcn0; // Program Counter Previous, to add
 	assign pchf = (cdi.pcop == PC_MEM) & ~pc_halted;
-	always_ff@(posedge clk) begin
-			if(rst) begin 
-				pcx <= 0;
-				pc_halted <= 0;
-			end else begin
-				pcx <= pcn;
-				pch <= pcn;
-				if (pchf) pc_halted <= 1;
-				else pc_halted <= 0;
-			end
-	end
-	assign pcp = (pchf) ? pch : pcn;
-	assign pc = (rst) ? 0 : pcp;
-	
-	always_comb begin
-		bconst = 0;  // FIXME: temporary
+	always_comb begin 
 		pc_off = { 
 			5'b0000_0, 
 			cdi.isize[0]&cdi.isize[1], 
 			cdi.isize[0]^cdi.isize[1], 
 			(~cdi.isize[1]&~cdi.isize[0])|(cdi.isize[1]&~cdi.isize[0])
 		}; // Adding 1 to 2bit value.
+
+		intr_re = cdi.intr_ctl == INTR_RE;
+		pcs = intr_re | interrupt | rst;
+		
 		case(cdi.pcop)
-			PC_NONE: pcn0 = pcx;
+			PC_NONE: pcn0 = pcb;
 			PC_MEM : pcn0 = mem_rd;
 			PC_IMM : pcn0 = {imm[7:0], imm[15:8]};
 			PC_IMM2: pcn0 = {imm[15:8], imm[23:16]};
-			default: pcn0 = pcx;
+			default: pcn0 = pcb;
 		endcase
+
 		pcn = (cdi.pcop == PC_IMM | cdi.pcop == PC_IMM2) ? pcn0 : pcn0 + pc_off;
-		//pca = (bconst) ? {imm[7:0], imm[15:8]} : pc;
-		//pcn = pca + pc_off;
+		pca = (pchf) ? pch : pcn;
+		casez({intr_re, interrupt, rst})
+			3'b000: pcb = pch;
+			3'b100: pcb = intrr;
+			3'b?10: pcb = intre;
+			3'b??1: pcb = 16'h0000;
+		endcase
+		pc = (pcs) ? pcb : pca;
+		
+
 	end
 	
-	// ======================== //
-	// 		  Interrupt	 		//
-	// ======================== //
-
-	word interrupt_flag;
 	always_ff@(posedge clk) begin
-		if(rst) interrupt_flag <= 0;
-		else if(interrupt) interrupt_flag <= com_rd;
+			if(rst) begin 
+				pch <= 0;
+				pc_halted <= 0;
+			end else begin
+				pch <= pcn;
+				pc_halted <= pchf;
+			end
 	end
 	
 	
@@ -149,9 +168,9 @@ module datapath8(
 	always_comb begin
 		sp_add = (cdi.stackop == ST_ADD) ? 'h0001 : 'hffff;
 		sp_next = sp + sp_add;
-		sp_addr = {9'b1111_1111_1, (cdi.stackop == ST_ADD) ? sp_next[15:0] : sp[15:0]};
+		sp_addr = {8'b1111_1111, (cdi.stackop == ST_ADD) ? sp_next[15:0] : sp[15:0]};
 		st_rd = {mem_rd[7:0]};
-		st_wr = (cdi.pcop == PC_IMM) ? pcx : {8'h00, r1};
+		st_wr = (cdi.pcop == PC_IMM) ? pch : {8'h00, r1};
 		//if(sp[0]) begin
 			//st_wr = {'h00, r1};
 			//st_rd = {mem_rd[7:0]};

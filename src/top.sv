@@ -41,7 +41,7 @@ module top(
 	wire fclk; // Fast clock 		100MHz 		(for sdram)
 	wire aclk; // Auxiliary clock 	32,768kHz 	(for timers)
 	
-	pll_clkpll_clk0 (
+	pll_clk pll_clk0 (
 			.inclk0(CLK50),
 			.areset(0),
 			.c0(fclk),
@@ -103,7 +103,7 @@ module top(
 		.switches(SWITCH),
 		.uart0_rx(RX),
 		.uart0_tx(TX),
-		.key1(~KEY[1])
+		.key1(KEY[1])
 	);
 
 	// Processor
@@ -194,6 +194,10 @@ module top_tb;
 
 			#1100ns;
 			KEY[0] = 1;
+			#20us;
+			KEY[1] = 0;
+			#5us;
+			KEY[1] = 1;
 			#300us;
 			$stop;
 	end
