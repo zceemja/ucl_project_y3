@@ -88,31 +88,31 @@
 \begin{multicols}{2}
 
 \section{Abstract}
-This project investigates area / performance / power / complexity benefits and trade-offs of One Instruction Set Computer (OISC\footnote{Also known as URISC (Ultimate Reduced Instruction Set Computer)}) comparing to traditional Reduced Instruction Set Computer (RISC) architectures in general computing application. It is shown that \texttt{SUBLEQ} OISC performs better in special cases, however there is lack of research in more complicated OISC architectures designed for general computing. At this point the project is mostly on track  with the benchmark being behind schedule.
+This project investigates area / performance / power / complexity benefits and trade-offs of One Instruction Set Computer (OISC\footnote{Also known as URISC (Ultimate Reduced Instruction Set Computer)}) in comparison to traditional Reduced Instruction Set Computer (RISC) architectures in a general computing application. It is shown that \texttt{SUBLEQ} OISC performs better in special cases, however there is a lack of research info more complicated OISC architectures designed for general computing. At this point the project is mostly on track  with the benchmark being behind schedule.
 
 \section{Introduction}
-Since the 80s there has been a rise of many processor architectures that try to fulfil specific performance and power application constraints. One of noticeable cases are ARM's RISC  architecture being used in mobile devices instead of more popular and robust x86 CISC (Complex Instruction Set Computer) architecture in favour of simplicity, cost and lower power consumption \autocite{jamil_1995,blem_menon_sankaralingam_2013}. It has been shown that in low power applications such as IoTs (Internet of Things), OISC implementation can be superior in power and data throughput comparing to traditional RISC architectures \autocite{yokota_saso_hara-azumi_2017, ahmed_sakamoto_anderson_hara-azumi_2015}. This project proposes to compare two novel RISC and OISC architectures and compare their performance, design complexity and efficiency.
+Since the 80s there has been a rise of many processor architectures that try to fulfil specific performance and power application constraints. One of more noticeable cases are ARM's RISC  architecture being used in mobile devices instead of the more popular and robust x86 CISC (Complex Instruction Set Computer) architecture in favour of simplicity, cost and lower power consumption \autocite{jamil_1995,blem_menon_sankaralingam_2013}. It has been shown that in low power applications, such as IoTs (Internet of Things), OISC implementation can be superior in power and data throughput comparing to traditional RISC architectures \autocite{yokota_saso_hara-azumi_2017, ahmed_sakamoto_anderson_hara-azumi_2015}. This project proposes to compare two novel RISC and OISC architectures and compare their performance, design complexity and efficiency.
 
-Project is split into 3 main objectives:\\
-$\bullet$ Design and build a RISC based processor. As it is aimed for low power and performance applications this will be 8bit word processor with 4 general purpose registers.\\
-$\bullet$ Design and build an OISC based processor. There are multiple different implementations that are still considered, such as \texttt{SUBLEQ} or one proposed in chapter \ref{sec:theory}.\\
-$\bullet$ Design a fair benchmark that both processors could execute. Benchmark may include different algorithms that are commonly used in controllers, IoT devices or similar low power microprocessor applications.
+The project has 3 main objectives:\\
+$\bullet$ Design and build a RISC based processor. As this is aimed for low power and performance applications it will be 8bit word processor with 4 general purpose registers.\\
+$\bullet$ Design and build an OISC based processor. There are multiple different implementations that are still under consideration, such as \texttt{SUBLEQ} or one proposed in chapter \ref{sec:theory}.\\
+$\bullet$ Design a fair benchmark that both processors could execute. This benchmark may include different algorithms that are commonly used in controllers, IoT devices or similar low power microprocessor applications.
 
-Following chapters will describe the estimated project outcome, project schedule and work done so far.
+The following chapters will describe the estimated project outcome, project schedule and work completed so far.
 
 \section{The Work Performed to Date}
 \subsection{Supporting Theory} \label{sec:theory}
 This section explains the theory and predictions of RISC and OISC architectures.
 
-Figure \ref{fig:simple_blocks} represents simplified diagrams of RISC and OISC architectures. In RISC and CISC architecture, program data travels from program memory to the control block where instruction is decoded. Then control block further decides how data is directed in the datapath block which is described in section \ref{sec:datapath}. Such structure requires a complicated control block and additional data routing blocks. In order to increase performance of one such processor you would need to add pipelining or add multiple cores. Both methods bring disadvantages - multicore processor requires software adjustments and each core doubles the control and datapath blocks, substantially increasing transistor count; pipelinig allows operation at higher frequencies however it brings design complications such as complicated hazard prevention logic and instruction lookup. RISC architecture in this project is mainly based on theory in \autocite{harris_harris_2013}. Simplicity of OISC architecture overcomes these disadvantages:
+Figure \ref{fig:simple_blocks} represents simplified diagrams of RISC and OISC architectures. In RISC and CISC architecture, program data travels from program memory to the control block where instruction is decoded. Then control block further decides how data is directed in the datapath block which is described in section \ref{sec:datapath}. Such structure requires a complicated control block and additional data routing blocks. In order to increase performance of one such processor you would need to add pipelining or multiple cores. Both methods have disadvantages: multicore processor requires software adjustments and each core doubles the control and datapath blocks, substantially increasing transistor count; pipelinig allows operation at higher frequencies however it brings design complications such as complicated hazard prevention logic and instruction lookup. RISC architecture in this project is mainly based on theory in \autocite{harris_harris_2013}. The simplicity of OISC architecture overcomes these disadvantages:
 \\
 Pipelining can be done by individual blocks and programmibly waiting for results, this is represented in figure \ref{fig:oisc_simple} Adder and Multiply vertical blocks, multicore can be simulated by adding more data and instruction buses, hazards can be prevented with software and/or integrated into address registers.
 \\ 
-ALU and any other processor component can be divided by adding different address registers thus allowing to utilise multiple components at the same time given that multiple data buses are used. This is represented in figure \ref{fig:oisc_simple} Arithmetic Unit horizontal blocks. Assuming 4 data and instructions buses are used, \textbf{AND} and \textbf{OR} blocks sources A and B can all be written during one cycle utilising both blocks at the same time.
+ALU and other processor components can be divided by adding different address registers. This allow utilisation of multiple components at the same time given that multiple data buses are used. This is represented in figure \ref{fig:oisc_simple} Arithmetic Unit horizontal blocks. Assuming 4 data and instructions buses are used, \textbf{AND} and \textbf{OR} blocks sources A and B can all be written during one cycle utilising both blocks at the same time.
 \\
-These principal functions should allow OISC architecture to have advantage in performance and power consumption while having lower transistor count and this is the main motivation behind project. This expectation is supported mainly by the following papers:
+These principal functions should allow OISC architecture to have advantage in performance and power consumption while having lower transistor count and this is the main motivation behind the project. This expectation is supported mainly by the following papers:
 \\
-$\bullet$ Using OISC \texttt{SUBLEQ} as a coprocessor for MIPS-ISA processor to emulate the functionality of different classes shows desirable area/performance/power trade-offs \autocite{ahmed_sakamoto_anderson_hara-azumi_2015}.
+$\bullet$ Using OISC \texttt{SUBLEQ} as a coprocessor for the MIPS-ISA processor to emulate the functionality of different classes shows desirable area/performance/power trade-offs \autocite{ahmed_sakamoto_anderson_hara-azumi_2015}.
 \\
 $\bullet$ Comparing OISC \texttt{SUBLEQ} multicore to RISC achieves better performance and lower energy for streaming data processing \autocite{yokota_saso_hara-azumi_2017}.
 \\
@@ -141,7 +141,7 @@ There is a lack of research investigating and comparing more general purpose OIS
 \newpage
 \begin{landscape}
 	\subsection{Project Scheduling}
-	As it can be seen in table \ref{table:time} below, project is mainly split into Term 1 which is dedicated for RISC and Term 2 which is dedicated for OISC implementation. Approximately 3 weeks are left until final report to have enough spare time to finish all tests and complete the poster \& the final report itself. It is also expected be assigned a lot of coursework around this time. Currently the benchmark development is behind schedule, more information in section \ref{sec:benchmark_issues}.
+	As it can be seen in table \ref{table:time} below, the project is mainly split into Term 1 which is dedicated to RISC and Term 2 which is dedicated to OISC implementation. Approximately 3 weeks before the final report submission are left to have enough spare time to finish all tests and complete the poster \& the final report itself. It is also expected a lot of coursework to be assigned around this time. Currently the benchmark development is behind schedule, more information in section \ref{sec:benchmark_issues}.
 	
 	\begin{table}[h!]
 		\centering
@@ -206,18 +206,18 @@ There is a lack of research investigating and comparing more general purpose OIS
 This section mainly includes progress on RISC processor and its components.
 
 \subsubsection{Memory} \label{sec:memory}
-Initial plan was to use 32MiB 16bit SDRAM chip located on FPGA board. After successfully simulating most of processor functions, next step was to synthesise and run it on the FPGA which brought 2 problems: 
+The initial plan was to use 32MiB 16bit SDRAM chip located on FPGA board. After successfully simulating most of the processor functions, the next step was to synthesise and run it on the FPGA which brought 2 problems: 
 
-(1) Flashing program to ROM was not simple because generic Verilog's unpacked register array cannot be initialised from file. Solution to this problem was solved by using FPGA's built-in M9K memory that allows flexible RAM/ROM configuration. In addition, M9K memory can be read from/written to via JTAG connection without affecting FPGA's operation which enabled a quick method to upload programs without the need to resynthesise processor HDL code.
+(1) Flashing program to ROM was not simple because generic Verilog's unpacked register array cannot be initialised from file. The solution to this problem was solved by using FPGA's built-in M9K memory that allows flexible RAM/ROM configuration. In addition, M9K memory can be read from/written to via JTAG connection without affecting FPGA's operation which enabled a quick method to upload programs without the need to resynthesise processor HDL code.
 
-(2) Used SDRAM memory controller runs at much higher frequency than the processor (at 100MHz versus 1MHz). The initial implementation of the interface between the two was multiple 1-word length FIFO (First-In-First-Out) registers which caused memory read operation to take 2 processor cycles. 3 possible solutions were considered - suspend the processor clock while memory data is read which would harm performance; remove FIFO registers and rely on SDRAM clock being much greater than processor clock which is not ideal if higher processor clocks are intended to be used; use M9K memory. Last option was chosen due to ease of implementation and ability to read RAM content via JTAG for debugging purposes.
+(2) Used SDRAM memory controller runs at much higher frequency than the processor (at 100MHz versus 1MHz). The initial implementation of the interface between the two was multiple 1-word length FIFO (First-In-First-Out) registers which caused memory read operation to take 2 processor cycles. 3 possible solutions were considered - suspend the processor clock while memory data is read which would harm performance; remove FIFO registers and rely on SDRAM clock being much greater than the processor clock which is not ideal if higher processor clocks are intended to be used; use M9K memory. The last option was chosen due to ease of implementation and ability to read RAM content via JTAG for debugging purposes.
 
 \subsubsection{Instructions}\label{sec:instr}
 Table \ref{table:risc_instr} below represents RISC processor instructions that been implemented so far. In this processor design, instructions are 8 bit size, where 5th and 6th bits points to register 1 address and 7th and 8th bits to register 2 address. Instructions are separated in 3 groups:\\\\
 $\bullet$ 2 register - uses both registers,\\
 $\bullet$ 1 register - uses only register 1,\\
 $\bullet$ 0 register - do not use registers.\\\\
-Such grouping allowed to encode more instructions in 8 bits. At every processor cycle 4 bytes of instructions are fetched, first byte encodes instruction, last 3 may encode immediate value. This allows jump and conditional branch instructions to use 16bit jump address. Memory instructions \texttt{LWHI}, \texttt{SWHI},  \texttt{LWLO} and \texttt{SWLO} can use 24bit address that allows it to access all addresses of SDRAM chip that been described in section \ref{sec:memory}. \texttt{MOVE} instruction is a special case, if register addresses 1 and 2 are different, data will be copied from register address 2 to 1. If these register address values are the same, value from immediate will be copied to register 1 address.
+Such grouping allowed to encode more instructions in 8 bits. At every processor cycle 4 bytes of instructions are fetched, first byte encodes instruction, last 3 may encode immediate value. This allows jump and conditional branch instructions to use 16bit jump address. Memory instructions \texttt{LWHI}, \texttt{SWHI},  \texttt{LWLO} and \texttt{SWLO} can use 24bit address that allows it to access all addresses of SDRAM chip that been described in section \ref{sec:memory}. \texttt{MOVE} instruction is a special case, if register addresses 1 and 2 are different, data will be copied from register address 2 to 1. If these register address values are the same, the value from the immediate will be copied to register 1 address.
 
 \end{multicols}
 \arrayrulecolor{black}
@@ -311,16 +311,16 @@ Such grouping allowed to encode more instructions in 8 bits. At every processor 
 \begin{multicols}{2}
 
 \subsubsection{Program Counter} \label{sec:pc}
-Figure \ref{fig:program_counter} represents the digital diagram for program counter. There are few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because first takes to fetch address from stack and second to fetch instruction from instruction memory).
+Figure \ref{fig:program_counter} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
 
 
 \subsubsection{Immediate Override} \label{sec:imo}
-Due to limited amount of instructions available and processor data width being 1 byte comparing to 2 bytes for instruction address and 3 bytes for memory address, there is no easy way to operate program pointers that can be dynamically calculated which limits program flexibility. Solution to this is IMO (Immediate Override), the logic for which is represented in figure \ref{fig:imo}. This circuit is connected between instruction memory's output higher 3 bytes (the immediate value, \textit{immr} bus) and immediate bus (\textit{imm}) at datapath. Override bytes can be written with \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. On \texttt{CI0} a flag for next clock cycle is enabled that replaces \textit{imm} value by ones stored in IMO registers. This circuit has two disadvantages: \\
+Due to the limited amount of instructions available and processor data width being 1 byte comparing to 2 bytes for instruction address and 3 bytes for memory address, there is no easy way to operate program pointers that can be dynamically calculated which limits program flexibility. Solution to this is IMO (Immediate Override), the logic for which is represented in figure \ref{fig:imo}. This circuit is connected between instruction memory's output higher 3 bytes (the immediate value, \textit{immr} bus) and immediate bus (\textit{imm}) at datapath. Override bytes can be written with \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. On \texttt{CI0} a flag for the next clock cycle is enabled that replaces \textit{imm} value by ones stored in IMO registers. This circuit has two disadvantages: \\
 \\
 1. Overriding immediate bytes takes one or more clock cycles,\\
 2. At override, \textit{immr} bytes are ignored therefore they are wasting instruction memory space.\\
 \\
-Point 2 can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at program counter, thus effectively saving instruction memory space. This solution however would introduce complication with assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
+Point 2 can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 \end{multicols}
 
 \begin{figure*}[hb!]
@@ -342,9 +342,9 @@ Point 2 can be resolved by designing a circuit that would subtract the amount of
 \begin{multicols}{2}
 	
 \subsubsection{Stack Pointer} \label{sec:sp}
-RISC processor implements stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:stack_pointer} represents digital diagram for stack pointer. Note that stack is only 16bit in size and most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent stack pointer being added by 1 twice during \texttt{RET} instruction. 
+RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:stack_pointer} represents the digital diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
 
-One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. Solution to this may be implemented in future.
+One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. The solution to this may be implemented in future.
 
 \end{multicols}
 
@@ -371,7 +371,7 @@ Data to register file is selected and saved with \textit{MUX0}. This data is del
 
 \section{Summary of Difficulties and Issues}
 \begin{multicols}{2}
-This chapter focuses on any difficulties and issues that are hindering project from moving forward.
+This chapter focuses on any difficulties and issues that are hindering the project from moving forward.
 
 \subsection{List of Difficulties}
 
@@ -384,14 +384,14 @@ $\bullet$ Assembler/Compiler
 One of the difficulties is to design an appropriate benchmark that could test scenarios used in actual such processor applications. Other issues comes with writing the benchmark itself, for instance the benchmark test to finding prime numbers may use many different algorithms, where one of the fastest and used in actual industry may be "Sieve of Atkin" algorithm \autocite{morain_1989}, however is it fairly complicated and time consuming especially when written in assembly. 
 
 \subsubsection{Assembler/Compiler}
-In order to write more complicated code for benchmark, a proper compiler is required. The current assembler supports definitions and labels, however not macros or imports from other files, nor linked libraries. Ideally, a common language compiler needs to be developed so that the benchmark programs could be imported without the need to completely rewrite them in assembly. However such compiler might take more time to develop than writing benchmarks in assembly. Therefore it needs to be decided which option to do.
+In order to write more complicated code for the benchmark, a proper compiler is required. The current assembler supports definitions and labels, however not macros or imports from other files, nor linked libraries. Ideally, a common language compiler needs to be developed so that the benchmark programs could be imported without the need to completely rewrite them in assembly. However such compiler might take more time to develop than writing benchmarks in assembly. Therefore it needs to be decided which option to proceed with.
 
 \subsection{Failure Assessment}
 This section describes the likely possibilities of project failures:
 
-As of current schedule OISC processor will be implemented in Term 2, however due to personal schedule, the project will be given about twice as less time than in Term 1 which may result in not finishing OISC processor or developing all benchmarks for it on time. Mitigation for this is to closely follow schedule and adjust OISC design in such way that would take less time to implement benchmark.
+As of the current schedule OISC processor will be implemented in Term 2, however due to personal schedule, the project will be given about twice as less time than in Term 1 which may result in not finishing OISC processor or developing all the benchmarks for it on time. Mitigation for this is to closely follow the schedule and adjust OISC design in such way that would take less time to implement the benchmark.
 
-Another possible failure may be FPGA failure which would delay testing and benchmarking processors. This has been already encountered before, JTAG has caused errors while communicating with FPGA which indicated that FPGA chip is damaged. After long investigation it has been discovered that the problem was caused by bug in a Linux JTAG Daemon service that needed to be simply restarted. Mitigation for any further issues is to have access to a backup FPGA board.
+Another possible failure may be FPGA failure which would delay testing and benchmarking processors. This has already been encountered before, JTAG has caused errors while communicating with FPGA which indicated that FPGA chip is damaged. After long investigation it has been discovered that the problem was caused by a bug in a Linux JTAG Daemon service that needed to be simply restarted. Mitigation for any further issues is to have access to a backup FPGA board.
 
 \subsection{Updated Safety Risk Assessment}
 There are no changes to Safety Risk Assessment.
