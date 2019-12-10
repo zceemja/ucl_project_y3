@@ -26,7 +26,7 @@
 \usepackage{longtable}
 \usepackage{xcolor,colortbl}
 \usepackage{pdfpages}
-
+%
 \counterwithin{figure}{subsection}
 \usepackage{multicol} 
 
@@ -204,16 +204,26 @@ Initial plan was to use 32M-Word 16bit SDRAM chip located at FPGA board. After s
 \newpage
 \subsubsection{Instructions}
 Table \ref{table:risc_instr} below represents RISC processor instructions that been implemented so far.
+
+
+
 \arrayrulecolor{black}
 \begin{longtable}{| l | p{.70\textwidth} | c |}
-	\hline 
+	\caption{Instruction set for RISC processor}	
+	\label{table:risc_instr}
+	
+	\\\hline
 	\rowcolor[rgb]{0.82,0.82,0.82}
 	Instr. & Description & Completed \\\hline
+	\endhead
+	\arrayrulecolor{black}\hline
+	\endfoot
 		
-
+	\arrayrulecolor{black}
 	\multicolumn{3}{|c|}{
 		\cellcolor[rgb]{0.7,0.7,1}\textit{2 register instructions}} \\\hline
 	\arrayrulecolor[rgb]{0.82,0.82,0.82}
+	
 		
 	MOVE & Copy intimidate or register & x \\\hline
 	ADD  & Arithmetical addition & x \\
@@ -265,10 +275,10 @@ Table \ref{table:risc_instr} below represents RISC processor instructions that b
 		
 	\arrayrulecolor{black}\hline
 	\multicolumn{3}{|c|}{
-		\cellcolor[rgb]{0.7,0.7,1}\textit{0 register instructions}
+	\cellcolor[rgb]{0.7,0.7,1}\textit{0 register instructions}
 	} \\
 	\hline\arrayrulecolor[rgb]{0.82,0.82,0.82} 
-		
+	
 	CALL & Call function, put return to stack & x \\
 	RET  & Return from function & x \\
 	JUMP & Jump to address & x \\
@@ -284,13 +294,7 @@ Table \ref{table:risc_instr} below represents RISC processor instructions that b
 	CLN  & Clear ALU negative & \\
 	SETN & Set ALU negative & \\
 	SSETN& Enable ALU negative & \\
-
-		
-	\arrayrulecolor{black}\hline
-	
-	\caption{Instruction set for RISC processor}
-	\label{table:risc_instr}
-\end{longtable}	
+\end{longtable}
 
 
 \subsubsection{Program Counter}
@@ -351,6 +355,6 @@ Append any code you may need here. Reference it in the text as "Appendix B, code
 \section{References}
 \printbibliography
 
-\includepdf[pages=-]{risknet.pdf}
+%\includepdf[pages=-]{risknet.pdf}
 
 \end{document}
