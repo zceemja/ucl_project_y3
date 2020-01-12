@@ -16,12 +16,14 @@ module datapath8(
 	// regiser file outputs
 	word r1, r2;
 	
-	// immidate overrride
+	// immidate override
 	word imo0, imo1, imo2;
-	reg imo0_en, imo1_en, imo2_en, imo_en;	
+	reg imo0_en, imo1_en, imo2_en, imo_en, imo_reg;	
 	reg [23:0] imm;
 
 	always_comb begin
+		imo_reg = imo0_en | imo1_en | imo2_en;
+		imo_en = imo_reg & (cdi.imoctl == IMO_NONE);
 		imm[7:0] = (imo_en & imo2_en) ? imo2 : immr[7:0];
 		imm[15:8] = (imo_en & imo1_en) ? imo1 : immr[15:8];
 		imm[23:16] = (imo_en & imo0_en) ? imo0 : immr[23:16];
@@ -32,12 +34,10 @@ module datapath8(
 			imo0_en <= 0;
 			imo1_en <= 0;
 			imo2_en <= 0;
-			imo_en <= 0;
 		end else case(cdi.imoctl)
 			IMO_0: begin
 				imo0 <= r1;
 				imo0_en <= 1;
-				imo_en <= 1;
 			end
 			IMO_1: begin
 				imo1 <= r1;
