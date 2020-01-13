@@ -123,9 +123,14 @@ module datapath8(
 			(~cdi.isize[1]&~cdi.isize[0])|(cdi.isize[1]&~cdi.isize[0])
 		}; // Adding 1 to 2bit value.
 
-		intr_re = cdi.intr_ctl == INTR_RE;
-		pcs = intr_re | interrupt | rst;
 		
+		intr_re = cdi.intr_ctl == INTR_RE;
+		casez({intr_re, interrupt, rst})
+			3'b000: pcb = pch;
+			3'b100: pcb = intrr;
+			3'b?10: pcb = intre;
+			3'b??1: pcb = 16'h0000;
+		endcase
 		case(cdi.pcop)
 			PC_NONE: pcn0 = pcb;
 			PC_MEM : pcn0 = mem_rd;
@@ -136,12 +141,7 @@ module datapath8(
 
 		pcn = (cdi.pcop == PC_IMM | cdi.pcop == PC_IMM2) ? pcn0 : pcn0 + pc_off;
 		pca = (pchf) ? pch : pcn;
-		casez({intr_re, interrupt, rst})
-			3'b000: pcb = pch;
-			3'b100: pcb = intrr;
-			3'b?10: pcb = intre;
-			3'b??1: pcb = 16'h0000;
-		endcase
+		pcs = intr_re | interrupt | rst;
 		pc = (pcs) ? pcb : pca;
 		
 
@@ -223,23 +223,11 @@ module datapath8(
 	// 		Register File 	 	//
 	// ======================== //
 	
-	word reg_wr, reg_wr1, reg_wr2, reg_wra;
+	word reg_wr, reg_wr1, reg_wr2;
+	reg [1:0]reg_wra;
 	reg reg_wr_en1; 
 	reg [1:0]reg_wr_mem;
 	
-	always_ff@(posedge clk) begin
-		if(rst) begin
-			reg_wr1 	<= 0;
-			reg_wr_en1 	<= 0;
-			reg_wr_mem 	<= 0;
-		end else begin
-			reg_wr1 	<= reg_wr;
-			reg_wr_en1 	<= cdi.rw_en;
-			reg_wra 	<= cdi.a3;
-			reg_wr_mem 	<= {cdi.selr == SR_MEML, cdi.selr == SR_MEMH};
-		end
-	end	
-
 	always_comb begin
 		case(cdi.selr)
 			SR_REG : reg_wr = r2;
@@ -254,6 +242,19 @@ module datapath8(
 		endcase
 	end
 	
+	always_ff@(posedge clk) begin
+		if(rst) begin
+			reg_wr1 	<= 0;
+			reg_wr_en1 	<= 0;
+			reg_wr_mem 	<= 0;
+		end else begin
+			reg_wr1 	<= reg_wr;
+			reg_wr_en1 	<= cdi.rw_en;
+			reg_wra 	<= cdi.a3;
+			reg_wr_mem 	<= {cdi.selr == SR_MEML, cdi.selr == SR_MEMH};
+		end
+	end	
+
 	always_comb begin
 		case(reg_wr_mem)
 			2'b10: 		reg_wr2 = mem_rd[7:0];

@@ -21,9 +21,9 @@
      CI2,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_2,2'b00  , INTR_NONE
     ADDC,    ALU_ADD,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 , INTR_NONE
     SUBC,    ALU_SUB,     SB_0,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b01 , INTR_NONE
-     SLL,     ALU_SL,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
-     SRL,     ALU_SR,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
-     SRA,     ALU_RA,   SB_REG,         1,  SR_ALUL,      0,      0,         0,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SLL,     ALU_SL,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SRL,     ALU_SR,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
+     SRA,     ALU_RA,   SB_IMM,         1,  SR_ALUL,      0,      0,         1,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
     LWHI,   ALU_NONE,  SB_NONE,         1,  SR_MEMH,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
     SWHI,   ALU_NONE,  SB_NONE,         0,  SR_NONE,      0,      0,         0,SO_MEMH , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE
     LWLO,   ALU_NONE,  SB_NONE,         1,  SR_MEML,      1,      0,         3,SO_MEML , ST_SKIP, PC_NONE ,IMO_NONE,2'b00  , INTR_NONE

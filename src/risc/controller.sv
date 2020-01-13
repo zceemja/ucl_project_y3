@@ -422,12 +422,12 @@ module controller8(
         end
         SLL    : begin
             cdi.alu_op   = ALU_SL;
-            cdi.selb     = SB_REG;
+            cdi.selb     = SB_IMM;
             cdi.rw_en    = 1;
             cdi.selr     = SR_ALUL;
             mem_rd       = 0;
             mem_wr       = 0;
-            cdi.isize    = 0;
+            cdi.isize    = 1;
             cdi.selo     = SO_MEML;
             cdi.stackop  = ST_SKIP;
             cdi.pcop     = PC_NONE;
@@ -440,12 +440,12 @@ module controller8(
         end
         SRL    : begin
             cdi.alu_op   = ALU_SR;
-            cdi.selb     = SB_REG;
+            cdi.selb     = SB_IMM;
             cdi.rw_en    = 1;
             cdi.selr     = SR_ALUL;
             mem_rd       = 0;
             mem_wr       = 0;
-            cdi.isize    = 0;
+            cdi.isize    = 1;
             cdi.selo     = SO_MEML;
             cdi.stackop  = ST_SKIP;
             cdi.pcop     = PC_NONE;
@@ -458,12 +458,12 @@ module controller8(
         end
         SRA    : begin
             cdi.alu_op   = ALU_RA;
-            cdi.selb     = SB_REG;
+            cdi.selb     = SB_IMM;
             cdi.rw_en    = 1;
             cdi.selr     = SR_ALUL;
             mem_rd       = 0;
             mem_wr       = 0;
-            cdi.isize    = 0;
+            cdi.isize    = 1;
             cdi.selo     = SO_MEML;
             cdi.stackop  = ST_SKIP;
             cdi.pcop     = PC_NONE;

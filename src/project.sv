@@ -37,10 +37,15 @@ module com_block(
 );
 
 	/* UART */
-	reg [2:0] uart0_reg;
+	reg [3:0] uart0_reg;
+	// UART REG
+	// 0: Is Recieving
+	// 1: Is Transmitting
+	// 2: Echo ON
+	// 3: Recieved and waiting 
 	reg uart0_recv;
 	reg uart0_transmit;
-	reg [7:0] tx_byte, rx_byte;
+	reg [7:0] tx_byte, rx_byte, rx_buf;
 	// Clock divide = 1e6 / (9600 * 4)
 	//uart#(.CLOCK_DIVIDE(1302)) uart0(
 	uart#(.CLOCK_DIVIDE(26)) uart0(
@@ -77,9 +82,11 @@ module com_block(
 		if(rst) begin 
 			//reset_seq <= 0;
 			uart0_reg[2] <= 0;
+			uart0_reg[3] <= 0;
 			//interrupt <= 0;
 			interrupt_reg <= 0;
 			leds <= 'b0000_0000;
+			rx_buf <= 0;
 		end
 		//else if(~uart0_reg[2] && reset_seq != 7) reset_seq <= reset_seq + 1;
 		else begin
@@ -89,7 +96,12 @@ module com_block(
 			endcase
 			if(~key1) interrupt_reg <= 1;
 			if(interrupt) interrupt_reg <= 0;
-			leds <= {5'b0, uart0_reg};
+			leds <= {3'b0, uart0_recv, uart0_reg};
+			if(uart0_recv) begin 
+					uart0_reg[3] <= 1;
+					rx_buf <= rx_byte;
+			end
+			if(~uart0_recv & addr == 8'h09) uart0_reg[3] <= 0;
 		end
 	end
 
@@ -101,10 +113,11 @@ module com_block(
 		//tx_byte = in_data;
 		case(addr)
 			8'h03: out_data = in_data; 				// Set uart0 flags
-			8'h04: out_data = {5'b0, uart0_reg};  	// Read uart0 flags
+			8'h04: out_data = {4'b0, uart0_reg};  	// Read uart0 flags
 			8'h05: out_data = in_data;  			// Write to uart0
 			8'h07: out_data = leds;					// Read current LEDs
 			8'h08: out_data = {4'b0, switches};		// Read DIP
+			8'h09: out_data = rx_buf;  			// Write to uart0
 			default: out_data = 0;
 		endcase
 	end
