@@ -70,11 +70,11 @@ class Instruction:
                 raise CompilingError(f"Unable to decode register name {regs[1]}")
             if regs[0] is None:
                 raise CompilingError(f"Unable to decode register name {regs[0]}")
-            instr |= regs[1] << 2 | regs[0]
+            instr |= regs[0] << 2 | regs[1]
         elif len(regs) == 1:
             if regs[0] is None:
                 raise CompilingError(f"Unable to decode register name {regs[0]}")
-            instr |= int(regs[0]) << 2
+            instr |= regs[0] << 2
         return instr.to_bytes(1, 'little')  # Order does not matter with 1 byte
 
     def compile(self, operands, scope):
@@ -297,10 +297,16 @@ class Compiler:
                     self.labels[line_args[1]] = self.decode_bytes(line_args[2])
                     continue
 
+                elif line_args[0].lower() == '%include':
+                    if len(line_args) != 2:
+                        raise CompilingError(f"Invalid %include arguments!")
+                    raise CompilingError(f"%include is not implemented yet")  # TODO: Complete
+                    continue
+
                 if csect is None:
                     raise CompilingError(f"No section defined!")
 
-                builtin_cmds = {'db'}
+                builtin_cmds = {'db', 'dbe'}
 
                 if line_args[0].lower() not in self.instr_db and\
                         line_args[0].lower() not in builtin_cmds:  # Must be label
@@ -329,6 +335,21 @@ class Compiler:
                     if len(data) % csect.width != 0:
                         fill = csect.width - (len(data) % csect.width)
                         data += b'\x00' * fill
+                    csect.instr.append(data)
+                    csect.count += int(len(data)/csect.width)
+                    continue
+
+                if instr_name == 'dbe':
+                    try:
+                        fill = int(args[0])
+                    except ValueError:
+                        raise CompilingError(f"Instruction 'dbe' invalid argument, must be a number")
+                    except IndexError:
+                        raise CompilingError(f"Instruction 'dbe' invalid argument count! Must be 1")
+
+                    if fill % csect.width != 0:
+                        fill += csect.width - (fill % csect.width)
+                    data = b'\x00' * fill
                     csect.instr.append(data)
                     csect.count += int(len(data)/csect.width)
                     continue
