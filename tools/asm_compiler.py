@@ -229,29 +229,33 @@ class Compiler:
             self.instr_db[alias.lower()] = instr
 
     def proc_func(self, left, right, op):
+        leftInt = int.from_bytes(left, self.order)
+        rightInt = int.from_bytes(right, self.order)
         if op == '|':
-            return left | right
-        if op == '^':
-            return left ^ right
-        if op == '&':
-            return left & right
-        if op == '<<':
-            return left << right
-        if op == '>>':
-            return left >> right
-        if op == '+':
-            return left + right
-        if op == '-':
-            return left - right
-        if op == '*':
-            return left * right
-        if op == '/' or op == '//':
-            return left / right
-        if op == '%' or op == '%%':
-            return left % right
-        if op == '@':
-            return bytes([left[len(left)-int.from_bytes(right, byteorder=self.order)-1]])
-        raise CompilingError(f"Invalid function operation {op}")
+            result = leftInt | rightInt
+        elif op == '^':
+            result = leftInt ^ rightInt
+        elif op == '&':
+            result = leftInt & rightInt
+        elif op == '<<':
+            result = leftInt << rightInt
+        elif op == '>>':
+            result = leftInt >> rightInt
+        elif op == '+':
+            result = leftInt + rightInt
+        elif op == '-':
+            result = leftInt - rightInt
+        elif op == '*':
+            result = leftInt * rightInt
+        elif op == '/' or op == '//':
+            result = leftInt // rightInt
+        elif op == '%' or op == '%%':
+            result = leftInt % rightInt
+        elif op == '@':
+            return bytes([left[len(left)-rightInt-1]])
+        else:
+            raise CompilingError(f"Invalid function operation {op}")
+        return result.to_bytes(len(left), self.order)
 
     def compile(self, file, code):
         failure = False
