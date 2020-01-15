@@ -13,6 +13,8 @@ args_re = re.compile("(?:^|,)(?=[^\"]|(\")?)\"?((?(1)[^\"]*|[^,\"]*))\"?(?=,|$)"
 func_re = re.compile("^([\w$#@~.?]+)\s*([|^<>+\-*/%@]{1,2})\s*([\w$#@~.?]+)$", re.IGNORECASE)
 secs_re = re.compile("^([\d]+)x([\d]+)x([\d]+)$", re.IGNORECASE)
 
+MAX_INT_BYTES = 12
+
 def args2operands(args):
     operands = ['"' + a[1] + '"' if a[0] == '"' else a[1] for a in args_re.findall(args or '') if a[1]]
     return operands
@@ -120,14 +122,16 @@ class Compiler:
         s = s.strip()
         typ = ""
         # Decimal numbers
-        if s.isnumeric():
+        if (s.startswith('+') or s.startswith('-')) and s[1:].isnumeric():
             typ = 'int'
+        elif s.isnumeric():
+            typ = 'uint'
         elif s.endswith('d') and s[:-1].isnumeric():
             s = s[:-1]
-            typ = 'int'
+            typ = 'uint'
         elif s.startswith('0d') and s[2:].isnumeric():
             s = s[2:]
-            typ = 'int'
+            typ = 'uint'
 
         # Hexadecimal numbers
         elif s.startswith('0') and s.endswith('h') and match(hex_re, s[1:-1]):
@@ -164,10 +168,15 @@ class Compiler:
             typ = 'string'
 
         # Convert with limits
-        if typ == 'int':
+        if typ == 'uint':
             numb = int(s)
-            for i in range(1, 9):
-                if -2 ** (i * 7) < i < 2 ** (i * 8):
+            for i in range(1, MAX_INT_BYTES+1):
+                if numb < 2 ** (i * 8):
+                    return numb.to_bytes(i, self.order)
+        elif typ == 'int':
+            numb = int(s)
+            for i in range(1, MAX_INT_BYTES+1):
+                if -2 ** (i * 7) < numb < 2 ** (i * 7):
                     return numb.to_bytes(i, self.order)
         elif typ == 'hex':
             numb = int(s, 16)
