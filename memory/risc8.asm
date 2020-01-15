@@ -22,12 +22,17 @@ initial_vt100 DB 0x1B,'c',0x1B,"[2J",0x1B,"[40;32m",0
 error_text DB LFCR,"Invalid operation: ",0
 error0 DB "Buffer is full",0
 mul16buf DBE 8
+generalbuf DBE 1
 termHiFlag 	DB  0x0000
 termBuff 	DB  10,0
 			DBE 10
 mallocPointer DB 0
 section .text 1x2x4096
 setup
+	CPY0 65432@1
+	CPY1 65432@0
+	CALL printU16
+
 	; Run init
 	INTRE interrupt
 	;CALL read_char
@@ -361,6 +366,8 @@ println
 	POP r0
 	RET
 
+
+
 mulU16
 	; Multiply 2 unsigned 16-bit int
 	; {r0 r1} * {r2 r3}
@@ -417,6 +424,77 @@ mulU16
 	ADDC r0
 	LWHI r3,mul16buf    ; r3=BY0
 	RET	
+
+bin2digit
+	; Converts U16 to digit
+	; Adopted from http://www.avr-asm-tutorial.net/avr_en/calc/CONVERT.html#bin2bcd
+	; Digit {r0 r1}, Place in 10^n {r2 r3}
+	PUSH r0
+	CPY0 0
+	SWLO r0,generalbuf  ; Using general buf to store number
+	POP r0
+.a
+	CI2 r0
+	BGT r2,0,.c  ; MSB is smaller than digit
+	CI2 r2
+	BGT r0,0,.b ; MSB is grater than digit
+	CI2 r1
+	BGT r3,0,.c ; LSB is smaller than digit
+.b
+	PUSH r0
+	LWLO r0,generalbuf
+	INC r0
+	SWLO r0,generalbuf 
+	POP r0
+	SUB r0,r2
+	SUB r1,r3
+	SUBC r0
+	JUMP .a
+.c
+	LWLO r2,generalbuf
+	RET	
+
+printU16
+; print unsigned 16bit int as base-10 digit
+; arguments: digit {r0, r1}
+	PUSH r0
+	PUSH r1
+	PUSH r2
+	PUSH r3
+
+	CPY2 10000@1
+	CPY3 10000@0
+	CALL bin2digit
+	MOVE r3,r0
+	MOVE r0,r2
+	ADDI r0,48 ; Convert to ascii digit
+	CALL print_char
+	MOVE r0,r3
+	
+	CPY2 1000@1
+	CPY3 1000@0
+	CALL bin2digit
+	MOVE r3,r0
+	MOVE r0,r2
+	ADDI r0,48 ; Convert to ascii digit
+	CALL print_char
+	MOVE r0,r3
+
+	CPY2 0
+	CPY3 100
+	CALL bin2digit
+	MOVE r0,r2
+	ADDI r0,48 ; Convert to ascii digit
+	CALL print_char
+
+	MOVE r0,r1
+	CALL printU8
+
+	POP r3
+	POP r2
+	POP r1
+	POP r0
+	RET
 
 printU8
 	; Assuing number is 128
