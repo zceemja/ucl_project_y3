@@ -39,7 +39,7 @@ asmc.add_instr(compiler.Instruction('XORI ', '1100_??11', 1))
 asmc.add_instr(compiler.Instruction('SLL  ', '1001_??00', 1))
 asmc.add_instr(compiler.Instruction('SRL  ', '1001_??01', 1))
 asmc.add_instr(compiler.Instruction('SRA  ', '1001_??10', 1))
-asmc.add_instr(compiler.Instruction('SRAS ', '1001_??11'))
+asmc.add_instr(compiler.Instruction('SUBC ', '1001_??11'))
 asmc.add_instr(compiler.Instruction('LWHI ', '1010_??00', 3))
 asmc.add_instr(compiler.Instruction('SWHI ', '1010_??01'))
 asmc.add_instr(compiler.Instruction('LWLO ', '1010_??10', 3))
@@ -155,7 +155,7 @@ if __name__ == '__main__':
                     with open(output, 'wb') as of:
                         of.write(x)
 
-            print(f"Total {section} size: {len(bdata)}B [{len(bdataf)}B]")
+            print(f"Total {section} size: {len(bdata)/len(bdataf)*100:.1f}% [{len(bdata)}B/{len(bdataf)}B]")
         else:
             print(f'No such section {section}!')
     else:
