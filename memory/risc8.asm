@@ -21,12 +21,14 @@ eq3_text DB LFCR,"3) 3*2=",0
 initial_vt100 DB 0x1B,'c',0x1B,"[2J",0x1B,"[40;32m",0
 error_text DB LFCR,"Invalid operation: ",0
 error0 DB "Buffer is full",0
+error1 DB "Number value overflow",0
 mul16buf DBE 8
 generalbuf DBE 1
 termHiFlag 	DB  0x0000
 termBuff 	DB  10,0
 			DBE 10
 mallocPointer DB 0
+MEMEND DB 0
 section .text 1x2x4096
 setup
 	CPY0 65432@1
@@ -63,6 +65,9 @@ setup
 	CALL printhex
 	MOVE r0,r3
 	CALL printhex
+	CALL println
+
+	CALL sieveOfAtkin
 	CALL println
 loop
 	CPY0 0
@@ -322,7 +327,7 @@ printhex
 	;CPY1 eq3x_text@0	
 	;CPY2 eq3x_text@1	
 	;CALL print_msg
-	;GETAH r0
+	;AH r0
 	;ADDI r0,48 ; Convert to ascii
 	;CALL print_char
 
@@ -340,7 +345,7 @@ printhex
 	;CPY1 eq5_text@0	
 	;CPY2 eq5_text@1	
 	;CALL print_msg
-	;GETAH r0
+	;AH r0
 	;ADDI r0,48 ; Convert to ascii
 	;CALL print_char
 	
@@ -366,7 +371,254 @@ println
 	POP r0
 	RET
 
+%define SLIMIT 255
+sieveOfAtkin
+	; Calculate primes up to limit
+	CPY0 MEMEND@0
+	CPY1 MEMEND@1
+	CPY2 0
+	CPY3 0
+	; Initialising memory with 0s
+.clearCell
+	CPY2 0
+	CI0 r0
+	CI0 r1
+	SWLO r2,NULL
+	INC r3
+	ADDC r3
+	INC r1
+	ADDC r0
+	BZ r3,.clearCell
+.main
+	CPY0 1 ; x=1
+.loopx
+	; FOR loop x
+	PUSH r0
+	MUL r0,r0 ; x^2
+	; check if more than 2 bytes
+	AH r2
+	BZ r2,.loopx0
+	POP r0
+	JUMP .p2; to part2 
+.loopx0  ; Loop content
+	CPY1 1 ; y=1
+.loopy
+	; FOR loop y
+	PUSH r1
+	MUL r1,r1 ; y^2
+	; check if more than 2 bytes
+	AH r2
+	BZ r2,.loopy0
+	POP r1
+	JUMP .loopxe; to loop x end
+.loopy0  ; Loop content
 
+; ======================
+; START OF MAIN FUNCTION
+; ======================
+
+ ;At this point r0=x^2; r1=y^2
+	CPY2 4 ; n=4
+	MUL r2,r0 ; n=4*x^2
+	AH r3 ; check for overflow
+	BZ r3,.c1a
+	JUMP .c2
+.c1a
+	ADD r2,r1 ; n=4*x^2 + y^2
+	ADDC r3 ; check for overflow
+	BZ r3,.c1b
+	JUMP .c2
+.c1b ; check if n%12==1
+	PUSH r2
+	CPY3 12
+	DIV r2,r3
+	AH r2
+	CPY3 1
+	XOR r3,r2
+	BZ r3,.c1f
+	; check if n%12==5
+	CPY3 5
+	XOR r3,r2
+	BZ r3,.c1f
+	POP r2; return n from stack
+	; else cary on C2
+	JUMP .c2
+.c1f
+	POP r2; return n from stack
+	CALL sieveOfAtkinInvN
+.c2
+; At this point r0=x^2; r1=y^2
+	CPY2 3 ; n=3
+	MUL r2,r0 ; n=3*x^2
+	AH r3 ; check for overflow
+	BZ r3,.c2a
+	JUMP .c3
+.c2a
+	ADD r2,r1 ; n=3*x^2 + y^2
+	ADDC r3 ; check for overflow
+	BZ r3,.c2b
+	JUMP .c3
+.c2b ; check if n%12==7
+	PUSH r2
+	CPY3 12
+	DIV r2,r3
+	AH r2
+	CPY3 7
+	XOR r3,r2
+	POP r2
+	BZ r3,.c2f
+	JUMP .c3
+.c2f
+	CALL sieveOfAtkinInvN
+.c3
+; At this point r0=x^2; r1=y^2
+; n=3*x^2-y^2
+	CPY2 3
+	MUL r2,r0
+	AH r3
+	SUB r2,r1
+	SUBC r3
+	BZ r3,.c3a ; check for limit
+	JUMP .loopye
+.c3a; check if x>y
+	; r2=n
+	POP r1 ; get y
+	POP r0 ; get x
+	CI2 r1
+	BGT r0,0,.c3b
+	PUSH r0
+	PUSH r1
+	JUMP .loopye
+.c3b; check if n%12==11
+	PUSH r0
+	PUSH r1
+	PUSH r2
+	CPY3 12
+	DIV r2,r3
+	AH r2 ; n%12
+	CPY3 11
+	XOR r3,r2
+	POP r2
+	BZ r3,.c3c
+	JUMP .loopye
+.c3c
+	CALL sieveOfAtkinInvN
+
+; ====================
+; END OF MAIN FUNCTION
+; ====================
+
+.loopye
+	POP r1
+	INC r1
+	JUMP .loopy
+.loopxe
+	POP r0
+	INC r0
+	JUMP .loopx
+.p2
+	; for (r=5;r^2<limit;r++)
+	CPY0 5  ; r=5
+.loopr
+	MOVE r1,r0
+	MUL r1,r0 ; r^2
+	AH r3
+	BZ r3,.r0 ; check for overflow
+	JUMP .end
+.r0
+	CPY2 MEMEND@0
+	CPY3 MEMEND@1
+	ADD r2,r0 ; Add r to pointer
+	ADDC r3
+	CI0 r2
+	CI1 r3
+	LWLO r2,NULL ; if sieve[r]
+	BZ r2,.loopre
+	; for(i = r^2; i<limit;i+=r^2) sieve[r]=0
+	; at this point r0 -> r;  r1 -> r^2
+	PUSH r0
+	MOVE r0,r1 ; set i=r^2
+.loopi
+	; sieve[r] = 0
+	CPY2 MEMEND@0
+	CPY3 MEMEND@1
+	ADD r2,r0
+	ADDC r3
+	CPY0 0
+	CI0 r2
+	CI1 r3
+	LWLO r0,NULL
+.loopie
+	ADD r0,r1
+	ADDC r2
+	BZ r2,.loopi ; if carry is zero carry on
+	POP r0
+.loopre
+	INC r0
+	JUMP .loopr
+.end
+; shall we print here?
+	CPY0 0
+	CPY1 MEMEND@0
+	CPY2 MEMEND@1
+.print0
+	CI0 r1
+	CI1 r2
+	LWLO r3,NULL
+	BZ r3,.print1
+	CALL printU8
+	PUSH r0
+	CPY0 0x20
+	CALL print_char
+	POP r0
+.print1
+	INC r2
+	ADDC r1
+	INC r0
+	ADDC r3
+	BZ r3,.print0 ; if not overflow, carry on
+	RET
+
+;sieveOfAtkinCore
+
+
+sieveOfAtkinInvN
+; sieve[n] ^=1 where n=r2
+	PUSH r0
+	PUSH r1
+	PUSH r3
+	CPY0 MEMEND@0
+	CPY1 MEMEND@1
+	ADD r0,r2
+	ADDC r1
+	CI0 r0
+	CI1 r1
+	LWLO r3,NULL
+	XORI r3,1
+	CI0 r0
+	CI1 r1
+	SWLO r3,NULL
+
+	MOVE r0,r2
+	CALL printU8
+	CPY0 0x20
+	CALL print_char
+
+	POP r3
+	POP r1
+	POP r0	
+
+;	MOVE r0,r2
+;	CPY1 16
+;	DIV r0,r1; n/=16
+;	PUSH r2
+;	; Get array pointer + n/=16
+;	CPY1 MEMEND@0
+;	CPY2 MEMEND@1
+;	ADD r2,r0
+;	ADDC r1
+
+	RET
 
 mulU16
 	; Multiply 2 unsigned 16-bit int
@@ -381,25 +633,25 @@ mulU16
 	PUSH r3
 	MUL r3,r1 ; BY0
 	SWHI r3
-	GETAH r3  ; BY1
+	AH r3  ; BY1
 	SWLO r3,mul16buf
 	POP r3   ; Buffer = [BY0 BY1]
 	PUSH r2
 	MUL r2,r1 ; BX0
 	SWHI r2
-	GETAH r2  ; BX1
+	AH r2  ; BX1
 	SWLO r2,mul16buf+1
 	POP r2   ; Buffer = [BY0 BY1 BX0 BX1]
 	PUSH r3
 	MUL r3,r0 ; AY0
 	SWHI r3
-	GETAH r3  ; AY1
+	AH r3  ; AY1
 	SWLO r3,mul16buf+2
 	POP r3   ; Buffer = [BY0 BY1 BX0 BX1 AY0 AY1]
 	PUSH r2
 	MUL r2,r0 ; AX0
 	SWHI r2
-	GETAH r2  ; AX1
+	AH r2  ; AX1
 	SWLO r2,mul16buf+3
 	POP r2   ; Buffer = [BY0 BY1 BX0 BX1 AY0 AY1 AX0 AX1]
 			 ;			 {  0  } {  1  } {  2  } {  3  }
@@ -511,7 +763,7 @@ printU8
 	
 	MOVE r1,r0
 	DIV r1,r2
-	GETAH r1
+	AH r1
 	PUSH r1  ; Stored last digit
 	BGE r0,10,.ge10
 	JUMP .p3
@@ -519,7 +771,7 @@ printU8
 	CPY2 100
 	MOVE r3,r0
 	DIV r3,r2
-	GETAH r3
+	AH r3
 	SUB r3,r1
 	CPY2 10
 	DIV r3,r2
