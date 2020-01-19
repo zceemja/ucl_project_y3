@@ -3,6 +3,16 @@
  * It includes all cpu external modules like UART
  * and SDRAM controller. 
 */
+
+// Compile OISC?
+`define OISC
+
+`ifdef OISC
+`include "oisc/cpu.sv"
+`elsif
+`include "risc/cpu.sv"
+`endif
+
 module top(
 	input  			CLK50,		// Clock 50MHz
 
@@ -123,8 +133,12 @@ module top(
 		.com_rd(com0_rd),
 		.com_interrupt(com0_interrupt)
 	);
-
+	
+	`ifdef OISC
+	oisc8_cpu cpu_block0(port0);
+	`elsif
 	risc8_cpu cpu_block0(port0);
+	`endif
 
 endmodule
 
@@ -194,10 +208,10 @@ module top_tb;
 
 			#1100ns;
 			KEY[0] = 1;
-			#20us;
-			KEY[1] = 0;
-			#5us;
-			KEY[1] = 1;
+			//#20us;
+			//KEY[1] = 0;
+			//#5us;
+			//KEY[1] = 1;
 			#300us;
 			$stop;
 	end

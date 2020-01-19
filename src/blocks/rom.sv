@@ -11,10 +11,13 @@ module m9k_rom (
 
 	parameter PROGRAM="";
 	parameter NAME="";
+	parameter WIDTH=8;
+	parameter NUMWORDS=1024;
+	localparam AWIDTH=$clog2(NUMWORDS);
 
-	input	[9:0]  address;
+	input	[AWIDTH-1:0]  address;
 	input	  clock;
-	output	[7:0]  q;
+	output	[WIDTH-1:0]  q;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
@@ -23,8 +26,8 @@ module m9k_rom (
 // synopsys translate_on
 `endif
 
-	wire [7:0] sub_wire0;
-	wire [7:0] q = sub_wire0[7:0];
+	wire [WIDTH-1:0] sub_wire0;
+	wire [WIDTH-1:0] q = sub_wire0[WIDTH-1:0];
 	
 	initial $display("Initialising ROM Memory: %s", PROGRAM);
 
@@ -44,7 +47,7 @@ module m9k_rom (
 				.clocken1 (1'b1),
 				.clocken2 (1'b1),
 				.clocken3 (1'b1),
-				.data_a ({8{1'b1}}),
+				.data_a ({WIDTH{1'b1}}),
 				.data_b (1'b1),
 				.eccstatus (),
 				.q_b (),
@@ -60,31 +63,34 @@ module m9k_rom (
 		altsyncram_component.intended_device_family = "Cyclone IV E",
 		altsyncram_component.lpm_hint = {"ENABLE_RUNTIME_MOD=YES,INSTANCE_NAME=", NAME},
 		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 1024,
+		altsyncram_component.numwords_a = NUMWORDS,
 		altsyncram_component.operation_mode = "ROM",
 		altsyncram_component.outdata_aclr_a = "NONE",
 		altsyncram_component.outdata_reg_a = "UNREGISTERED",
 		altsyncram_component.ram_block_type = "M9K",
-		altsyncram_component.widthad_a = 10,
-		altsyncram_component.width_a = 8,
+		altsyncram_component.widthad_a = AWIDTH,
+		altsyncram_component.width_a = WIDTH,
 		altsyncram_component.width_byteena_a = 1;
 
 endmodule 
 
 module pseudo_rom(addr, clk, q);
 	parameter PROGRAM="";
+	parameter WIDTH=8;
+	parameter NUMWORDS=1024;
+	localparam AWIDTH=$clog2(NUMWORDS);
 	
 	input  reg 	clk;
-	input  wire [9:0] addr;
-	output  reg [7:0] q;
+	input  wire [AWIDTH-1:0] addr;
+	output  reg [WIDTH-1:0] q;
 	
 	initial $display("Initialising ROM Memory: %s", PROGRAM);
 	
-	reg [9:0] addr0;
-	logic [7:0] rom [2**10:0];
+	reg [AWIDTH-1:0] addr0;
+	logic [WIDTH-1:0] rom [NUMWORDS:0];
 	initial $readmemh(PROGRAM, rom);
 	always_ff@(posedge clk) addr0 <= addr; 	
-	assign q[7:0] = rom[addr0];
+	assign q = rom[addr0];
 
 endmodule
 

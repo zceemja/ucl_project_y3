@@ -1,3 +1,7 @@
+`include "risc.sv"
+`include "controller.sv"
+`include "datapath.sv"
+
 import risc8_pkg::*;
 import alu_pkg::*;
 
