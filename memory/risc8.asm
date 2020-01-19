@@ -587,23 +587,55 @@ sieveOfAtkinInvN
 	PUSH r0
 	PUSH r1
 	PUSH r3
+	PUSH r2
+	
+	CPY3 16
+	DIV r2,r3; n/=16
+
 	CPY0 MEMEND@0
 	CPY1 MEMEND@1
-	ADD r0,r2
+	ADD r0,r2 ; add n to pointer
 	ADDC r1
+
+	CI0 r0
+	CI1 r1
+	LWHI r2,NULL
 	CI0 r0
 	CI1 r1
 	LWLO r3,NULL
-	XORI r3,1
+	PUSH r0
+	PUSH r1
+	; check if high or low byte
+	; n is saved from MSB to LSB e.g.:
+	; data in memory address:
+	;    0 0 0 0  0 0 0 0    0 0 0 0  0 0 0 0
+	; n= 0 1 2 3  4 5 6 7    8 9 A B  C D E F
+	; At this point r3=memLO, r2=memHI
+	CPY0 1
+	AH r1; n%16
+	BGE r1,8,.lo
+	JUMP .hi
+.lo
+	SUBI r1,8
+	CI2 r1
+	SLL r0,0  ; 1 << (n-8)
+	XOR r3,r0
+	JUMP .fi
+.hi
+	CI2 r1
+	SLL r0,0  ; 1 << n
+	XOR r2,r0
+.fi
+	; Everything's been flipped, time to upload to ram
+	POP r1
+	POP r0
+
+	SWHI r2
 	CI0 r0
 	CI1 r1
 	SWLO r3,NULL
-
-	MOVE r0,r2
-	CALL printU8
-	CPY0 0x20
-	CALL print_char
-
+	
+	POP r2
 	POP r3
 	POP r1
 	POP r0	
