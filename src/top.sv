@@ -4,8 +4,7 @@
  * and SDRAM controller. 
 */
 
-// Compile OISC?
-`define OISC
+`include "const.sv"
 
 `ifdef OISC
 `include "oisc/cpu.sv"
