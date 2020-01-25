@@ -25,6 +25,7 @@ module oisc8_cpu(processor_port port);
 	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0);
 	alu_block alu0(bus0);
 	mem_block ram0(bus0, port);
+	oisc_com_block com0(bus0, port);
 
 endmodule
 
@@ -85,6 +86,21 @@ module pc_block(IBus bus);
 			.bus(bus),.data_from_bus(comp_acc)
 	);
 
+endmodule
+
+module oisc_com_block(IBus bus, processor_port port);
+	reg [7:0] addr;
+	reg wr,rd;
+	assign port.com_addr = wr|rd ? addr : 8'd0;
+	PortReg#(.ADDR_SRC(COMAR), .ADDR_DST(COMA)) p_coma(
+			.bus(bus),.data_from_bus(addr),.data_to_bus(addr),.wr(),.rd()
+	);
+	PortInputSeq#(.ADDR(COMD)) p_comd(
+			.bus(bus),.data_from_bus(port.com_wr),.wr(wr)
+	);
+	PortOutput#(.ADDR(COMDR)) p_comdr(
+			.bus(bus),.data_to_bus(port.com_rd),.rd(rd)
+	);
 endmodule
 
 module mem_block(IBus bus, processor_port port);
