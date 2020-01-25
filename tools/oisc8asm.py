@@ -90,7 +90,7 @@ class InstructionDest:
         if len(operands) != 1:
             raise CompilingError(f"Instruction has invalid amount of operands")
 
-        if operands[0] in instrSrc:
+        if operands[0].upper() in instrSrc:
             src = instrSrc[operands[0]]
             immediate = 0
         else:

@@ -5,31 +5,29 @@ import oisc8_pkg::*;
 
 module oisc8_cpu(processor_port port);
 	
-	wire [`DWIDTH-1:0] data_bus;
-	wire [`DAWIDTH+`SAWIDTH:0] instr_bus;  
-	
-	IBus bus0(
-			.clk(port.clk),
-			.rst(port.rst),
-			.instr(instr_bus),
-			.data(data_bus)
-	);
-	
+	wire[`SAWIDTH+`DAWIDTH:0] instr0;
+	IBus bus0(port.clk, port.rst, instr0);
+	//assign bus.clk = port.clk;
+	//assign bus.rst = port.rst;
+	//oconn oc(port, bus0.host);	
 	// NULL block always return 0 and ignores input.
 	//Port #() p_null0(
 	//		.bus(bus0),
 	//		.data_to_bus(8'd0)
 	//);
 	//Port #(.ADDR)
-	PortOutput#() p_null(.bus(bus0),.data_to_bus(`DWIDTH'd0));
-	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0);
-	alu_block alu0(bus0);
-	mem_block ram0(bus0, port);
-	oisc_com_block com0(bus0, port);
+	PortOutput p_null(.bus(bus0.port),.data_to_bus(`DWIDTH'd0));
+	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0.port, instr0);
+	alu_block alu0(bus0.port);
+	mem_block ram0(bus0.port, port);
+	oisc_com_block com0(bus0.port, port);
 
 endmodule
 
-module pc_block(IBus bus);
+module pc_block(
+		IBus.port bus, 
+		output wire[`SAWIDTH+`DAWIDTH:0] instr
+	);
 
 	parameter PROGRAM = "";
 	reg[15:0] pc, pcn, pcr; // Program counter
@@ -54,7 +52,7 @@ module pc_block(IBus bus);
 	 		.NUMWORDS(2048)
 	) 
 	`endif
-		rom0(pc[12:0], bus.clk, bus.instr[12:0]);
+		rom0(pc[12:0], bus.clk, instr[12:0]);
 	
 	`ifndef SYNTHESIS
 	reg [15:0] pcp;  // Current program counter for debugging
@@ -88,7 +86,7 @@ module pc_block(IBus bus);
 
 endmodule
 
-module oisc_com_block(IBus bus, processor_port port);
+module oisc_com_block(IBus.port bus, processor_port port);
 	reg [7:0] addr;
 	reg wr,rd;
 	assign port.com_addr = wr|rd ? addr : 8'd0;
@@ -103,7 +101,7 @@ module oisc_com_block(IBus bus, processor_port port);
 	);
 endmodule
 
-module mem_block(IBus bus, processor_port port);
+module mem_block(IBus.port bus, processor_port port);
 	reg w0,w1,w2,wd0,wd1;
 	reg [15:0] data, cached;
 	reg [23:0] pointer;
@@ -193,7 +191,7 @@ module mem_block(IBus bus, processor_port port);
 	//end
 endmodule
 
-module alu_block(IBus bus);
+module alu_block(IBus.port bus);
 	logic [`DWIDTH-1:0] acc0, acc1;	
 	
 	PortReg#(.ADDR_SRC(ALUACC0R), .ADDR_DST(ALUACC0)) p_aluacc0(
