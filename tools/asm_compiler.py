@@ -12,6 +12,7 @@ oct_re = re.compile(r"^[0-8]+$", re.IGNORECASE)
 args_re = re.compile("(?:^|,)(?=[^\"]|(\")?)\"?((?(1)[^\"]*|[^,\"]*))\"?(?=,|$)", re.IGNORECASE)
 func_re = re.compile("^([\w$#@~.?]+)\s*([|^<>+\-*/%@]{1,2})\s*([\w$#@~.?]+)$", re.IGNORECASE)
 secs_re = re.compile("^([\d]+)x([\d]+)x([\d]+)$", re.IGNORECASE)
+funcc_re = re.compile("^([\w$#@~.?]+)\(([\w,]+)\)(.*)", re.IGNORECASE)
 
 MAX_INT_BYTES = 12
 
@@ -108,6 +109,7 @@ class Compiler:
         self.instr_db: Dict[str, Instruction] = {}
         self.data = []
         self.labels = {}
+        self.macros = {}
         self.order = byte_order
         self.regnames = {}
         self.address_size = address_size
@@ -266,21 +268,116 @@ class Compiler:
             raise CompilingError(f"Invalid function operation {op}")
         return result.to_bytes(len(left), self.order)
 
+    def __code_compiler(self, file, lnum, line_args, csect, scope):
+        builtin_cmds = {'db', 'dbe'}
+
+        if line_args[0].endswith(':') and label_re.match(line_args[0][:-1]) is not None:
+            # Must be label
+            label = line_args[0][:-1]
+            line_args = line_args[1:]
+            if label.startswith('.'):
+                if scope is None:
+                    raise CompilingError(f"No local scope for {label}!")
+                label = scope + label
+            else:
+                scope = label
+            if label in self.labels:
+                raise CompilingError(f"Label {label} duplicate")
+            self.labels[label] = csect.count.to_bytes(csect.length, self.order)
+
+        if len(line_args) == 0:
+            return scope
+        elif len(line_args) == 1:
+            args = None
+        else:
+            args = line_args[1]
+        instr_name = line_args[0].lower()
+
+        # Builtin instructions
+        if instr_name == 'db':
+            data = self.decode_with_labels(args2operands(args), scope)
+            if len(data) % csect.width != 0:
+                fill = csect.width - (len(data) % csect.width)
+                data += b'\x00' * fill
+            csect.instr.append(data)
+            csect.count += len(data) // csect.width
+            return scope
+
+        if instr_name == 'dbe':
+            try:
+                fill = int(args[0])
+            except ValueError:
+                raise CompilingError(f"Instruction 'dbe' invalid argument, must be a number")
+            except IndexError:
+                raise CompilingError(f"Instruction 'dbe' invalid argument count! Must be 1")
+
+            if fill % csect.width != 0:
+                fill += csect.width - (fill % csect.width)
+            data = b'\x00' * fill
+            csect.instr.append(data)
+            csect.count += len(data) // csect.width
+            return scope
+
+        if instr_name in self.macros:
+            argsp = args2operands(args)
+            if len(argsp) != self.macros[instr_name][0]:
+                raise CompilingError(f"Invalid macro argument count!")
+            for slnum, sline in enumerate(self.macros[instr_name][1]):
+                slnum += 1
+                for i in range(len(argsp)):
+                    sline = [l.replace(f'%{i+1}', argsp[i]) for l in sline]
+                try:
+                    scope = self.__code_compiler(file, lnum, sline, csect, scope)
+                except CompilingError as e:
+                    print(f"ERROR {file}:{self.macros[instr_name][2] + slnum}: {e.message}")
+                    raise CompilingError(f"Previous error")
+            return scope
+
+        if instr_name not in self.instr_db:
+            raise CompilingError(f"Instruction '{instr_name}' not recognised!")
+
+        instr_obj = self.instr_db[instr_name.lower()]
+        csect.instr.append((instr_obj, args, lnum, scope))
+        csect.count += instr_obj.length
+        return scope
+
+    @staticmethod
+    def __line_generator(code):
+        for lnum, line in enumerate(code):
+            lnum += 1
+            line = line.split(';', 1)[0]
+            line = re.sub(' +', ' ', line)  # replace multiple spaces
+            line = line.strip()
+            line_args = [l.strip() for l in line.split(' ', 2)]
+            # line_args = list(filter(lambda x: len(x) > 0, line_args))
+            if len(line_args) == 0 or line_args[0] == '':
+                continue
+            yield lnum, line_args
+
+    def compile_file(self, file):
+        try:
+            with open(file, 'r') as f:
+                data = self.compile(file, f.readlines())
+            return data
+        except IOError:
+            return None
+
     def compile(self, file, code):
         failure = False
 
         sections: Dict[str, Section] = {}
         csect = None
         scope = None
+        macro = None
 
-        for lnum, line in enumerate(code):
-            lnum += 1
-            line = line.split(';', 1)[0].strip()
-
+        for lnum, line_args in self.__line_generator(code):
             try:
-                line_args = [l.strip() for l in line.split(' ', 2)]
-                # line_args = list(filter(lambda x: len(x) > 0, line_args))
-                if len(line_args) == 0 or line_args[0] == '':
+                # Inside macro
+                if macro is not None:
+                    if line_args[0].lower() == '%endmacro':
+                        macro = None
+                        continue
+                    self.macros[macro][1].append(line_args)
                     continue
 
                 # Section
@@ -309,6 +406,16 @@ class Compiler:
                         raise CompilingError(f"Invalid %define arguments!")
                     self.labels[line_args[1]] = self.decode_bytes(line_args[2])
                     continue
+                elif line_args[0].lower() == '%macro':
+                    if len(line_args) != 3:
+                        raise CompilingError(f"Invalid %macro arguments!")
+                    if line_args[1] in self.macros:
+                        raise CompilingError(f"Macro '{line_args[1]}' already in use")
+                    if not line_args[2].isdigit():
+                        raise CompilingError(f"%macro argument 2 must be a number")
+                    macro = line_args[1].lower()
+                    self.macros[macro] = (int(line_args[2]), [], lnum)
+                    continue
 
                 elif line_args[0].lower() == '%include':
                     if len(line_args) != 2:
@@ -319,60 +426,7 @@ class Compiler:
                 if csect is None:
                     raise CompilingError(f"No section defined!")
 
-                builtin_cmds = {'db', 'dbe'}
-
-                if line_args[0].lower() not in self.instr_db and\
-                        line_args[0].lower() not in builtin_cmds:  # Must be label
-                    label = line_args[0]
-                    line_args = line_args[1:]
-                    if label.startswith('.'):
-                        if scope is None:
-                            raise CompilingError(f"No local scope for {label}!")
-                        label = scope + label
-                    else:
-                        scope = label
-                    if label in self.labels:
-                        raise CompilingError(f"Label {label} duplicate")
-                    self.labels[label] = csect.count.to_bytes(csect.length, self.order)
-
-                if len(line_args) == 0:
-                    continue
-                elif len(line_args) == 1:
-                    instr_name, args = line_args[0].lower(), None
-                else:
-                    instr_name, args = line_args[0].lower(), line_args[1]
-
-                # Builtin instructions
-                if instr_name == 'db':
-                    data = self.decode_with_labels(args2operands(args), scope)
-                    if len(data) % csect.width != 0:
-                        fill = csect.width - (len(data) % csect.width)
-                        data += b'\x00' * fill
-                    csect.instr.append(data)
-                    csect.count += int(len(data)/csect.width)
-                    continue
-
-                if instr_name == 'dbe':
-                    try:
-                        fill = int(args[0])
-                    except ValueError:
-                        raise CompilingError(f"Instruction 'dbe' invalid argument, must be a number")
-                    except IndexError:
-                        raise CompilingError(f"Instruction 'dbe' invalid argument count! Must be 1")
-
-                    if fill % csect.width != 0:
-                        fill += csect.width - (fill % csect.width)
-                    data = b'\x00' * fill
-                    csect.instr.append(data)
-                    csect.count += int(len(data)/csect.width)
-                    continue
-
-                if instr_name not in self.instr_db:
-                    raise CompilingError(f"Instruction '{instr_name}' not recognised!")
-
-                instr_obj = self.instr_db[instr_name.lower()]
-                csect.instr.append((instr_obj, args, lnum, scope))
-                csect.count += instr_obj.length
+                scope = self.__code_compiler(file, lnum, line_args, csect, scope)
 
             except CompilingError as e:
                 failure = True

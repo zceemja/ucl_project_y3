@@ -46,7 +46,7 @@ asmc.add_instr(compiler.Instruction('LWLO ', '1010_??10', 3))
 asmc.add_instr(compiler.Instruction('SWLO ', '1010_??11', 3))
 asmc.add_instr(compiler.Instruction('INC  ', '1011_??00'))
 asmc.add_instr(compiler.Instruction('DEC  ', '1011_??01'))
-asmc.add_instr(compiler.Instruction('GETAH', '1011_??10'))
+asmc.add_instr(compiler.Instruction('GETAH', '1011_??10', alias=['AH']))
 asmc.add_instr(compiler.Instruction('GETIF', '1011_??11'))
 asmc.add_instr(compiler.Instruction('PUSH ', '1100_??00'))
 asmc.add_instr(compiler.Instruction('POP  ', '1100_??01'))
@@ -118,8 +118,7 @@ if __name__ == '__main__':
                 print(f'Output file already exists {output}!')
                 sys.exit(1)
 
-    with open(args.file, 'r') as f:
-        data = asmc.compile(args.file, f.readlines())
+    data = asmc.compile_file(args.file)
     if data is not None:
         section = args.section
         if section in data:
