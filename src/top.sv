@@ -71,7 +71,12 @@ module top(
 	wire  		ram_rd_ready;
 	wire  		ram_rd_ack;
 	
-	ram#("../../memory/risc8.data") ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
+	`ifdef OISC
+	ram#("../../memory/oisc8.data") 
+	`elsif
+	ram#("../../memory/risc8.data") 
+	`endif
+	ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	
 	//sdram_block sdram0(
 	//	.mclk(mclk), 

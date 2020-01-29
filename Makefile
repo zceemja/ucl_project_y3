@@ -1,4 +1,8 @@
 
+# Configuration
+PROCESSOR ?= RISC8  # Also supported OISC8
+PROCESSOR_LOW = $(strip $(shell echo $(PROCESSOR) | tr A-Z a-z))
+
 QUARTUS_DIR = /opt/altera/18.1/quartus
 MODELSIM_DIR = /opt/altera/18.1/modelsim_ase
 PROJECT_NAME = UCL_project_y3
@@ -16,18 +20,30 @@ TTY  ?= /dev/ttyUSB0
 BAUD ?= 9600
 
 GENTABLE_BIN = python3 tools/gen_sv.py
-ASMC = python3 tools/risc8asm.py
+ASMC = python3 tools/$(PROCESSOR_LOW)asm.py
 
 MEMSIZE ?= 4096
 RAMSIZE ?= -1
-MEMDEP := $(shell find memory -name '*.asm')
+MEMDEP := $(shell find memory -name '*${PROCESSOR_LOW}.asm')
 MEMSLICES = 0 1 2 3
+
+ifeq "${PROCESSOR_LOW}" "risc8"
 MEMRES = $(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).mem)) \
 		$(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).mif)) \
 		$(foreach i,$(MEMSLICES),$(MEMDEP:.asm=.text_$(i).uhex)) \
 		$(MEMDEP:.asm=.data.mem) \
 		$(MEMDEP:.asm=.data.uhex) \
 		$(MEMDEP:.asm=.data.mif)
+else ifeq "${PROCESSOR_LOW}" "oisc8"
+MEMRES = $(MEMDEP:.asm=.text.mem)  \
+		 $(MEMDEP:.asm=.text.uhex) \
+		 $(MEMDEP:.asm=.text.mif)  \
+		 $(MEMDEP:.asm=.data.mem)  \
+		 $(MEMDEP:.asm=.data.uhex) \
+		 $(MEMDEP:.asm=.data.mif)
+else
+$(error "Processor not supported: ${PROCESSOR_LOW}")
+endif
 
 VERILOG ?= $(wildcard src/*/*.sv) 
 
@@ -104,8 +120,17 @@ compile: $(MEMRES)
 %.data.uhex: %.asm
 	$(ASMC) -t uhex -f $< .data
 
+%.text.mem: %.asm
+	$(ASMC) -t mem -f $< .text
+
+%.text.mif: %.asm
+	$(ASMC) -t mif -f $< .text
+
+%.text.uhex: %.asm
+	$(ASMC) -t uhex -f $< .text
+
 flash: $(MEMRES)
-	$(QUARTUS_DIR)/bin/quartus_stp -t ./scripts/update_risc8.tcl
+	$(QUARTUS_DIR)/bin/quartus_stp -t ./scripts/update_$(PROCESSOR_LOW).tcl
 
 clean:
 	rm -f $(MEMRES)
