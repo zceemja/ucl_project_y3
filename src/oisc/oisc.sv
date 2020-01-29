@@ -17,7 +17,9 @@ package oisc8_pkg;
 		MEMSWHI =`DAWIDTH'd9,
 		MEMSWLO =`DAWIDTH'd10,
 		COMA    =`DAWIDTH'd11,
-		COMD    =`DAWIDTH'd12
+		COMD    =`DAWIDTH'd12,
+		REG0    =`DAWIDTH'd13,
+		REG1    =`DAWIDTH'd14
 	} e_iaddr_dst;  // destination enum
 
 	typedef enum logic [`SAWIDTH-1:0] {
@@ -32,30 +34,36 @@ package oisc8_pkg;
 		AND     =`SAWIDTH'd7,
 		OR      =`SAWIDTH'd8,
 		XOR     =`SAWIDTH'd9,	
-		SLL     =`SAWIDTH'd11,	
-		SRL     =`SAWIDTH'd12,	
-		EQ     	=`SAWIDTH'd13,	
-		GT     	=`SAWIDTH'd14,	
-		GE    	=`SAWIDTH'd15,	
-		MULLO   =`SAWIDTH'd16,	
-		MULHI   =`SAWIDTH'd17,	
-		DIV     =`SAWIDTH'd18,	
-		MOD     =`SAWIDTH'd19,
+		SLL     =`SAWIDTH'd10,	
+		SRL     =`SAWIDTH'd11,	
+		EQ     	=`SAWIDTH'd12,	
+		GT     	=`SAWIDTH'd13,	
+		GE    	=`SAWIDTH'd14,	
+		NE     	=`SAWIDTH'd15,	
+		LT     	=`SAWIDTH'd16,	
+		LE    	=`SAWIDTH'd17,
+		MULLO   =`SAWIDTH'd18,	
+		MULHI   =`SAWIDTH'd19,	
+		DIV     =`SAWIDTH'd20,	
+		MOD     =`SAWIDTH'd21,
 		// Program Counter
-		BRPT0R  =`SAWIDTH'd20,
-		BRPT1R  =`SAWIDTH'd21,
+		BRPT0R  =`SAWIDTH'd22,
+		BRPT1R  =`SAWIDTH'd23,
 		// Memory
-		MEMPT0R =`SAWIDTH'd22,
-		MEMPT1R =`SAWIDTH'd23,
-		MEMPT2R =`SAWIDTH'd24,
-		MEMLWHI =`SAWIDTH'd25,
-		MEMLWLO =`SAWIDTH'd26,
-		STACKR	=`SAWIDTH'd27,
-		STPT0R  =`SAWIDTH'd28,
-		STPT1R  =`SAWIDTH'd29,
+		MEMPT0R =`SAWIDTH'd24,
+		MEMPT1R =`SAWIDTH'd25,
+		MEMPT2R =`SAWIDTH'd26,
+		MEMLWHI =`SAWIDTH'd27,
+		MEMLWLO =`SAWIDTH'd28,
+		STACKR	=`SAWIDTH'd29,
+		STPT0R  =`SAWIDTH'd30,
+		STPT1R  =`SAWIDTH'd31,
 		// COM
-		COMAR   =`SAWIDTH'd30,
-		COMDR   =`SAWIDTH'd31		
+		COMAR   =`SAWIDTH'd32,
+		COMDR   =`SAWIDTH'd33,
+		// GP_REG
+		REG0R   =`SAWIDTH'd34,
+		REG1R   =`SAWIDTH'd35
 	} e_iaddr_src;  // source enum
 
 endpackage
@@ -82,84 +90,103 @@ interface IBus(clk, rst, instr);
 	//modport host(output clk, rst);
 endinterface
 
-module PortReg(bus, data_from_bus, data_to_bus, rd, wr);
+//module PortReg(bus, data_from_bus, data_to_bus, rd, wr);
+//	import oisc8_pkg::*;
+//
+//	IBus bus;
+//	output logic[`DWIDTH-1:0] data_from_bus;
+//	input  logic[`SAWIDTH-1:0] data_to_bus;
+//	output reg rd, wr;
+//
+//	parameter ADDR_SRC = e_iaddr_src'(0);
+//	parameter ADDR_DST = e_iaddr_dst'(0);
+//	parameter DEFAULT = `DWIDTH'd0;
+//
+//	reg [`SAWIDTH-1:0] data;
+//	always_comb begin
+//		 casez({bus.imm,bus.rst})
+//			2'b00: data = bus.data[`SAWIDTH-1:0];
+//			2'b10: data = bus.instr_src;
+//			2'b?1: data = DEFAULT;
+//		endcase
+//
+//		wr = (bus.instr_dst == ADDR_DST);
+//		rd = (bus.instr_src == ADDR_SRC);
+//	end
+//	
+//	genvar i;
+//	generate 
+//		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+//			bufif1(bus.data[i], data_to_bus[i], rd);
+//		end 
+//	endgenerate
+//	
+//	always_ff@(posedge bus.clk) begin
+//		if(bus.rst) data_from_bus <= DEFAULT;
+//		else if(wr) data_from_bus <= data;
+//	end
+//endmodule
+
+//module PortReg(bus, data_from_bus, data_to_bus, rd, wr);
+//	import oisc8_pkg::*;
+//
+//	IBus bus;
+//	output logic[`DWIDTH-1:0] data_from_bus;
+//	input  logic[`SAWIDTH-1:0] data_to_bus;
+//	output reg rd, wr;
+//
+//	parameter ADDR_SRC = e_iaddr_src'(0);
+//	parameter ADDR_DST = e_iaddr_dst'(0);
+//	parameter DEFAULT = `DWIDTH'd0;
+//
+//	reg [`SAWIDTH-1:0] datain, latch, dataout;
+//	always_comb begin
+//		casez({bus.imm,bus.rst})
+//			2'b00: datain = bus.data[`SAWIDTH-1:0];
+//			2'b10: datain = bus.instr_src;
+//			2'b?1: datain = DEFAULT;
+//		endcase
+//
+//		wr = (bus.instr_dst == ADDR_DST);
+//		rd = (bus.instr_src == ADDR_SRC);
+//		data_from_bus = wr ? datain : latch;
+//
+//	end
+//	
+//	always_latch begin
+//		if(bus.rst) latch <= DEFAULT;
+//		else if(wr) latch <= data;
+//	end
+//	
+//	always_ff@(posedge bus.clk) begin
+//		if(bus.rst) dataout <= `DWIDTH'd0;
+//		else dataout <= data_from_bus;
+//	end
+//
+//	genvar i;
+//	generate 
+//		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+//			bufif1(bus.data[i], dataout[i], rd);
+//		end 
+//	endgenerate
+//
+//endmodule
+
+module PortReg(bus, register, wr, rd);
 	import oisc8_pkg::*;
-
-	IBus bus;
-	output logic[`DWIDTH-1:0] data_from_bus;
-	input  logic[`SAWIDTH-1:0] data_to_bus;
-	output reg rd, wr;
-
-	parameter ADDR_SRC = e_iaddr_src'(0);
-	parameter ADDR_DST = e_iaddr_dst'(0);
-	parameter DEFAULT = `DWIDTH'd0;
-
-	reg [`SAWIDTH-1:0] data;
-	always_comb begin
-		 casez({bus.imm,bus.rst})
-			2'b00: data = bus.data[`SAWIDTH-1:0];
-			2'b10: data = bus.instr_src;
-			2'b?1: data = DEFAULT;
-		endcase
-
-		wr = (bus.instr_dst == ADDR_DST);
-		rd = (bus.instr_src == ADDR_SRC);
-	end
 	
-	genvar i;
-	generate 
-		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
-			bufif1(bus.data[i], data_to_bus[i], rd);
-		end 
-	endgenerate
-
-	always_ff@(posedge bus.clk) begin
-		if(bus.rst) data_from_bus <= DEFAULT;
-		else if(wr) data_from_bus <= data;
-	end
-endmodule
-
-module PortRegSeq(bus, data_from_bus, data_to_bus, rd, wr);
-	import oisc8_pkg::*;
-
-	IBus bus;
-	output logic[`DWIDTH-1:0] data_from_bus;
-	input  logic[`SAWIDTH-1:0] data_to_bus;
-	output reg rd, wr;
-
-	parameter ADDR_SRC = e_iaddr_src'(0);
 	parameter ADDR_DST = e_iaddr_dst'(0);
+	parameter ADDR_SRC = e_iaddr_src'(0);
 	parameter DEFAULT = `DWIDTH'd0;
 
-	reg [`SAWIDTH-1:0] data, latch;
-	always_comb begin 
-		casez({bus.imm,bus.rst})
-			2'b00: data = bus.data[`SAWIDTH-1:0];
-			2'b10: data = bus.instr_src;
-			2'b?1: data = DEFAULT;
-		endcase
-
-		wr = (bus.instr_dst == ADDR_DST);
-		rd = (bus.instr_src == ADDR_SRC);
-		data_from_bus = wr ? data : latch;
-
-	end
-
-	always_ff@(posedge bus.clk) begin
-		if(bus.rst) latch <= DEFAULT;
-		else if(wr) latch <= data;
-	end
-
-	genvar i;
-	generate 
-		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
-			bufif1(bus.data[i], data_to_bus[i], rd);
-		end 
-	endgenerate
-
+	IBus bus;
+	output reg [`DWIDTH-1:0] register;
+	output reg wr, rd;
+	PortLatch#(ADDR_DST, DEFAULT) p_in(bus, register, wr);
+	PortOutputFF#(ADDR_SRC, DEFAULT) p_out(bus, register, rd);
 endmodule
 
-module PortInput(bus, data_from_bus, wr, rst);
+module PortInputFF(bus, data_from_bus, wr, rst);
 	import oisc8_pkg::*;
 
 	IBus bus;
@@ -185,7 +212,7 @@ module PortInput(bus, data_from_bus, wr, rst);
 	end
 endmodule
 
-module PortInputSeq(bus, data_from_bus, wr);
+module PortInput(bus, data_from_bus, wr);
 	import oisc8_pkg::*;
 
 	IBus bus;
@@ -203,6 +230,61 @@ module PortInputSeq(bus, data_from_bus, wr);
 	end
 endmodule
 
+module PortOutputFF(bus, data_to_bus, rd);
+	import oisc8_pkg::*;
+	IBus bus;
+	input reg [`DWIDTH-1:0] data_to_bus;
+	output reg rd;
+
+	parameter ADDR = e_iaddr_src'(0);
+	parameter DEFAULT = `DWIDTH'd0;
+	
+	reg[`DWIDTH-1:0] register;
+	always_comb rd = (bus.instr_src == ADDR);
+	always_ff@(posedge bus.clk) begin
+		if(bus.rst) register <= DEFAULT;
+		else register <= data_to_bus;
+	end
+
+	genvar i;
+	generate 
+		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+			`ifdef SYNTHESIS
+			bufif1(bus.data[i], data_to_bus[i], rd);
+			`else
+			bufif1(bus.data[i], data_to_bus[i], rd&~bus.imm);
+			`endif
+		end 
+	endgenerate
+
+endmodule
+
+module PortLatch(bus, latched, wr);
+	import oisc8_pkg::*;
+	IBus bus;
+	output reg[`DWIDTH-1:0] latched;
+	output reg wr;
+	
+	parameter ADDR = e_iaddr_dst'(0);
+	parameter DEFAULT = `DWIDTH'd0;
+
+	reg[`DWIDTH-1:0] data, register;
+	always_comb begin
+		wr = (bus.instr_dst == ADDR);
+		data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
+		latched = wr ? data : register;
+	end
+
+	always_ff@(posedge bus.clk) begin
+		if(bus.rst) register <= DEFAULT;
+		else if(wr) register <= data;
+	end
+	//always_latch begin
+	//	if(bus.rst) latched <= DEFAULT;
+	//	else if(wr) latched <= data; 
+	//end
+
+endmodule
 
 module PortOutput(bus, data_to_bus, rd);
 	import oisc8_pkg::*;
@@ -214,12 +296,16 @@ module PortOutput(bus, data_to_bus, rd);
 	//parameter ADDR = e_iaddr_src'(`SAWIDTH'd0);
 	parameter ADDR = `SAWIDTH'd0;
 
-	always_comb rd = (bus.instr_src == ADDR);
+	always_comb rd = bus.instr_src == ADDR;
 
 	genvar i;
 	generate 
 		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+			`ifdef SYNTHESIS
 			bufif1(bus.data[i], data_to_bus[i], rd);
+			`else
+			bufif1(bus.data[i], data_to_bus[i], rd&~bus.imm);
+			`endif
 		end 
 	endgenerate
 
