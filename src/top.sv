@@ -42,14 +42,16 @@ module top(
 	`else
 		initial $display("Assuming this is simulation");
 	`endif
-
-	assign rst = ~KEY[0];
+	
+	wire debug_rst;
+	sys_ss#("RST") sys_ss_rst(debug_rst);
+	assign rst = ~KEY[0] | debug_rst;
 	
 	/* Clocks */
 	wire mclk; // Master clock 		1MHz 		(for cpu)
 	wire fclk; // Fast clock 		100MHz 		(for sdram)
 	wire aclk; // Auxiliary clock 	32,768kHz 	(for timers)
-	
+
 	pll_clk pll_clk0 (
 			.inclk0(CLK50),
 			.areset(0),
