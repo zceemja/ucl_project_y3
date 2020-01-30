@@ -39,13 +39,14 @@ module top(
 	
 	`ifdef SYNTHESIS
 		initial $display("Assuming this is synthesis");
+		wire debug_rst;
+		sys_ss#("RST") sys_ss_rst(debug_rst);
+		assign rst = ~KEY[0] | debug_rst;
 	`else
 		initial $display("Assuming this is simulation");
+		assign rst = ~KEY[0];
 	`endif
 	
-	wire debug_rst;
-	sys_ss#("RST") sys_ss_rst(debug_rst);
-	assign rst = ~KEY[0] | debug_rst;
 	
 	/* Clocks */
 	wire mclk; // Master clock 		1MHz 		(for cpu)
