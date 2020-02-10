@@ -5,8 +5,7 @@ import oisc8_pkg::*;
 
 module oisc8_cpu(processor_port port);
 	
-	wire[`SAWIDTH+`DAWIDTH:0] instr0;
-	IBus bus0(port.clk, port.rst, instr0);
+	IBus bus0(port.clk, port.rst);
 	//assign bus.clk = port.clk;
 	//assign bus.rst = port.rst;
 	//oconn oc(port, bus0.host);	
@@ -16,21 +15,41 @@ module oisc8_cpu(processor_port port);
 	//		.data_to_bus(8'd0)
 	//);
 	//Port #(.ADDR)
-	PortOutput p_null(.bus(bus0.port),.data_to_bus(`DWIDTH'd0));
+	//PortOutput p_null(.bus(bus0.port),.data_to_bus(`DWIDTH'd0));
 	PortReg#(.ADDR_SRC(REG0R), .ADDR_DST(REG0)) p_reg0(.bus(bus0.port));
 	PortReg#(.ADDR_SRC(REG1R), .ADDR_DST(REG1)) p_reg1(.bus(bus0.port));
-	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0.port, instr0);
+	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0.port, bus0.iport);
 	alu_block alu0(bus0.port);
 	mem_block ram0(bus0.port, port);
 	oisc_com_block com0(bus0.port, port);
 
 endmodule
 
-module pc_block(
-		IBus.port bus, 
-		output wire[`SAWIDTH+`DAWIDTH:0] instr
-	);
+module pc_block(IBus.port bus, IBus.iport port);
 
+	wire[`SAWIDTH+`DAWIDTH:0] instr;
+
+	assign port.imm = instr[`DAWIDTH+`SAWIDTH];
+	assign port.instr_dst = e_iaddr_dst'(instr[`DAWIDTH+`SAWIDTH-1:`SAWIDTH]);
+	assign port.instr_src = e_iaddr_src'(port.imm ? `SAWIDTH'd0 : instr[`SAWIDTH-1:0]);
+	
+	reg write_null;	
+	always_comb write_null = (bus.instr_src == `SAWIDTH'd0) & ~port.imm;
+	data_buf dbus0(bus, 0, write_null);	
+	data_buf dbus1(bus, instr[`DWIDTH-1:0], port.imm);	
+	//genvar i;
+	//generate 
+	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_imm_to_data
+	//		bufif1(bus.data[i], instr[i], port.imm);
+	//	end 
+	//endgenerate
+	
+	//generate 
+	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_null_to_data
+	//		bufif1(bus.data[i], 0, write_null);
+	//	end 
+	//endgenerate
+	
 	parameter PROGRAM = "";
 	reg[15:0] pc, pcn, pcr; // Program counter
 	reg[15:0] pointer;  // Instruction pointer accumulator
@@ -85,6 +104,8 @@ module pc_block(
 	PortInput#(.ADDR(BRZ), .DEFAULT(`DWIDTH'hFF)) p_brz(
 			.bus(bus),.data_from_bus(comp_acc)
 	);
+	PortOutput#(.ADDR(PC0)) p_pc0(.bus(bus),.data_to_bus(pcn[7:0]));
+	PortOutput#(.ADDR(PC1)) p_pc1(.bus(bus),.data_to_bus(pcn[15:8]));
 
 endmodule
 
@@ -130,9 +151,9 @@ module mem_block(IBus.port bus, processor_port port);
 			.wr(w2)
 	);
 	
-	PortLatch#(.ADDR(MEMSWLO)) p_mem0sw(.bus(bus),.latched(data[7:0]),.wr(wd0));	
-	PortLatch#(.ADDR(MEMSWHI)) p_mem1sw(.bus(bus),.latched(data[15:8]),.wr(wd1));
-		
+	PortInput#(.ADDR(MEMSWLO)) p_mem0sw(.bus(bus),.data_from_bus(data[7:0]),.wr(wd0));	
+	PortInput#(.ADDR(MEMSWHI)) p_mem1sw(.bus(bus),.data_from_bus(data[15:8]),.wr(wd1));
+    
 	PortOutput#(.ADDR(MEMLWLO)) p_mem0lw(.bus(bus),.data_to_bus(cached[7:0]));
 	PortOutput#(.ADDR(MEMLWHI)) p_mem1lw(.bus(bus),.data_to_bus(cached[15:8]));
 
@@ -170,47 +191,109 @@ module mem_block(IBus.port bus, processor_port port);
 		.data_to_bus(st_cache),
 		.rd(st_pop_en0)
 	);
-	reg rd_en0;	
+  	reg rd_en0;
 
-	assign port.ram_rd_en = w0|w1|w2|st_pop_en;
-	assign port.ram_wr_en = wd0|st_push_en;
-	assign port.ram_wr_data = st_push_en ? {8'd0,st_push} : data;
-	assign port.ram_addr = 
-		st_push_en ? {8'hFF, stp} :
-		(st_pop_en ? {8'hFF, stpp2} : pointer);
+	always_comb begin
+		cached = (rd_en0) ? port.ram_rd_data : cached0;
+		//port.ram_wr_data = ram_wr_data;
+		//cachedLo = (rd_en0) ? port.ram_rd_data[7:0] : cached0[7:0];
+		//cachedHi = (rd_en0) ? port.ram_rd_data[15:8] : cached0[15:8];
+
+		`ifdef SYNTHESIS
+		port.ram_rd_en = w0|w1|w2|st_pop_en;
+		port.ram_wr_en = wd0|wd1|st_push_en;
+		casez({wd0,wd1,st_push_en})
+    		3'b100: port.ram_wr_data = {cached[15:8],data[7:0]};
+    		3'b?10: port.ram_wr_data = {data[15:8],cached[7:0]};
+    		3'b??1: port.ram_wr_data = {8'd0,st_push};
+			default: port.ram_wr_data = 16'bx;
+		endcase
+		casez({st_push_en,st_pop_en})
+			2'b00: port.ram_addr = pointer;
+			2'b10: port.ram_addr = {8'hFF, stp};
+			2'b?1: port.ram_addr = {8'hFF, stpp2};
+			default: port.ram_addr = 24'bx;
+		endcase
+		`else
+		force port.ram_rd_en = w0|w1|w2|st_pop_en;
+		force port.ram_wr_en = wd0|wd1|st_push_en;
+		casez({wd0,wd1,st_push_en})
+    		3'b100: force port.ram_wr_data = {cached[15:8],data[7:0]};
+    		3'b?10: force port.ram_wr_data = {data[15:8],cached[7:0]};
+    		3'b??1: force port.ram_wr_data = {8'd0,st_push};
+			default: force port.ram_wr_data = 16'bx;
+		endcase
+		casez({st_push_en,st_pop_en})
+			2'b00: force port.ram_addr = pointer;
+			2'b10: force port.ram_addr = {8'hFF, stp};
+			2'b?1: force port.ram_addr = {8'hFF, stpp2};
+			default: force port.ram_addr = 24'bx;
+		endcase
+		`endif
+	end
+
+	//assign port.ram_wr_data = st_push_en ? {8'd0,st_push} : cached0;
+	//assign port.ram_addr = 
+	//	st_push_en ? {8'hFF, stp} :
+	//	(st_pop_en ? {8'hFF, stpp2} : pointer);
 	
-	always_comb cached = (rd_en0) ? port.ram_rd_data : cached0; 
 	always_ff@(posedge bus.clk) begin
-		rd_en0 <= port.ram_rd_en;
-		if(port.ram_wr_en) cached0 <= data;
-		else if(rd_en0) cached0 <= port.ram_rd_data;
+		if(bus.rst) begin
+			cached0 <= 16'd0;
+			rd_en0 <= 1'b0;
+		end else begin
+			casez({wd0,wd1,rd_en0})
+				3'b1?0: cached0[7:0] <= data[7:0];
+				3'b?10: cached0[15:8] <= data[15:8];
+				3'b001: cached0 <= port.ram_rd_data;
+				3'b101: cached0 <= {port.ram_rd_data[15:8],data[7:0]};
+				3'b011: cached0 <= {data[15:8],port.ram_rd_data[7:0]};
+				3'b11?: cached0 <= data;
+			endcase
+			rd_en0 <= w0|w1|w2; 
+		end
 	end
 endmodule
 
 module alu_block(IBus.port bus);
 	logic [`DWIDTH-1:0] acc0, acc1;	
-	
 	//PortReg#(.ADDR_SRC(ALUACC0R), .ADDR_DST(ALUACC0)) p_aluacc0(
 	//		.bus(bus),.data_from_bus(acc0),.data_to_bus(acc0),.wr(),.rd());
 	//PortReg#(.ADDR_SRC(ALUACC1R), .ADDR_DST(ALUACC1)) p_aluacc1(
 	//		.bus(bus),.data_from_bus(acc1),.data_to_bus(acc1),.wr(),.rd());
-	PortReg#(ALUACC0, ALUACC0R) p_aluacc0(.bus(bus),.register(acc0));
-	PortReg#(ALUACC1, ALUACC1R) p_aluacc1(.bus(bus),.register(acc1));
+	PortNReg#(ALUACC0, ALUACC0R) p_aluacc0(.bus(bus),.register(acc0));
+	PortNReg#(ALUACC1, ALUACC1R) p_aluacc1(.bus(bus),.register(acc1));
 
 	//carry_lookahead_adder#(.WIDTH(`DWIDTH)) alu_adder0(acc0,acc1,reg_add);
 	wire [`DWIDTH-1:0] reg_add;
-	reg reg_addc, reg_addc0, reg_addc_en0, reg_addc_en1;
+	wire reg_addc, add_rd;
 	assign {reg_addc,reg_add} = acc0 + acc1;
-	//always_latch if(reg_addc_en0|reg_addc_en1) reg_addc0 <= reg_addc;
+	PortOutputFF#(.ADDR(ADD)) p_add(.bus(bus),.data_to_bus(reg_add),.rd(add_rd));
+	PortOutput#(.ADDR(ADDC)) p_addc(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_addc}));
 
-	PortOutputFF#(.ADDR(ADD)) p_add(.bus(bus),.data_to_bus(reg_add),.rd(reg_addc_en0));
-	PortOutputFF#(.ADDR(ADDC)) p_addc(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_add_c0}),.rd(reg_addc_en1));
+	reg reg_adcc, reg_adcc0, adc_rd;
+	wire [`DWIDTH-1:0] reg_adc;
+	assign {reg_adcc0, reg_adc} = acc0 + acc1 + reg_adcc;
+	PortOutput#(.ADDR(ADC)) p_adc(.bus(bus),.data_to_bus(reg_adc),.rd(adc_rd));
+	always_ff@(posedge bus.clk) begin
+			if(add_rd) reg_adcc <= reg_addc;
+			else if(adc_rd) reg_adcc <= reg_adcc0;
+	end
 
 	wire [`DWIDTH-1:0] reg_sub;
-	reg reg_sub_c;
-	assign {reg_sub_c,reg_sub} = acc0 - acc1;
-	PortOutputFF#(.ADDR(SUB)) p_sub(.bus(bus),.data_to_bus(reg_sub),.rd());
-	//PortOutputFF#(.ADDR(SUBC)) p_subc(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_sub_c}));
+	wire reg_subc;
+	assign {reg_subc,reg_sub} = acc0 - acc1;
+	PortOutputFF#(.ADDR(SUB)) p_sub(.bus(bus),.data_to_bus(reg_sub),.rd(sub_rd));
+	PortOutput#(.ADDR(SUBC)) p_subc(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_subc}));
+	
+	reg reg_sbcc, reg_sbcc0, sbc_rd;
+	wire [`DWIDTH-1:0] reg_sbc;
+	assign {reg_sbcc0, reg_sbc} = acc0 - acc1 - reg_sbcc;
+	PortOutput#(.ADDR(SBC)) p_sbc(.bus(bus),.data_to_bus(reg_sbc),.rd(sbc_rd));
+	always_ff@(posedge bus.clk) begin
+			if(sub_rd) reg_sbcc <= reg_subc;
+			else if(sbc_rd) reg_sbcc <= reg_sbcc0;
+	end
 
 	wire [`DWIDTH-1:0] reg_and, reg_or, reg_xor; 
 	assign reg_and = acc0 & acc1;
@@ -226,17 +309,13 @@ module alu_block(IBus.port bus);
 	PortOutputFF#(.ADDR(SLL)) p_sll(.bus(bus),.data_to_bus(reg_sll));
 	PortOutputFF#(.ADDR(SRL)) p_srl(.bus(bus),.data_to_bus(reg_srl));
 	
-	wire reg_eq, reg_gt, reg_ge;
-	assign reg_eq = acc0 == acc1;
-	assign reg_gt = acc0 >  acc1;
-	assign reg_ge = acc0 >= acc1;
-	PortOutputFF#(.ADDR(EQ)) p_eq(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_eq}));
-	PortOutputFF#(.ADDR(GT)) p_gt(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_gt}));
-	PortOutputFF#(.ADDR(GE)) p_ge(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},reg_ge}));
+	PortOutputFF#(.ADDR(EQ)) p_eq(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0==acc1}));
+	PortOutputFF#(.ADDR(GT)) p_gt(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0> acc1}));
+	PortOutputFF#(.ADDR(GE)) p_ge(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0>=acc1}));
 	
-	PortOutputFF#(.ADDR(NE)) p_ne(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},~reg_eq}));
-	PortOutputFF#(.ADDR(LT)) p_lt(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},~reg_gt}));
-	PortOutputFF#(.ADDR(LE)) p_le(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},~reg_ge}));
+	PortOutputFF#(.ADDR(NE)) p_ne(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0!=acc1}));
+	PortOutputFF#(.ADDR(LT)) p_lt(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0< acc1}));
+	PortOutputFF#(.ADDR(LE)) p_le(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0<=acc1}));
 	
 	wire [`DWIDTH*2-1:0] reg_mul;
 	assign reg_mul = acc0 * acc1;

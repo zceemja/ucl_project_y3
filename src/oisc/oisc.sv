@@ -49,21 +49,25 @@ package oisc8_pkg;
 		// Program Counter
 		BRPT0R  =`SAWIDTH'd22,
 		BRPT1R  =`SAWIDTH'd23,
+		PC0		=`SAWIDTH'd24,
+		PC1		=`SAWIDTH'd25,
 		// Memory
-		MEMPT0R =`SAWIDTH'd24,
-		MEMPT1R =`SAWIDTH'd25,
-		MEMPT2R =`SAWIDTH'd26,
-		MEMLWHI =`SAWIDTH'd27,
-		MEMLWLO =`SAWIDTH'd28,
-		STACKR	=`SAWIDTH'd29,
-		STPT0R  =`SAWIDTH'd30,
-		STPT1R  =`SAWIDTH'd31,
+		MEMPT0R =`SAWIDTH'd26,
+		MEMPT1R =`SAWIDTH'd27,
+		MEMPT2R =`SAWIDTH'd28,
+		MEMLWHI =`SAWIDTH'd29,
+		MEMLWLO =`SAWIDTH'd40,
+		STACKR	=`SAWIDTH'd31,
+		STPT0R  =`SAWIDTH'd32,
+		STPT1R  =`SAWIDTH'd33,
 		// COM
-		COMAR   =`SAWIDTH'd32,
-		COMDR   =`SAWIDTH'd33,
+		COMAR   =`SAWIDTH'd34,
+		COMDR   =`SAWIDTH'd35,
 		// GP_REG
-		REG0R   =`SAWIDTH'd34,
-		REG1R   =`SAWIDTH'd35
+		REG0R   =`SAWIDTH'd36,
+		REG1R   =`SAWIDTH'd37,
+		ADC     =`SAWIDTH'd38,
+		SBC     =`SAWIDTH'd39
 	} e_iaddr_src;  // source enum
 
 endpackage
@@ -75,20 +79,67 @@ interface IBus(clk, rst, instr);
 	input wire[`SAWIDTH+`DAWIDTH:0] instr;
 
 	wire[`DWIDTH-1:0] data;
-
 	logic imm;
 	e_iaddr_dst instr_dst;
 	e_iaddr_src instr_src;
-	assign imm = instr[`DAWIDTH+`SAWIDTH];
-	assign instr_dst = e_iaddr_dst'(instr[`DAWIDTH+`SAWIDTH-1:`SAWIDTH]);
-	assign instr_src = e_iaddr_src'(instr[`SAWIDTH-1:0]);
-	
+
 	modport port(
 		input clk, rst, imm, instr_dst, instr_src,
 		inout data
 	);
+	modport iport(
+		output imm, instr_dst, instr_src,
+		inout data
+	);
 	//modport host(output clk, rst);
 endinterface
+
+//primitive pr_clocked_latch(clk, reset, enable, data, latched);
+//input clk, reset, enable, data;
+//output latched;
+//table
+////clk rst en data state latched
+//  p   0   1   1  :  0  :  1;
+//  p   0   1   1  :  1  :  1;
+//  p   0   1   0  :  ?  :  0;
+//  p   0   0   ?  :  ?  :  -;
+//  p   0   x   0  :  0  :  -;
+//  p   0   x   1  :  1  :  -;
+//  p   1   x   x  :  0  :  0;
+//  p   1   x   x  :  1  :  0;
+//(?0)  ?   ?   ?  :  ?  :  -;
+// ? (??) (??) (??):  ?  :  -;
+//endtable
+//endprimitive
+
+//module m_latch(clk, rst, en, data, latched);
+//	parameter WIDTH = `DWIDTH;
+//	parameter DEFAULT = {WIDTH{1'b0}};
+//	input reg rst, en;
+//	input reg [WIDTH-1:0] data;
+//	output reg [WIDTH-1:0] latched;
+//
+//	genvar i;
+//	generate 
+//		for(i=0;i<WIDTH;i=i+1) begin : data_latch
+//			pr_clocked_latch(clk, rst, en, data[i], latched[i]); 
+//		end 
+//	endgenerate
+//endmodule
+
+
+module data_buf(bus, data_to_bus, en);
+	IBus bus;
+	input wire [`DWIDTH-1:0] data_to_bus;
+	input wire en;
+
+	genvar i;
+	generate 
+		for(i=0;i<`DWIDTH;i=i+1) begin : data_buffer
+			bufif1(bus.data[i], data_to_bus[i], en);
+		end 
+	endgenerate
+endmodule
 
 //module PortReg(bus, data_from_bus, data_to_bus, rd, wr);
 //	import oisc8_pkg::*;
@@ -186,6 +237,20 @@ module PortReg(bus, register, wr, rd);
 	PortOutputFF#(ADDR_SRC, DEFAULT) p_out(bus, register, rd);
 endmodule
 
+module PortNReg(bus, register, wr, rd);
+	import oisc8_pkg::*;
+	
+	parameter ADDR_DST = e_iaddr_dst'(0);
+	parameter ADDR_SRC = e_iaddr_src'(0);
+	parameter DEFAULT = `DWIDTH'd0;
+
+	IBus bus;
+	output reg [`DWIDTH-1:0] register;
+	output reg wr, rd;
+	PortInputNFF#(ADDR_DST, DEFAULT) p_in(bus, register, wr);
+	PortOutputFF#(ADDR_SRC, DEFAULT) p_out(bus, register, rd);
+endmodule
+
 module PortInputFF(bus, data_from_bus, wr, rst);
 	import oisc8_pkg::*;
 
@@ -200,7 +265,8 @@ module PortInputFF(bus, data_from_bus, wr, rst);
 	reg [`SAWIDTH-1:0] data;
 
 	always_comb begin
-		data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
+		//data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
+		data = bus.data[`SAWIDTH-1:0];
 		wr = (bus.instr_dst == ADDR);
 	end
 
@@ -224,7 +290,8 @@ module PortInput(bus, data_from_bus, wr);
 
 	reg [`SAWIDTH-1:0] data;
 	always_comb begin
-		data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
+		//data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
+		data = bus.data[`SAWIDTH-1:0];
 		wr = (bus.instr_dst == ADDR);
 		data_from_bus = wr ? data : DEFAULT;
 	end
@@ -245,18 +312,38 @@ module PortOutputFF(bus, data_to_bus, rd);
 		if(bus.rst) register <= DEFAULT;
 		else register <= data_to_bus;
 	end
+	
 
-	genvar i;
-	generate 
-		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
-			`ifdef SYNTHESIS
-			bufif1(bus.data[i], data_to_bus[i], rd);
-			`else
-			bufif1(bus.data[i], data_to_bus[i], rd&~bus.imm);
-			`endif
-		end 
-	endgenerate
+	data_buf dbuf0(bus, register, rd);
+	//genvar i;
+	//generate 
+	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+	//		bufif1(bus.data[i], data_to_bus[i], rd);
+	//	end 
+	//endgenerate
 
+endmodule
+
+module PortInputNFF(bus, latched, wr);
+	import oisc8_pkg::*;
+	IBus bus;
+	output reg[`DWIDTH-1:0] latched;
+	output reg wr;
+	
+	parameter ADDR = e_iaddr_dst'(0);
+	parameter DEFAULT = `DWIDTH'd0;
+
+	reg[`DWIDTH-1:0] data, register;
+	always_comb begin
+		wr = (bus.instr_dst == ADDR);
+		data = bus.data[`SAWIDTH-1:0];
+		latched = register;
+	end
+
+	always_ff@(negedge bus.clk) begin
+		if(bus.rst) register <= DEFAULT;
+		else if(wr) register <= data;
+	end
 endmodule
 
 module PortLatch(bus, latched, wr);
@@ -270,18 +357,19 @@ module PortLatch(bus, latched, wr);
 
 	reg[`DWIDTH-1:0] data, register;
 	always_comb begin
-		wr = (bus.instr_dst == ADDR);
-		data = bus.imm ? bus.instr_src : bus.data[`SAWIDTH-1:0];
-		latched = wr ? data : register;
+		wr = (bus.instr_dst == ADDR) & (register != bus.data) & ~bus.rst;
+		latched = wr ? bus.data : register;
 	end
 
 	always_ff@(posedge bus.clk) begin
 		if(bus.rst) register <= DEFAULT;
-		else if(wr) register <= data;
+		else if(wr) register <= bus.data;
 	end
+	//m_latch#(DEFAULT) bus_latch(bus.rst, wr, bus.data, latched);
 	//always_latch begin
 	//	if(bus.rst) latched <= DEFAULT;
-	//	else if(wr) latched <= data; 
+	//	else if(wr) latched <= bus.data;
+	//	else latched <= latched;
 	//end
 
 endmodule
@@ -290,23 +378,20 @@ module PortOutput(bus, data_to_bus, rd);
 	import oisc8_pkg::*;
 
 	IBus bus;
-	input  reg[`SAWIDTH-1:0] data_to_bus;
-	output reg rd;
+	input  wire[`SAWIDTH-1:0] data_to_bus;
+	output wire rd;
 
 	//parameter ADDR = e_iaddr_src'(`SAWIDTH'd0);
 	parameter ADDR = `SAWIDTH'd0;
 
-	always_comb rd = bus.instr_src == ADDR;
-
-	genvar i;
-	generate 
-		for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
-			`ifdef SYNTHESIS
-			bufif1(bus.data[i], data_to_bus[i], rd);
-			`else
-			bufif1(bus.data[i], data_to_bus[i], rd&~bus.imm);
-			`endif
-		end 
-	endgenerate
+	assign rd = bus.instr_src == ADDR;
+	
+	data_buf dbus0(bus, data_to_bus, rd);
+	//genvar i;
+	//generate 
+	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_data_buf
+	//		bufif1(bus.data[i], data_to_bus[i], rd);
+	//	end 
+	//endgenerate
 
 endmodule
