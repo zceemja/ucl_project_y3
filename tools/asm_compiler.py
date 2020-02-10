@@ -11,10 +11,13 @@ bin_re = re.compile(r"^[0-1_]+$", re.IGNORECASE)
 oct_re = re.compile(r"^[0-8]+$", re.IGNORECASE)
 args_re = re.compile("(?:^|,)(?=[^\"]|(\")?)\"?((?(1)[^\"]*|[^,\"]*))\"?(?=,|$)", re.IGNORECASE)
 func_re = re.compile("^([\w$#@~.?]+)\s*([|^<>+\-*/%@]{1,2})\s*([\w$#@~.?]+)$", re.IGNORECASE)
+func2_re = re.compile("^([\w$#@~.?]+)\s*\(\s*([\w$#@~.?]+)*\)$", re.IGNORECASE)
+brackets_re = re.compile(r"(\((?:\(??[^\(]*?\)))", re.IGNORECASE)
 secs_re = re.compile("^([\d]+)x([\d]+)x([\d]+)$", re.IGNORECASE)
 funcc_re = re.compile("^([\w$#@~.?]+)\(([\w,]+)\)(.*)", re.IGNORECASE)
 
 MAX_INT_BYTES = 12
+
 
 def args2operands(args):
     operands = ['"' + a[1] + '"' if a[0] == '"' else a[1] for a in args_re.findall(args or '') if a[1]]
@@ -101,7 +104,7 @@ class Section:
         self.count = 0
         self.width = 1
         self.length = 1
-        self.size = 2**8
+        self.size = 2 ** 8
 
 
 class Compiler:
@@ -172,12 +175,12 @@ class Compiler:
         # Convert with limits
         if typ == 'uint':
             numb = int(s)
-            for i in range(1, MAX_INT_BYTES+1):
+            for i in range(1, MAX_INT_BYTES + 1):
                 if numb < 2 ** (i * 8):
                     return numb.to_bytes(i, self.order)
         elif typ == 'int':
             numb = int(s)
-            for i in range(1, MAX_INT_BYTES+1):
+            for i in range(1, MAX_INT_BYTES + 1):
                 if -2 ** (i * 7) < numb < 2 ** (i * 7):
                     return numb.to_bytes(i, self.order)
         elif typ == 'hex':
@@ -263,12 +266,12 @@ class Compiler:
         elif op == '%' or op == '%%':
             result = leftInt % rightInt
         elif op == '@':
-            return bytes([left[len(left)-rightInt-1]])
+            return bytes([left[len(left) - rightInt - 1]])
         else:
             raise CompilingError(f"Invalid function operation {op}")
         return result.to_bytes(len(left), self.order)
 
-    def __code_compiler(self, file, lnum, line_args, csect, scope):
+    def __code_compiler(self, file, lnum, line_args, csect, scope, macro):
         builtin_cmds = {'db', 'dbe'}
 
         if line_args[0].endswith(':') and label_re.match(line_args[0][:-1]) is not None:
@@ -279,7 +282,7 @@ class Compiler:
                 if scope is None:
                     raise CompilingError(f"No local scope for {label}!")
                 label = scope + label
-            else:
+            elif not macro:
                 scope = label
             if label in self.labels:
                 raise CompilingError(f"Label {label} duplicate")
@@ -322,12 +325,17 @@ class Compiler:
             argsp = args2operands(args)
             if len(argsp) != self.macros[instr_name][0]:
                 raise CompilingError(f"Invalid macro argument count!")
+            self.macros[instr_name][3] += 1  # How many time macro been used (used for macro labels)
+            mlabel = f'{instr_name}.{self.macros[instr_name][3]}'
             for slnum, sline in enumerate(self.macros[instr_name][1]):
                 slnum += 1
-                for i in range(len(argsp)):
-                    sline = [l.replace(f'%{i+1}', argsp[i]) for l in sline]
+                mline = sline.copy()
+                for i, mline0 in enumerate(mline):
+                    for j in range(len(argsp)):
+                        mline0 = mline0.replace(f'%{j + 1}', argsp[j])
+                    mline[i] = re.sub(r'(%{2})([\w$#~.?]+)', mlabel+r'.\2', mline0)
                 try:
-                    scope = self.__code_compiler(file, lnum, sline, csect, scope)
+                    scope = self.__code_compiler(file, lnum, mline, csect, scope, True)
                 except CompilingError as e:
                     print(f"ERROR {file}:{self.macros[instr_name][2] + slnum}: {e.message}")
                     raise CompilingError(f"Previous error")
@@ -414,7 +422,7 @@ class Compiler:
                     if not line_args[2].isdigit():
                         raise CompilingError(f"%macro argument 2 must be a number")
                     macro = line_args[1].lower()
-                    self.macros[macro] = (int(line_args[2]), [], lnum)
+                    self.macros[macro] = [int(line_args[2]), [], lnum, 0]
                     continue
 
                 elif line_args[0].lower() == '%include':
@@ -426,7 +434,7 @@ class Compiler:
                 if csect is None:
                     raise CompilingError(f"No section defined!")
 
-                scope = self.__code_compiler(file, lnum, line_args, csect, scope)
+                scope = self.__code_compiler(file, lnum, line_args, csect, scope, False)
 
             except CompilingError as e:
                 failure = True
@@ -498,12 +506,12 @@ def convert_to_mem(data, width=1, uhex=False):
 
     if uhex:
         if width == 2:
-            for i in range(int(len(data)/2)):
-                x += format(data[-(i*2) - 2], f'02x').upper().encode()
-                x += format(data[-(i*2) - 1], f'02x').upper().encode()
+            for i in range(int(len(data) / 2)):
+                x += format(data[-(i * 2) - 2], f'02x').upper().encode()
+                x += format(data[-(i * 2) - 1], f'02x').upper().encode()
         else:
             for i in range(len(data)):
-                x += format(data[-i-1], f'02x').upper().encode()
+                x += format(data[-i - 1], f'02x').upper().encode()
         return x
 
     if width == 2:
@@ -514,7 +522,7 @@ def convert_to_mem(data, width=1, uhex=False):
         datax = data
 
     fa = f'0{math.ceil(math.ceil(math.log2(len(datax))) / 4)}x'
-    a = [format(d, f'0{width*2}x') for d in datax]
+    a = [format(d, f'0{width * 2}x') for d in datax]
     for i in range(int(len(a) / 8) + 1):
         y = a[i * 8:(i + 1) * 8]
         if len(y) > 0:
@@ -525,7 +533,7 @@ def convert_to_mem(data, width=1, uhex=False):
 def convert_to_mif(data, depth=32, width=1):
     x = f'''-- auto-generated memory initialisation file
 DEPTH = {math.ceil(depth)};
-WIDTH = {width*8};
+WIDTH = {width * 8};
 ADDRESS_RADIX = HEX;
 DATA_RADIX = HEX;
 CONTENT
@@ -539,8 +547,8 @@ BEGIN
             datax.append(data[-1] << 8)
     else:
         datax = data
-    a = [format(i, f'0{width*2}x') for i in datax]
-    for i in range(int(len(a*width) / 8) + 1):
+    a = [format(i, f'0{width * 2}x') for i in datax]
+    for i in range(int(len(a * width) / 8) + 1):
         y = a[i * 8:(i + 1) * 8]
         if len(y) > 0:
             x += (format(i * 8, addr_format) + ' : ' + ' '.join(y) + ';\n').encode()
