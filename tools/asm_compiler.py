@@ -321,6 +321,13 @@ class Compiler:
             csect.count += len(data) // csect.width
             return scope
 
+        if instr_name == '%def':
+            ops = args2operands(args)
+            if len(ops) != 2:
+                raise CompilingError(f"Command '%def' hsa invalid argument count! Must be 2, found {len(ops)}")
+            self.labels[scope + '.' + ops[0]] = ops[1].lower()
+            return scope
+
         if instr_name in self.macros:
             argsp = args2operands(args)
             if len(argsp) != self.macros[instr_name][0]:
@@ -341,8 +348,18 @@ class Compiler:
                     raise CompilingError(f"Previous error")
             return scope
 
+        if scope + '.' + instr_name in self.labels:
+            instr_name = self.labels[scope + '.' + instr_name]  # replace with definition
+
         if instr_name not in self.instr_db:
             raise CompilingError(f"Instruction '{instr_name}' not recognised!")
+
+        # replace args with %def
+        ops = args2operands(args)
+        for i, arg in enumerate(ops):
+            if scope + '.' + arg in self.labels:
+                ops[i] = self.labels[scope + '.' + arg]
+        args = ','.join(ops)
 
         instr_obj = self.instr_db[instr_name.lower()]
         csect.instr.append((instr_obj, args, lnum, scope))
