@@ -39,6 +39,7 @@ module top(
 	
 	`ifdef SYNTHESIS
 		initial $display("Assuming this is synthesis");
+		// Adding external reset source
 		wire debug_rst;
 		sys_ss#("RST") sys_ss_rst(debug_rst);
 		assign rst = ~KEY[0] | debug_rst;
@@ -81,6 +82,22 @@ module top(
 	`endif
 	ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	
+	`ifdef SYNTHESIS
+		reg[23:0] ram_addr_rd_pr, ram_addr_wr_pr;
+		reg[15:0] ram_data_rd_pr, ram_data_wr_pr;
+		reg ram_rd_pr0;
+		always_ff@(posedge mclk) begin
+			ram_rd_pr0 <= ram_rd_en;
+			if(ram_wr_en) begin
+				ram_addr_wr_pr <= ram_addr;
+				ram_data_wr_pr <= ram_wr_data;
+			end
+			if(ram_rd_en) ram_addr_rd_pr <= ram_addr;
+			if(ram_rd_pr0) ram_data_rd_pr <= ram_rd_data;
+		end
+		sys_sp#("ramw",40) sys_ramw({ram_addr_wr_pr,ram_data_wr_pr});
+		sys_sp#("ramr",40) sys_ramr({ram_addr_rd_pr,ram_data_rd_pr});
+	`endif
 	//sdram_block sdram0(
 	//	.mclk(mclk), 
 	//	.fclk(fclk), 
