@@ -56,7 +56,7 @@ package oisc8_pkg;
 		MEMPT1R =`SAWIDTH'd27,
 		MEMPT2R =`SAWIDTH'd28,
 		MEMLWHI =`SAWIDTH'd29,
-		MEMLWLO =`SAWIDTH'd40,
+		MEMLWLO =`SAWIDTH'd30,
 		STACKR	=`SAWIDTH'd31,
 		STPT0R  =`SAWIDTH'd32,
 		STPT1R  =`SAWIDTH'd33,
@@ -66,8 +66,11 @@ package oisc8_pkg;
 		// GP_REG
 		REG0R   =`SAWIDTH'd36,
 		REG1R   =`SAWIDTH'd37,
+		// ALU other
 		ADC     =`SAWIDTH'd38,
-		SBC     =`SAWIDTH'd39
+		SBC     =`SAWIDTH'd39,
+		ROL     =`SAWIDTH'd40,
+		ROR     =`SAWIDTH'd41
 	} e_iaddr_src;  // source enum
 
 endpackage

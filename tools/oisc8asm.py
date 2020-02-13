@@ -74,7 +74,7 @@ instrSrc = {
     27: ["MEMPT1R", "MEM1"],
     28: ["MEMPT2R", "MEM2"],
     29: ["MEMLWHI", "LWHI", "MEMHI"],
-    40: ["MEMLWLO", "LWLO", "MEMLO"],
+    30: ["MEMLWLO", "LWLO", "MEMLO"],
     31: ["STACKR", "STACK"],
     32: ["STACKPT0", "STPT0"],
     33: ["STACKPT1", "STPT1"],
@@ -84,6 +84,8 @@ instrSrc = {
     37: ["REG1R", "REG1"],
     38: ["ADC"],
     39: ["SBC"],
+    40: ["ROL"],
+    41: ["ROR"],
 }
 instrMap = {}
 for i, v in instrSrc.items():

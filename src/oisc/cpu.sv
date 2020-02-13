@@ -303,12 +303,103 @@ module alu_block(IBus.port bus);
 	PortOutputFF#(.ADDR(OR)) p_or(.bus(bus),.data_to_bus(reg_or));
 	PortOutputFF#(.ADDR(XOR)) p_xor(.bus(bus),.data_to_bus(reg_xor));
 
-	wire [`DWIDTH-1:0] reg_sll, reg_srl; 
-	assign reg_sll = acc0 << acc1[$clog2(`DWIDTH)-1:0];
-	assign reg_srl = acc0 >> acc1[$clog2(`DWIDTH)-1:0];
-	PortOutputFF#(.ADDR(SLL)) p_sll(.bus(bus),.data_to_bus(reg_sll));
-	PortOutputFF#(.ADDR(SRL)) p_srl(.bus(bus),.data_to_bus(reg_srl));
+	// ==================
+	// Shifts and rotates
+	// ==================
+	reg [`DWIDTH-1:0] w_sll, w_srl, w_sllc, w_srlc, w_rol, w_ror, w_rolc, w_rorc, rolr, rorr;
+	reg [`DWIDTH-1:0] reg_sllc,reg_srlc; 
+	wire [1:0] sll_en, srl_en;
+	always_ff@(posedge bus.clk) begin
+			if(bus.rst) begin
+				reg_sllc <= 1'b0;
+				reg_srlc <= 1'b0;
+			end else begin
+				if(sll_en[0]) reg_sllc <= w_sllc;
+				//if(sll_en[0]|sll_en[1]) reg_sllc <= w_sllc;
+				//if(~sll_en[0]|sll_en[1]) reg_sllc <= w_rolc;
+				if(srl_en[0]) reg_srlc <= w_srlc;
+				//if(srl_en[0]|srl_en[1]) reg_srlc <= w_srlc;
+				//if(~srl_en[0]|srl_en[1]) reg_srlc <= w_rorc;
+			end
+	end
+
+	always_comb case(acc1[$clog2(`DWIDTH)-1:0])
+		3'd0: {w_sllc,w_sll} = {8'd0,acc0};
+		3'd1: {w_sllc,w_sll} = {7'd0,acc0,1'd0};
+		3'd2: {w_sllc,w_sll} = {6'd0,acc0,2'd0};
+		3'd3: {w_sllc,w_sll} = {5'd0,acc0,3'd0};
+		3'd4: {w_sllc,w_sll} = {4'd0,acc0,4'd0};
+		3'd5: {w_sllc,w_sll} = {3'd0,acc0,5'd0};
+		3'd6: {w_sllc,w_sll} = {2'd0,acc0,6'd0};
+		3'd7: {w_sllc,w_sll} = {1'd0,acc0,7'd0};
+		default: {w_sllc,w_sll} = {acc0,8'd0};
+	endcase
 	
+	always_comb case(acc1[$clog2(`DWIDTH)-1:0])
+		3'd0: {w_srl,w_srlc} = {acc0,8'd0};
+		3'd1: {w_srl,w_srlc} = {1'd0,acc0,7'd0};
+		3'd2: {w_srl,w_srlc} = {2'd0,acc0,6'd0};
+		3'd3: {w_srl,w_srlc} = {3'd0,acc0,5'd0};
+		3'd4: {w_srl,w_srlc} = {4'd0,acc0,4'd0};
+		3'd5: {w_srl,w_srlc} = {5'd0,acc0,3'd0};
+		3'd6: {w_srl,w_srlc} = {6'd0,acc0,2'd0};
+		3'd7: {w_srl,w_srlc} = {6'd0,acc0,1'd0};
+		default: {w_srl,w_srlc} = {8'd0,acc0};
+	endcase
+	//assign {w_sllc,w_sll} = acc0 << acc1[$clog2(`DWIDTH)-1:0];
+	//assign {w_srl,w_srlc} = acc0 >> acc1[$clog2(`DWIDTH)-1:0];
+    
+	//reg [`DWIDTH-1:0] mask_r, mask_l;
+
+	//// FIXME: write generator
+	//always_comb case(acc1[$clog2(`DWIDTH)-1:0])
+	//	3'd1: mask_l = 8'b11111111;
+	//	3'd0: mask_l = 8'b11111110;
+	//	3'd1: mask_l = 8'b11111100;
+	//	3'd3: mask_l = 8'b11111000;
+	//	3'd4: mask_l = 8'b11110000;
+	//	3'd5: mask_l = 8'b11100000;
+	//	3'd6: mask_l = 8'b11000000;
+	//	3'd7: mask_l = 8'b10000000;
+	//	default: mask_l = 8'd0;
+	//endcase	
+	//always_comb case(acc1[$clog2(`DWIDTH)-1:0])
+	//	3'd1: mask_r = 8'b11111111;
+	//	3'd0: mask_r = 8'b01111111; 
+	//	3'd1: mask_r = 8'b00111111; 
+	//	3'd3: mask_r = 8'b00011111; 
+	//	3'd4: mask_r = 8'b00001111; 
+	//	3'd5: mask_r = 8'b00000111; 
+	//	3'd6: mask_r = 8'b00000011; 
+	//	3'd7: mask_r = 8'b00000001; 
+	//	default: mask_r = 8'd0;
+	//endcase	
+    //genvar i;
+    //generate
+	//	always_comb case(acc1[$clog2(`DWIDTH)])
+	//	for (i=0; i < `DWIDTH-1; i++) begin : generate_mask_r
+	//		 i: mask_r = 2**i-1;
+	//	end
+	//	endcase
+    //endgenerate
+
+	//assign {w_rolc,w_rol} = acc0 << acc1[$clog2(`DWIDTH)-1:0];
+	//assign {w_ror,w_rorc} = acc0 >> acc1[$clog2(`DWIDTH)-1:0];
+
+	//assign rolr = (w_sll&mask_l)|(sll_en[0]|sll_en[1]?w_sllc:reg_sllc);	
+	//assign rorr = (w_srl&mask_r)|(srl_en[0]|srl_en[1]?w_srlc:reg_srlc);	
+
+	PortOutputFF#(.ADDR(SLL)) p_sll(.bus(bus),.data_to_bus(w_sll),.rd(sll_en[0]));
+	PortOutputFF#(.ADDR(SRL)) p_srl(.bus(bus),.data_to_bus(w_srl),.rd(srl_en[0]));
+	PortOutput#(.ADDR(ROL)) p_rol(.bus(bus),.data_to_bus(reg_sllc));
+	PortOutput#(.ADDR(ROR)) p_ror(.bus(bus),.data_to_bus(reg_srlc));
+	
+	//PortOutputFF#(.ADDR(ROL)) p_rol(.bus(bus),.data_to_bus(rolr),.rd(sll_en[1]));
+	//PortOutputFF#(.ADDR(ROR)) p_ror(.bus(bus),.data_to_bus(rorr),.rd(srl_en[1]));
+	
+	// =================
+	// Compare registers
+	// =================
 	PortOutputFF#(.ADDR(EQ)) p_eq(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0==acc1}));
 	PortOutputFF#(.ADDR(GT)) p_gt(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0> acc1}));
 	PortOutputFF#(.ADDR(GE)) p_ge(.bus(bus),.data_to_bus({{`DWIDTH-1{1'b0}},acc0>=acc1}));
