@@ -72,3 +72,21 @@ module sys_ss (output wire source);
 	);
 
 endmodule
+
+module sys_sp (probe);
+	parameter NAME = "";
+	parameter WIDTH = 1;
+	input wire[WIDTH-1:0] probe;
+
+	altsource_probe_top #(
+		.sld_auto_instance_index ("YES"),
+		.sld_instance_index      (0),
+		.instance_id             (NAME),
+		.probe_width             (WIDTH),
+		.source_width            (0),
+		.enable_metastability    ("NO")
+	) in_system_sources_probes_0 (
+		.probe (probe)  // probes.probe
+	);
+
+endmodule
