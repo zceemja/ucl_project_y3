@@ -78,17 +78,21 @@ module pseudo_rom(addr, clk, q);
 	parameter PROGRAM="";
 	parameter WIDTH=8;
 	parameter NUMWORDS=1024;
+	parameter BINARY=0;
 	localparam AWIDTH=$clog2(NUMWORDS);
 	
 	input  reg 	clk;
 	input  wire [AWIDTH-1:0] addr;
-	output  reg [WIDTH-1:0] q;
+	output reg [WIDTH-1:0] q;
 	
 	initial $display("Initialising ROM Memory: %s", PROGRAM);
 	
 	reg [AWIDTH-1:0] addr0;
 	logic [WIDTH-1:0] rom [NUMWORDS:0];
-	initial $readmemh(PROGRAM, rom);
+	initial begin
+		if(BINARY==0) $readmemh(PROGRAM, rom);
+		else $readmemb(PROGRAM, rom);
+	end
 	always_ff@(posedge clk) addr0 <= addr; 	
 	assign q = rom[addr0];
 

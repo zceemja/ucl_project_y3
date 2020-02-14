@@ -150,7 +150,7 @@ if __name__ == '__main__':
     parser.add_argument('file', help='Files to compile')
     parser.add_argument('-t', '--output_type', choices=['bin', 'mem', 'binary', 'mif', 'uhex'], default='mem',
                         help='Output type')
-    parser.add_argument('-S', '--slice', default=-1, type=int, help='Slice output for section')
+    parser.add_argument('-S', '--slice', default=0, type=int, help='Slice output for section')
     parser.add_argument('-o', '--output', help='Output directory')
     parser.add_argument('-f', '--force', action='store_true', help='Force override output file')
     parser.add_argument('-s', '--stdout', action='store_true', help='Print to stdout')
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     if not path.exists(output_dir):
         mkdir(output_dir)
 
-    if args.output_type == 'mem':
+    if args.output_type == 'mem' or args.output_type == 'binary':
         ext = '.mem'
     elif args.output_type == 'bin':
         ext = '.bin'
@@ -177,12 +177,10 @@ if __name__ == '__main__':
         ext = '.out'
     bname = path.basename(args.file).rsplit('.', 1)[0]
 
-    sformat = f'01d'
     outputs = []
     if args.slice > 0:
-        sformat = f'0{int(math.log10(args.slice)) + 1}d'
         for i in range(0, args.slice):
-            outputs.append(path.join(output_dir, f'{bname}{args.section}_{format(i, sformat)}{ext}'))
+            outputs.append(path.join(output_dir, f'{bname}{args.section}_{i}{ext}'))
     else:
         outputs = [path.join(output_dir, bname + args.section + ext)]
     if not args.stdout and not args.force:
@@ -197,27 +195,58 @@ if __name__ == '__main__':
         if section in data:
             width, length, size, bdata = data[section]
             asize = len(bdata)
+
             if size > 0:
                 bdataf = bdata + (size - len(bdata)) * bytearray(b'\x00')
             else:
                 bdataf = bdata
 
-            for i, output in enumerate(outputs):
+            if section == '.text':
+                if len(bdata) % 4 != 0:
+                    bdata += b'\x00\x00'
+                bitblocks = [
+                    format(int.from_bytes(bdataf[i * 4:i * 4 + 2], 'big'), '013b') +
+                    format(int.from_bytes(bdataf[i * 4 + 2:i * 4 + 4], 'big'), '013b')
+                    for i in range(0, len(bdataf) // 4)
+                ]
+                bitblocks += ['0'*26] * (size//3 - len(bitblocks))
+                # calculate parity bit
+                bitblocks = [b + str(b.count('1') % 2) for b in bitblocks]
+                # divide into 3 for each memory chip
+            else:
+                bits = [
+                    format(int.form_bytes(bdataf[i * width:i * width + width], 'big'), f'0{width*2}b')
+                    for i in range(0, len(bdataf) // width)
+                ]
+                bitblocks = [bdataf]
+                # bitstring = ''.join(bits)
+                # bitstring += len(bitstring) % 8 * 27 * '0'  # fill to the integer byte
+                # x = int(bitstring, 2).to_bytes(len(bitstring) // 8, 'big')
 
-                y = bdataf[i::len(outputs)]
+            for i, output in enumerate(outputs):
+                block_chunks = []
+                chunk_width = 9 if section == '.text' else 16
+                for block in bitblocks:
+                    for j in range(len(outputs)):
+                        block_chunks.append(block[chunk_width * j:chunk_width * (j+1)])
+
+                y = block_chunks[i::len(outputs)]
                 if args.output_type == 'binary':
-                    x = compiler.convert_to_binary(y)
-                elif args.output_type == 'mem':
-                    x = compiler.convert_to_mem(y, width=width)
-                elif args.output_type == 'mif':
-                    x = compiler.convert_to_mif(y, width=width, depth=len(y)/width)
-                elif args.output_type == 'uhex':
-                    x = compiler.convert_to_mem(y, width=width, uhex=True)
+                    x = '\n'.join(y).encode()
                 else:
-                    x = bytes(y)
+                    # merge bits chunks info bytes
+                    y = int(''.join(y), 2).to_bytes(len(y)//8, 'big')
+                    if args.output_type == 'mem':
+                        x = compiler.convert_to_mem(y, width=1, uhex=True, reverse=True)
+                    elif args.output_type == 'mif':
+                        x = compiler.convert_to_mif(y, width=width, depth=len(y)/width)
+                    elif args.output_type == 'uhex':
+                        x = compiler.convert_to_mem(y, width=width, uhex=True)
+                    else:
+                        x = bytes(y)
 
                 op = 'Printing' if args.stdout else 'Saving'
-                print(f"{op} {args.output_type} {section} data '{output}' [Size: {len(y)}B Slice: {format(i + 1, sformat)}/{len(outputs)}]")
+                print(f"{op} {args.output_type} {section} data '{output}' [Size: {len(y)}B Slice: {i+1}/{len(outputs)}]")
                 if args.stdout:
                     if args.decompile:
                         print(asmc.decompile(bdata))
@@ -226,8 +255,13 @@ if __name__ == '__main__':
                 else:
                     with open(output, 'wb') as of:
                         of.write(x)
-
-            print(f"Total {section} size: {len(bdata) / len(bdataf) * 100:.1f}% [{len(bdata)}B/{len(bdataf)}B]")
+            if section == '.text':
+                insUsed = int(asize)//2
+                insTotal = size//2
+                print(f"Total {section} size: {insUsed / insTotal * 100:.1f}% "
+                      f"[ {insUsed} instr / {insTotal} instr ]")
+            else:
+                print(f"Total {section} size: {asize / len(bdataf) * 100:.1f}% [{int(asize)}B/{len(bdataf)}B]")
         else:
             print(f'No such section {section}!')
     else:

@@ -448,6 +448,30 @@ class Compiler:
                     raise CompilingError(f"%include is not implemented yet")  # TODO: Complete
                     continue
 
+                elif line_args[0].lower() == '%ifdef':
+                    if len(line_args) != 1:
+                        raise CompilingError(f"Invalid %ifdef arguments!")
+                    raise CompilingError(f"%ifdef is not implemented yet")  # TODO: Complete
+                    continue
+
+                elif line_args[0].lower() == '%ifndef':
+                    if len(line_args) != 1:
+                        raise CompilingError(f"Invalid %ifndef arguments!")
+                    raise CompilingError(f"%ifndef is not implemented yet")  # TODO: Complete
+                    continue
+
+                elif line_args[0].lower() == '%else':
+                    if len(line_args) != 0:
+                        raise CompilingError(f"Invalid %else arguments!")
+                    raise CompilingError(f"%else is not implemented yet")  # TODO: Complete
+                    continue
+
+                elif line_args[0].lower() == '%endif':
+                    if len(line_args) != 0:
+                        raise CompilingError(f"Invalid %endif arguments!")
+                    raise CompilingError(f"%endif is not implemented yet")  # TODO: Complete
+                    continue
+
                 if csect is None:
                     raise CompilingError(f"No section defined!")
 
@@ -513,12 +537,13 @@ class Compiler:
         return '\n'.join(res)
 
 
-def convert_to_binary(data):
-    a = '\n'.join([format(i, '08b') for i in data])
+def convert_to_binary(data, bit_width=8):
+    bin_data = ''.join([format(i, '08b') for i in data])
+    a = '\n'.join(bin_data[i*bit_width:i*bit_width+bit_width] for i in range(0, len(data)//bit_width))
     return a.encode()
 
 
-def convert_to_mem(data, width=1, uhex=False):
+def convert_to_mem(data, width=1, uhex=False, reverse=False):
     x = b''
 
     if uhex:
@@ -528,7 +553,10 @@ def convert_to_mem(data, width=1, uhex=False):
                 x += format(data[-(i * 2) - 1], f'02x').upper().encode()
         else:
             for i in range(len(data)):
-                x += format(data[-i - 1], f'02x').upper().encode()
+                if reverse:
+                    x += format(data[i], f'02x').upper().encode()
+                else:
+                    x += format(data[-i - 1], f'02x').upper().encode()
         return x
 
     if width == 2:

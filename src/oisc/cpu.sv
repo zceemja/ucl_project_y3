@@ -1,5 +1,10 @@
+`ifndef DEFINED
+`define DEFINED
 `include "oisc.sv"
 `include "../const.sv"
+`endif
+`include "romblock.sv"
+
 import oisc8_pkg::*;
 
 
@@ -22,90 +27,6 @@ module oisc8_cpu(processor_port port);
 	alu_block alu0(bus0.port);
 	mem_block ram0(bus0.port, port);
 	oisc_com_block com0(bus0.port, port);
-
-endmodule
-
-module pc_block(IBus.port bus, IBus.iport port);
-
-	wire[`SAWIDTH+`DAWIDTH:0] instr;
-
-	assign port.imm = instr[`DAWIDTH+`SAWIDTH];
-	assign port.instr_dst = e_iaddr_dst'(instr[`DAWIDTH+`SAWIDTH-1:`SAWIDTH]);
-	assign port.instr_src = e_iaddr_src'(port.imm ? `SAWIDTH'd0 : instr[`SAWIDTH-1:0]);
-	
-	reg write_null;	
-	always_comb write_null = (bus.instr_src == `SAWIDTH'd0) & ~port.imm;
-	data_buf dbus0(bus, 0, write_null);	
-	data_buf dbus1(bus, instr[`DWIDTH-1:0], port.imm);	
-	//genvar i;
-	//generate 
-	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_imm_to_data
-	//		bufif1(bus.data[i], instr[i], port.imm);
-	//	end 
-	//endgenerate
-	
-	//generate 
-	//	for(i=0;i<`DWIDTH;i=i+1) begin : generate_null_to_data
-	//		bufif1(bus.data[i], 0, write_null);
-	//	end 
-	//endgenerate
-	
-	parameter PROGRAM = "";
-	reg[15:0] pc, pcn, pcr; // Program counter
-	reg[15:0] pointer;  // Instruction pointer accumulator
-	reg[7:0] comp_acc;  // Compare accumulator
-	reg comp_zero;
-
-	/* ====================
-	*       ROM BLOCK
-	   ==================== */
-	`ifdef SYNTHESIS
-	m9k_rom#(
-			.PROGRAM({PROGRAM, ".mif"}), 
-			.NAME("rom0"),
-			.WIDTH(16),
-			.NUMWORDS(2048)
-	)
-	`else
-	pseudo_rom#(
-			.PROGRAM({PROGRAM, ".mem"}), 
-			.WIDTH(16),
-	 		.NUMWORDS(2048)
-	) 
-	`endif
-		rom0(pc[12:0], bus.clk, instr[12:0]);
-
-
-	`ifndef SYNTHESIS
-	reg [15:0] pcp;  // Current program counter for debugging
-	`endif 
-
-	always_comb comp_zero = comp_acc == `DWIDTH'd0;
-	//assign pcn = comp_zero|bus.rst ? pointer : pc + 1;
-	assign pcn = pc + 1;
-	always_ff@(posedge bus.clk) begin
-		if(bus.rst) begin 
-			pcr <= 0;
-		end
-		else begin 
-			`ifndef SYNTHESIS
-			pcp <= pc;
-			`endif 
-			pcr <= pcn;
-		end
-	end
-	assign pc = ~comp_zero|bus.rst ? pcr: pointer; 	
-	PortReg#(.ADDR_SRC(BRPT0R), .ADDR_DST(BRPT0)) p_brpt0(
-			.bus(bus),.register(pointer[7:0]),.wr(),.rd()
-	);
-	PortReg#(.ADDR_SRC(BRPT1R), .ADDR_DST(BRPT1)) p_brpt1(
-			.bus(bus),.register(pointer[15:8]),.wr(),.rd()
-	);
-	PortInput#(.ADDR(BRZ), .DEFAULT(`DWIDTH'hFF)) p_brz(
-			.bus(bus),.data_from_bus(comp_acc)
-	);
-	PortOutput#(.ADDR(PC0)) p_pc0(.bus(bus),.data_to_bus(pcn[7:0]));
-	PortOutput#(.ADDR(PC1)) p_pc1(.bus(bus),.data_to_bus(pcn[15:8]));
 
 endmodule
 

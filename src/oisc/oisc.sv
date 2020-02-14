@@ -75,11 +75,11 @@ package oisc8_pkg;
 
 endpackage
 
-interface IBus(clk, rst, instr);
+interface IBus(input clk, rst);
 	import oisc8_pkg::*;
 	
-	input wire clk, rst;	
-	input wire[`SAWIDTH+`DAWIDTH:0] instr;
+	//input wire clk, rst;	
+	//input wire[`SAWIDTH+`DAWIDTH:0] instr;
 
 	wire[`DWIDTH-1:0] data;
 	logic imm;
