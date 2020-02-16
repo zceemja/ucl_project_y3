@@ -1,0 +1,208 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[top=1cm,bottom=2cm,left=1cm,right=1cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{svg}
+\usepackage{pdflscape}
+\usepackage{hyperref}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{longtable}
+\usepackage[normalem]{ulem}
+
+\setcounter{tocdepth}{3}
+\begin{document}
+\begin{titlepage}
+	\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+	\begin{tikzpicture}[remember picture, overlay]
+	\node [anchor=north east, inner sep=0pt]  at (current page.north east)
+	{\includegraphics[width=21cm]{graphics/ucl-banner-dl-port-outline.eps}};
+	\end{tikzpicture}\\[3cm]
+	\center
+	
+	\textsc{\Large University College London}\\[0.5cm]
+	\textsc{\large Department of Electronic \& Electrical Engineering}\\[0.5cm]
+	
+	\HRule \\[0.4cm]
+	\setstretch{1.5}
+	{ \huge \bfseries Project Progress Report No. 3}\\[0.4cm]
+	\setstretch{1.0}
+	\HRule \\[1.0cm]
+	
+	
+	\Large \emph{Author:}\\
+	Minduagas \textsc{Jarmolovicius}\\
+	\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+	
+	\Large \emph{Supervisor:}\\
+	Prof. Robert \textsc{Killey}\\
+	\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+	\vfill
+	{\large January 20, 2020}\\[2cm]
+	
+\end{titlepage}
+
+	
+%\maketitle
+%\tableofcontents
+
+\pagebreak
+\section{Progress}
+The following points have been done since last report:
+\begin{description}
+	\item[$\bullet$] New instruction have been added to RISC;
+	\item[$\bullet$] Implemented multiple function in assembly for RISC;
+	\item[$\bullet$] Improved RISC assembler;
+	\item[$\bullet$] Started to implement the structure of OISC in SystemVerilog;
+\end{description}
+
+Project schedule as Grantt chart has been updated in the last page in table \ref{table:time}. 
+
+\subsection{New RISC instruction}
+Added \texttt{ADDC} and \texttt{SUBC} instructions to allow addition and subtraction with carry. They work as follows:
+\\
+\texttt{ADDC} \texttt{[operand]}: operand = operand + carry\\ 
+\texttt{SUBC} \texttt{[operand]}: operand = operand - carry \\
+Carry flag is write to only at \texttt{ADD}, \texttt{ADDI}, \texttt{SUB} and \texttt{SUBI} instructions. 
+\\\\
+Note that some instruction become unnecessary since last instruction changes, mainly \texttt{INC} and \texttt{DEC} that increase/decrease operand value by 1 This instruction can be replaced by \\\texttt{ADDI [operand] 1} and \texttt{SUBI [operand] 1}\\
+Such replacement would only have 1 downside as taking 1 byte more in instruction memory.
+\subsection{RISC assembly functions}
+Created following RISC functions in assembly:
+
+\begin{table}[h!]
+	\centering
+	\arrayrulecolor{black}
+	\newcommand{\riscLink}[1]{
+		\href{https://gogs.infcof.com/min/ucl_project_y3/src/07c8da54825f4dd4f539140682916a539947067d/memory/risc8.asm\#L#1}{#1}
+	}
+	\begin{tabular}{| l | p{13cm} | l | l | } \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Name & Description & Line \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}
+		read\_char & Waits for input from UART and writes to \texttt{r0} &
+		 \riscLink{922} \\\hline
+		print\_char & Sends \texttt{r0} byte to print to UART &
+		 \riscLink{964} \\\hline
+		print\_msg  & Prints string to UART from memory pointer at \texttt{\{r2 r1\}} &
+		 \riscLink{944} \\\hline
+		printU8 & Prints unsigned 8bit decimal at \texttt{r0} to UART &
+		 \riscLink{783} \\\hline
+		printU16 & Prints unsigned 16bit decimal at \texttt{\{r0 r1\}} to UART &
+		 \riscLink{741} \\\hline
+		printhex & Prints hexadecimal value at \texttt{r0} to UART &
+		 \riscLink{271} \\\hline
+		printbin & Prints binary value at \texttt{r0} to UART &
+		 \riscLink{245} \\\hline
+		mulU16 & Multiples value in \texttt{\{r0 r1\}} with \texttt{\{r2 r3\}} resulting in 32bit value in \texttt{\{r0 r1 r2 r3\}}  &
+		 \riscLink{655} \\\hline
+		arrayPop & Removes last value from array at memory pointer in \texttt{\{r0 r1\}} and places value in \texttt{\{r2 r3\}} &
+		 \riscLink{894} \\\hline
+		arrayPush & Adds value in \texttt{\{r2 r3\}} to array at memory pointer in \texttt{\{r0 r1\}} &
+		 \riscLink{854} \\\hline
+		arrayClear & Resets array header in memory pointer \texttt{\{r0 r1\}} &
+		 \riscLink{840} \\\hline
+		sieveOfAtkin & Calculates and prints first 255 prime numbers &
+		 \riscLink{375} \\\hline
+
+		\arrayrulecolor{black}\hline
+		
+	\end{tabular}
+	\caption{List of implemented RISC functions. Note Line numbers are hyperlinks to assembly file at specific commit.}
+	\label{table:com_instr}
+\end{table}
+\subsection{RISC assembler}
+Assembler has \texttt{@} operator that takes nth byte from a value or label. E.g. \texttt{0x0102@n} would return nth byte of 0x0102. This is useful for decimal values.
+\subsection{OISC Implementation}
+A basic architecture of OISC processor has been implemented. The fundamental structure includes a common bus (SystemVerilog interface named \textit{IBus}) that includes data and instruction wires. Instruction currently is 16bit wide, where first byte is destination address and second byte is source address.
+
+Modules can be attached to IBus using Ports. Ports is SystemVerilog module that takes address as a parameter and has 2 internal registers - \texttt{data\_from\_bus} and \texttt{data\_to\_bus}. If instruction destination matches Port address data \texttt{data\_from\_bus} is set to IBus data value, otherwise it does not change. If instruction source matches Port address register \texttt{data\_to\_bus} is connected to IBus data bus, otherwise IBus data connection is set to high impedance. 
+
+Immediate value can be writing to special Port by writing instruction source address (which would be the immediate value) to \texttt{data\_from\_bus} instead of data bus. In such case source address might be invalid however this does not affect operation as invalid address resulting data bus being unknown state is ignored by destination.
+
+Port and IBus are described in \href{https://gogs.infcof.com/min/ucl_project_y3/src/a075e40b996c00e83dd3ac838108fa16b4a89cb0/src/oisc/oisc.sv}{here}.
+
+\section{Difficulties encountered}
+Some minor difficulties been encountered with assembler. Its been discovered that assembler had a software bug where in 2-operand instructions operand positions were swapped resulting in issues with compiler code. So far this is the only issue caused by assembler.
+\\ \\
+It also been discovered that writing assembly takes a lot of time, therefore writing a higher level compiler (e.g. BASIC) or translation program to convert RISC assembly to OISC is considered.
+
+\section{Failure Risk Assessment}
+There are no updates on failure risk assessment. 
+
+\section{Updated Safety Risk Assessment}
+There are no updates on safety risk assessment.
+
+\section{Help and Advice Needed}
+At this state no help is needed, and any issues and advices are sorted out and discussed in weekly supervisor meetings.
+
+\newpage
+\begin{landscape}
+\section{Updated Schedule}
+\begin{table}[h]
+\centering
+\begin{ganttchart}[
+	y unit title=0.4cm,
+	y unit chart=0.5cm,
+	x unit=1.1mm,
+	hgrid,
+	today=2020-01-20,
+	today label node/.append style={below=12pt},
+	today label font=\itshape\color{blue},
+	today rule/.style={draw=blue, ultra thick},
+	title height=1,
+	bar/.append style={fill=blue!50},
+	bar incomplete/.append style={fill=gray!50},
+	progress label text={$\displaystyle{#1\%}$},
+	time slot format=isodate
+	]{2019-10-01}{2020-03-31}
+	\gantttitlecalendar{year, month=shortname} \\
+	\gantttitle{40}{6}
+	\gantttitlelist{41,...,52}{7}
+	\gantttitlelist{1,...,13}{7}
+	\gantttitle{}{2} \\
+	\ganttbar[progress=100]{RISC implementation}{2019-10-01}{2019-10-27}\\
+	\ganttbar[progress=95]{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+	\ganttbar[progress=100]{UART and I/O}{2019-10-21}{2019-10-27}
+	\ganttbar[progress=100]{}{2019-11-25}{2019-12-08} \\
+	\ganttbar[progress=100]{RISC Assembler}{2019-10-14}{2019-11-11}\\
+	\ganttbar[progress=80]{Developing benchmark}{2019-11-11}{2019-12-13}
+	\ganttbar[progress=0]{}{2020-02-23}{2020-03-07} \\
+	\ganttbar[progress=100]{OISC Implementation}{2019-12-02}{2019-12-13}
+	\ganttbar[progress=20]{}{2020-01-13}{2020-02-02}\\
+	\ganttbar[progress=0]{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+	\ganttbar[progress=0]{OISC Assembler}{2020-01-20}{2020-02-09}\\
+	\ganttbar[progress=0]{OISC Compiler}{2020-02-09}{2020-03-01}\\
+	\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+	\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+	\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+	\ganttmilestone{December Interim Report}{2019-12-13}\\
+	\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+	\ganttmilestone{Progress Report \#4}{2020-02-14}\\
+	\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+	\ganttmilestone{Poster Presentation}{2020-03-18}\\
+	\ganttmilestone{Final Report}{2020-03-30}
+	\ganttvrule{Reading Week}{2019-11-03}
+	\ganttvrule{}{2019-11-10}
+	\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+	\ganttvrule{}{2020-01-12}
+	\ganttvrule{Reading Week}{2020-02-17}
+	\ganttvrule{}{2020-02-23}
+\end{ganttchart}	
+\caption{Updated project schedule Grantt chart}
+\label{table:time}
+\end{table}
+\end{landscape}
+
+\end{document}
