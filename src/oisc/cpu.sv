@@ -21,8 +21,15 @@ module oisc8_cpu(processor_port port);
 	//);
 	//Port #(.ADDR)
 	//PortOutput p_null(.bus(bus0.port),.data_to_bus(`DWIDTH'd0));
-	PortReg#(.ADDR_SRC(REG0R), .ADDR_DST(REG0)) p_reg0(.bus(bus0.port));
-	PortReg#(.ADDR_SRC(REG1R), .ADDR_DST(REG1)) p_reg1(.bus(bus0.port));
+	reg [`DWIDTH-1:0] reg0, reg1;
+	PortReg#(.ADDR_SRC(REG0R), .ADDR_DST(REG0)) p_reg0(.bus(bus0.port),.register(reg0));
+	PortReg#(.ADDR_SRC(REG1R), .ADDR_DST(REG1)) p_reg1(.bus(bus0.port),.register(reg1));
+	
+	`ifdef DEBUG
+	sys_sp#("REG0", `DWIDTH) sys_reg0(reg0);
+	sys_sp#("REG1", `DWIDTH) sys_reg1(reg1);
+	`endif
+
 	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0.port, bus0.iport);
 	alu_block alu0(bus0.port);
 	mem_block ram0(bus0.port, port);
@@ -49,6 +56,12 @@ module oisc_com_block(IBus.port bus, processor_port port);
 	PortOutput#(.ADDR(COMDR)) p_comdr(
 			.bus(bus),.data_to_bus(port.com_rd),.rd(rd)
 	);
+	
+	`ifdef DEBUG
+	sys_sp#("COMA", 8) sys_coma(addr);
+	sys_sp#("COMW", 8) sys_comw(port.com_wr);
+	sys_sp#("COMR", 8) sys_comd(port.com_rd);
+	`endif
 endmodule
 
 module mem_block(IBus.port bus, processor_port port);
@@ -184,6 +197,11 @@ module alu_block(IBus.port bus);
 	//		.bus(bus),.data_from_bus(acc1),.data_to_bus(acc1),.wr(),.rd());
 	PortNReg#(ALUACC0, ALUACC0R) p_aluacc0(.bus(bus),.register(acc0));
 	PortNReg#(ALUACC1, ALUACC1R) p_aluacc1(.bus(bus),.register(acc1));
+
+	`ifdef DEBUG
+	sys_sp#("ALU0", `DWIDTH) sys_alu0(acc0);
+	sys_sp#("ALU1", `DWIDTH) sys_alu1(acc1);
+	`endif
 
 	//carry_lookahead_adder#(.WIDTH(`DWIDTH)) alu_adder0(acc0,acc1,reg_add);
 	wire [`DWIDTH-1:0] reg_add;

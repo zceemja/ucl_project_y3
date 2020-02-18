@@ -24,8 +24,7 @@ module pc_block(IBus.port bus, IBus.iport port);
 	reg[15:0] pc, pcr; // Program counter
 	reg[15:0] pointer;  // Instruction pointer accumulator
 	reg[7:0] comp_acc;  // Compare accumulator
-	reg comp_zero;
-	reg rst0, pc0; // delayed reset and lsb of pc
+	reg comp_zero, pc0;
 
 	/* ====================
 	*       ROM BLOCK
@@ -51,9 +50,13 @@ module pc_block(IBus.port bus, IBus.iport port);
 	assign instrB = instrBlock[13:1];
 	assign instr = pc0 ? instrA : instrB;
 
-	`ifndef SYNTHESIS
+	`ifdef DEBUG
 	reg [15:0] pcp;  // Current program counter for debugging
 	always_ff@(posedge bus.clk) pcp <= pc;
+	sys_sp#("PC", 16) sys_pc(pcp);
+	sys_sp#("INST", 13) sys_instr(instr);
+	sys_sp#("BRPT", 16) sys_brpt(pointer);
+	sys_sp#("DATA", 16) sys_data(port.data);
 	`endif
 	
 
@@ -61,7 +64,6 @@ module pc_block(IBus.port bus, IBus.iport port);
 	//assign pcn = comp_zero|bus.rst ? pointer : pc + 1;
 	assign pcn = pc + 1;
 	always_ff@(posedge bus.clk) begin
-		rst0 <= bus.rst;
 		if(bus.rst) begin 
 			pcr <= 16'd0;
 			pc0 <= 1'b0;
@@ -70,7 +72,7 @@ module pc_block(IBus.port bus, IBus.iport port);
 			pc0 <= pc[0];
 		end
 	end
-	always_comb casez({comp_zero,bus.rst|rst0})
+	always_comb casez({comp_zero,bus.rst})
 		2'b00: pc = pcr;
 		2'b10: pc = pointer;
 		2'b?1: pc = 16'd0;

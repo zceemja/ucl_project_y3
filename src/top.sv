@@ -54,6 +54,20 @@ module top(
 	wire fclk; // Fast clock 		100MHz 		(for sdram)
 	wire aclk; // Auxiliary clock 	32,768kHz 	(for timers)
 
+	`ifdef DEBUG
+	wire mclk1, mclk0, clkd;
+	sys_ss#("CLKD", 1) sys_clkd(clkd);
+	sys_ss#("MCLK", 1) sys_mclk(mclk0);
+	assign mclk = clkd ? mclk0 : mclk1;
+
+	pll_clk pll_clk0 (
+			.inclk0(CLK50),
+			.areset(0),
+			.c0(fclk),
+			.c1(mclk1),
+			.c2(aclk)
+	);
+	`else
 	pll_clk pll_clk0 (
 			.inclk0(CLK50),
 			.areset(0),
@@ -61,6 +75,7 @@ module top(
 			.c1(mclk),
 			.c2(aclk)
 	);
+	`endif
 
 	//clk_dive#(28'd50) clk_div_mclk(CLK50, mclk);
 	//assign mclk = ~KEY[1];	
@@ -82,7 +97,7 @@ module top(
 	`endif
 	ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	
-	`ifdef SYNTHESIS
+	`ifdef DEBUG
 		reg[23:0] ram_addr_rd_pr, ram_addr_wr_pr;
 		reg[15:0] ram_data_rd_pr, ram_data_wr_pr;
 		reg ram_rd_pr0;
@@ -127,7 +142,11 @@ module top(
 	wire com0_interrupt;
 
 	com_block com0 (
+		`ifdef DEBUG
+		.clk(mclk1),
+		`else
 		.clk(mclk),
+		`endif
 		.rst(rst),
 		.addr(com0_addr),
 		.in_data(com0_wr),

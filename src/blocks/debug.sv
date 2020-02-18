@@ -55,15 +55,39 @@ module altsource_probe_top
     
 endmodule
 
-module sys_ss (output wire source);
+
+module sys_comb(source, probe);
 	parameter NAME = "";
+	parameter WIDTH = 1;
+	input wire[WIDTH-1:0] probe;
+	output wire[WIDTH-1:0] source;
+
+	altsource_probe_top #(
+		.sld_auto_instance_index ("YES"),
+		.sld_instance_index      (0),
+		.instance_id             (NAME),
+		.probe_width             (WIDTH),
+		.source_width            (WIDTH),
+		.enable_metastability    ("NO")
+	) in_system_sources_probes_0 (
+		.probe (probe),       // probes.probe
+		.source(source),      // sources.source
+		.source_ena ('d0)    // (terminated)
+	);
+endmodule
+
+
+module sys_ss (source);
+	parameter NAME = "";
+	parameter WIDTH = 1;
+	output wire[WIDTH-1:0] source;
 
 	altsource_probe_top #(
 		.sld_auto_instance_index ("YES"),
 		.sld_instance_index      (0),
 		.instance_id             (NAME),
 		.probe_width             (0),
-		.source_width            (1),
+		.source_width            (WIDTH),
 		.source_initial_value    ("0"),
 		.enable_metastability    ("NO")
 	) in_system_sources_probes_0 (
