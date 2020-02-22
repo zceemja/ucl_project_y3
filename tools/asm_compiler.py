@@ -103,8 +103,21 @@ class Section:
         self.data = b''
         self.count = 0
         self.width = 1
-        self.length = 1
-        self.size = 2 ** 8
+        self.length = 3
+        self.options = {}
+        self.depth = 2 ** 8
+
+    @property
+    def bin_width(self):
+        if 'bin_width' in self.options and self.options['bin_width'].isdecimal():
+            return int(self.options['bin_width'])
+        return self.width * 8
+
+    @property
+    def fill_bits(self):
+        if 'fill_bits' in self.options and self.options['fill_bits'].isdecimal():
+            return int(self.options['fill_bits'])
+        return self.depth * self.width * 8
 
 
 class Compiler:
@@ -340,7 +353,7 @@ class Compiler:
                 for i, mline0 in enumerate(mline):
                     for j in range(len(argsp)):
                         mline0 = mline0.replace(f'%{j + 1}', argsp[j])
-                    mline[i] = re.sub(r'(%{2})([\w$#~.?]+)', mlabel+r'.\2', mline0)
+                    mline[i] = re.sub(r'(%{2})([\w$#~.?]+)', mlabel + r'.\2', mline0)
                 try:
                     scope = self.__code_compiler(file, lnum, mline, csect, scope, True)
                 except CompilingError as e:
@@ -412,15 +425,29 @@ class Compiler:
                     section_name = line_args[1].lower()
                     if section_name not in sections:
                         s = Section()
+                        options = {}
                         if len(line_args) == 3:
-                            m = secs_re.match(line_args[2])
-                            if m is not None:
-                                g = m.groups()
-                                s.width = int(g[0])
-                                s.length = int(g[1])
-                                s.size = int(g[2])
-                            else:
-                                raise CompilingError(f"Invalid section argument: {line_args[2]}")
+                            for sp in line_args[2].split(','):
+                                if '=' not in sp:
+                                    continue
+                                sp2 = sp.split('=', 1)
+                                key = sp2[0].lower()
+                                val = sp2[1]
+                                s.options[key] = val
+                                if not val.isdecimal():
+                                    continue
+                                if key == 'depth':
+                                    s.depth = int(val)
+                                if key == 'width':
+                                    s.width = int(val)
+                            # m = secs_re.match(line_args[2])
+                            # if m is not None:
+                            #     g = m.groups()
+                            #     s.width = int(g[0])
+                            #     s.length = int(g[1])
+                            #     s.size = int(g[2])
+                            # else:
+                            #     raise CompilingError(f"Invalid section argument: {line_args[2]}")
                         sections[section_name] = s
                     csect = sections[section_name]
                     continue
@@ -495,7 +522,8 @@ class Compiler:
                     print(f"ERROR {file}:{lnum}: {e.message}")
         if failure:
             return None
-        return {k: (v.width, v.length, v.size, v.data) for k, v in sections.items()}
+        # return {k: (v.width, v.length, v.size, v.data) for k, v in sections.items()}
+        return sections
 
     def decompile(self, binary):
         addr = 0
@@ -537,65 +565,92 @@ class Compiler:
         return '\n'.join(res)
 
 
-def convert_to_binary(data, bit_width=8):
-    bin_data = ''.join([format(i, '08b') for i in data])
-    a = '\n'.join(bin_data[i*bit_width:i*bit_width+bit_width] for i in range(0, len(data)//bit_width))
-    return a.encode()
+def main(asmc):
+    import sys
+    import argparse
+    from os import path, mkdir
+    from bitstring import BitArray
 
+    parser = argparse.ArgumentParser(description='Assembly compiler', add_help=True)
+    parser.add_argument('file', help='Files to compile')
+    parser.add_argument('-o', '--output', help='Output directory')
+    parser.add_argument('-f', '--force', action='store_true', help='Force override output file')
+    parser.add_argument('-s', '--stdout', action='store_true', help='Print to stdout')
+    parser.add_argument('-D', '--decompile', action='store_true', help='Print decompiled')
+    args = parser.parse_args(sys.argv[1:])
+    bname = path.basename(args.file).rsplit('.', 1)[0]
 
-def convert_to_mem(data, width=1, uhex=False, reverse=False):
-    x = b''
+    if not path.isfile(args.file):
+        print(f'No file {args.file}!')
+        sys.exit(1)
 
-    if uhex:
-        if width == 2:
-            for i in range(int(len(data) / 2)):
-                x += format(data[-(i * 2) - 2], f'02x').upper().encode()
-                x += format(data[-(i * 2) - 1], f'02x').upper().encode()
-        else:
-            for i in range(len(data)):
-                if reverse:
-                    x += format(data[i], f'02x').upper().encode()
-                else:
-                    x += format(data[-i - 1], f'02x').upper().encode()
-        return x
+    output_dir = args.output or path.dirname(args.file)
+    if not path.exists(output_dir):
+        mkdir(output_dir)
 
-    if width == 2:
-        datax = [(x << 8) | y for x, y in zip(data[0::2], data[1::2])]
-        if len(data) % 2 == 1:
-            datax.append(data[-1] << 8)
+    data = asmc.compile_file(args.file)
+    if data is not None:
+        for sec_name in data:
+            sec = data[sec_name]
+            if sec_name == '.text' and args.decompile:
+                print(asmc.decompile(sec.data))
+
+            output = path.join(output_dir, f'{bname}.{sec_name.strip(".")}.o')
+            if not args.stdout and not args.force:
+                if path.isfile(output):
+                    print(f'Output file already exists {output}!')
+                    inval = ''
+                    while True:
+                        inval = input('Override? [y/n]: ')
+                        inval = inval.lower().strip()
+                        if inval != 'y' and inval != 'n':
+                            print('Please type y or n')
+                            continue
+                        break
+                    if inval == 'n':
+                        continue
+
+            parity = 0
+            if 'parity' in sec.options and sec.options['parity'].isdigit():
+                parity = int(sec.options['parity'])
+
+            content = sec.data
+
+            used = -1
+            # if fill_bits == 0 and len(sec.data) < sec.depth:
+            #     used = len(content)/sec.depth
+            #     content += (sec.depth*sec.width - len(content)) * bytearray(b'\x00')
+
+            # converting to BitArray
+            binary = BitArray()
+            for i in range(sec.depth):
+                if len(binary) >= sec.fill_bits:  # FIXME: better solution
+                    break
+                cell = content[i*sec.width:(i+1)*sec.width]
+                cell_bytes = BitArray(cell)
+                if len(cell_bytes) < sec.width:  # we can assume content ends here
+                    if used == -1:
+                        used = len(binary)/sec.fill_bits
+                    f = '0' * (sec.bin_width - len(cell_bytes))
+                    cell_bytes.append(BitArray(bin=f))
+                cell_bytes = cell_bytes[len(cell_bytes)-sec.bin_width:]
+                binary.append(cell_bytes)
+                if parity > 0 and i % parity == 1:
+                    parity_bit = str(binary[-(i*parity*sec.bin_width):].bin.count('1') % 2)
+                    binary.append(BitArray(bin=parity_bit))
+
+            if used == -1:  # this is bad. Content is bigger than memory itself
+                used = len(binary)/sec.fill_bits
+            # if fill_bits > 0 and len(binary) < fill_bits:
+            #     used = len(binary) / fill_bits
+            #     fill = (fill_bits - len(binary)) * BitArray(bin='0')
+            #     binary.append(fill)
+
+            with open(output, 'wb') as f:
+                f.write(binary.bytes)
+            print(f'Saved {sec_name} to "{output}", used {used*100:.2f}% [{int(len(binary)/8 * used)}B of {len(binary)//8}B]')
     else:
-        datax = data
+        print(f'Failed to compile {args.file}!')
+        sys.exit(1)
+    sys.exit(0)
 
-    fa = f'0{math.ceil(math.ceil(math.log2(len(datax))) / 4)}x'
-    a = [format(d, f'0{width * 2}x') for d in datax]
-    for i in range(int(len(a) / 8) + 1):
-        y = a[i * 8:(i + 1) * 8]
-        if len(y) > 0:
-            x += (' '.join(y) + ' ' * ((8 - len(y)) * 3) + '  // ' + format((i * 8 - 1) + len(y), fa) + '\n').encode()
-    return x
-
-
-def convert_to_mif(data, depth=32, width=1):
-    x = f'''-- auto-generated memory initialisation file
-DEPTH = {math.ceil(depth)};
-WIDTH = {width * 8};
-ADDRESS_RADIX = HEX;
-DATA_RADIX = HEX;
-CONTENT
-BEGIN
-'''.encode()
-
-    addr_format = f'0{math.ceil(int(math.log2(len(data))) / 4)}x'
-    if width == 2:
-        datax = [(x << 8) | y for x, y in zip(data[0::2], data[1::2])]
-        if len(data) % 2 == 1:
-            datax.append(data[-1] << 8)
-    else:
-        datax = data
-    a = [format(i, f'0{width * 2}x') for i in datax]
-    for i in range(int(len(a * width) / 8) + 1):
-        y = a[i * 8:(i + 1) * 8]
-        if len(y) > 0:
-            x += (format(i * 8, addr_format) + ' : ' + ' '.join(y) + ';\n').encode()
-    x += b"END;"
-    return x

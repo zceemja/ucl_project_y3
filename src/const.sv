@@ -6,3 +6,6 @@
 
 // Add debugging hardware to processor
 `define DEBUG
+
+`define ROMDIR "../../memory/build/"
+`define RAMDIR "../../memory/build/"

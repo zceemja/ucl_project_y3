@@ -62,6 +62,7 @@ module sys_comb(source, probe);
 	input wire[WIDTH-1:0] probe;
 	output wire[WIDTH-1:0] source;
 
+	`ifdef SYNTHESIS
 	altsource_probe_top #(
 		.sld_auto_instance_index ("YES"),
 		.sld_instance_index      (0),
@@ -74,6 +75,7 @@ module sys_comb(source, probe);
 		.source(source),      // sources.source
 		.source_ena ('d0)    // (terminated)
 	);
+	`endif
 endmodule
 
 
@@ -82,6 +84,7 @@ module sys_ss (source);
 	parameter WIDTH = 1;
 	output wire[WIDTH-1:0] source;
 
+	`ifdef SYNTHESIS
 	altsource_probe_top #(
 		.sld_auto_instance_index ("YES"),
 		.sld_instance_index      (0),
@@ -94,6 +97,9 @@ module sys_ss (source);
 		.source     (source), // sources.source
 		.source_ena (1'b1)    // (terminated)
 	);
+	`else
+	assign source = 'd0;
+	`endif
 
 endmodule
 
@@ -102,6 +108,7 @@ module sys_sp (probe);
 	parameter WIDTH = 1;
 	input wire[WIDTH-1:0] probe;
 
+	`ifdef SYNTHESIS
 	altsource_probe_top #(
 		.sld_auto_instance_index ("YES"),
 		.sld_instance_index      (0),
@@ -112,5 +119,6 @@ module sys_sp (probe);
 	) in_system_sources_probes_0 (
 		.probe (probe)  // probes.probe
 	);
+	`endif
 
 endmodule

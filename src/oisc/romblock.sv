@@ -32,23 +32,23 @@ module pc_block(IBus.port bus, IBus.iport port);
 	wire [26:0] instrBlock;
 	wire [12:0] instrA, instrB;
 	`ifdef SYNTHESIS
-	m9k_rom#(.PROGRAM({PROGRAM, "_0.mif"}),.NAME("rom0"),.WIDTH(9),.NUMWORDS(1024))
+	m9k_rom#(.PROGRAM({PROGRAM, ".0.mif"}),.NAME("rom0"),.WIDTH(9),.NUMWORDS(1024))
 		rom0(pc[10:1], bus.clk, instrBlock[26:18]);
-	m9k_rom#(.PROGRAM({PROGRAM, "_1.mif"}),.NAME("rom1"),.WIDTH(9),.NUMWORDS(1024))
+	m9k_rom#(.PROGRAM({PROGRAM, ".1.mif"}),.NAME("rom1"),.WIDTH(9),.NUMWORDS(1024))
 		rom1(pc[10:1], bus.clk, instrBlock[17:9]);
-	m9k_rom#(.PROGRAM({PROGRAM, "_2.mif"}),.NAME("rom2"),.WIDTH(9),.NUMWORDS(1024))
+	m9k_rom#(.PROGRAM({PROGRAM, ".2.mif"}),.NAME("rom2"),.WIDTH(9),.NUMWORDS(1024))
 		rom2(pc[10:1], bus.clk, instrBlock[8:0]);
 	`else
-	pseudo_rom#(.PROGRAM({PROGRAM, "_0.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
+	pseudo_rom#(.PROGRAM({PROGRAM, ".0.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
 		rom0(pc[10:1], bus.clk, instrBlock[26:18]);
-	pseudo_rom#(.PROGRAM({PROGRAM, "_1.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
+	pseudo_rom#(.PROGRAM({PROGRAM, ".1.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
 		rom1(pc[10:1], bus.clk, instrBlock[17:9]);
-	pseudo_rom#(.PROGRAM({PROGRAM, "_2.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
+	pseudo_rom#(.PROGRAM({PROGRAM, ".2.mem"}),.WIDTH(9),.NUMWORDS(1024),.BINARY(1)) 
 		rom2(pc[10:1], bus.clk, instrBlock[8:0]);
 	`endif
 	assign instrA = instrBlock[26:14];
 	assign instrB = instrBlock[13:1];
-	assign instr = pc0 ? instrA : instrB;
+	assign instr = pc0==1'b0 ? instrA : instrB;  // weird behaviour with euality
 
 	`ifdef DEBUG
 	reg [15:0] pcp;  // Current program counter for debugging

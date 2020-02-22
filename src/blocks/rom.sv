@@ -85,14 +85,14 @@ module pseudo_rom(addr, clk, q);
 	input  wire [AWIDTH-1:0] addr;
 	output reg [WIDTH-1:0] q;
 	
-	initial $display("Initialising ROM Memory: %s", PROGRAM);
+	initial begin
+		$display("Initialising ROM Memory: %s", PROGRAM);
+		if (BINARY==1) $readmemb(PROGRAM, rom);
+		else $readmemh(PROGRAM, rom);
+	end
 	
 	reg [AWIDTH-1:0] addr0;
 	logic [WIDTH-1:0] rom [NUMWORDS:0];
-	initial begin
-		if(BINARY==0) $readmemh(PROGRAM, rom);
-		else $readmemb(PROGRAM, rom);
-	end
 	always_ff@(posedge clk) addr0 <= addr; 	
 	assign q = rom[addr0];
 
@@ -136,16 +136,16 @@ module rom (
 	end
 	//always_ff@(posedge clock) q <= qn;
 
+	m9k_rom#({PROGRAM, "_0.mif"}, "rom0") rom0(addr0, clock, q0);
+	m9k_rom#({PROGRAM, "_1.mif"}, "rom1") rom1(addr1, clock, q1);
+	m9k_rom#({PROGRAM, "_2.mif"}, "rom2") rom2(addr2, clock, q2);
+	m9k_rom#({PROGRAM, "_3.mif"}, "rom3") rom3(addr3, clock, q3);
 	`ifdef SYNTHESIS
-		m9k_rom#({PROGRAM, "_0.mif"}, "rom0") rom0(addr0, clock, q0);
-		m9k_rom#({PROGRAM, "_1.mif"}, "rom1") rom1(addr1, clock, q1);
-		m9k_rom#({PROGRAM, "_2.mif"}, "rom2") rom2(addr2, clock, q2);
-		m9k_rom#({PROGRAM, "_3.mif"}, "rom3") rom3(addr3, clock, q3);
 	`else
-		pseudo_rom#({PROGRAM, "_0.mem"}) rom0(addr0, clock, q0);
-		pseudo_rom#({PROGRAM, "_1.mem"}) rom1(addr1, clock, q1);
-		pseudo_rom#({PROGRAM, "_2.mem"}) rom2(addr2, clock, q2);
-		pseudo_rom#({PROGRAM, "_3.mem"}) rom3(addr3, clock, q3);
+		//pseudo_rom#({PROGRAM, "_0"}) rom0(addr0, clock, q0);
+		//pseudo_rom#({PROGRAM, "_1"}) rom1(addr1, clock, q1);
+		//pseudo_rom#({PROGRAM, "_2"}) rom2(addr2, clock, q2);
+		//pseudo_rom#({PROGRAM, "_3"}) rom3(addr3, clock, q3);
 		// Currently read address (for debugging)
 		reg [11:0] ff_addr;
 		always_ff@(posedge clock) ff_addr <= address;

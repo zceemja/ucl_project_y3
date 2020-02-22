@@ -30,7 +30,7 @@ module oisc8_cpu(processor_port port);
 	sys_sp#("REG1", `DWIDTH) sys_reg1(reg1);
 	`endif
 
-	pc_block#(.PROGRAM("../../memory/oisc8.text")) pc0(bus0.port, bus0.iport);
+	pc_block#(.PROGRAM({`ROMDIR, "oisc8.text"})) pc0(bus0.port, bus0.iport);
 	alu_block alu0(bus0.port);
 	mem_block ram0(bus0.port, port);
 	oisc_com_block com0(bus0.port, port);
@@ -85,6 +85,11 @@ module mem_block(IBus.port bus, processor_port port);
 			.wr(w2)
 	);
 	
+	`ifdef DEBUG
+	sys_sp#("MEMP", 24) sys_memp(pointer);
+	sys_sp#("MEMC", 16) sys_memc(cached);
+	`endif
+	
 	PortInput#(.ADDR(MEMSWLO)) p_mem0sw(.bus(bus),.data_from_bus(data[7:0]),.wr(wd0));	
 	PortInput#(.ADDR(MEMSWHI)) p_mem1sw(.bus(bus),.data_from_bus(data[15:8]),.wr(wd1));
     
@@ -114,6 +119,10 @@ module mem_block(IBus.port bus, processor_port port);
 			if(st_push_en|st_pop_en) stp <= stpp;
 		end
 	end
+	
+	`ifdef DEBUG
+	sys_sp#("STP", 16) sys_stp(stp);
+	`endif
 
 	PortInput#(.ADDR(STACK)) p_push(
 		.bus(bus),

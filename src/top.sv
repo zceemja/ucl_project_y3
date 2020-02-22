@@ -91,9 +91,9 @@ module top(
 	wire  		ram_rd_ack;
 	
 	`ifdef OISC
-	ram#("../../memory/oisc8.data") 
+	ram#({`RAMDIR, "oisc8.data"}) 
 	`elsif
-	ram#("../../memory/risc8.data") 
+	ram#({`RAMDIR, "risc8.data"}) 
 	`endif
 	ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	
@@ -255,7 +255,7 @@ module top_tb;
 			//KEY[1] = 0;
 			//#5us;
 			//KEY[1] = 1;
-			#300us;
+			#10us;
 			$stop;
 	end
 	initial forever #10ns CLK50 = ~CLK50;
