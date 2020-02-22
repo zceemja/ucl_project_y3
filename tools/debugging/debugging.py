@@ -73,7 +73,6 @@ def memeditor(w, q, hw, dev, mem):
     except INSYS_MEM_ERROR as e:
         error = e.args[0]
     except curses.error:
-        trace = traceback.format_exc()
         error = 'Terminal window is too small'
     finally:
         try:
@@ -266,6 +265,11 @@ def memedit_window(w, q, hw, dev, mem):
         elif key == ord('r'):
             if selected in moded:
                 del moded[selected]
+        elif key == ord('s'):
+            for i, val in moded.items():
+                data[i] = val
+            content = ''.join(list(reversed(data)))
+            q.write_content_to_memory(mem_index, 0, depth, content)
         elif key in {curses.KEY_ENTER, ord('\n')}:
             row = selected//cols
             col = selected - cols*row
