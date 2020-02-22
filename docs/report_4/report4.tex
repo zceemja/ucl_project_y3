@@ -1,0 +1,313 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{newunicodechar}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage{svg}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{chngcntr}
+\usepackage{longtable}
+\usepackage{xcolor,colortbl}
+\usepackage{pdfpages}
+%
+\counterwithin{figure}{subsection}
+\usepackage{multicol} 
+
+\setcounter{tocdepth}{3}
+
+
+\begin{document}
+	
+	\begin{titlepage}
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+		\begin{tikzpicture}[remember picture, overlay]
+		\node [anchor=north east, inner sep=0pt]  at (current page.north east)
+		{\includegraphics[width=21cm]{graphics/ucl-banner-dl-port-outline.eps}};
+		\end{tikzpicture}\\[3cm]
+		\center
+		
+		\textsc{\Large University College London}\\[0.5cm]
+		\textsc{\large Department of Electronic and Electrical Engineering}\\[0.5cm]
+		
+		\HRule \\[0.4cm]
+		\setstretch{1.5}
+		{ \huge \bfseries Project Progress Report No. 4}\\[0.4cm]
+		\setstretch{1.0}
+		\HRule \\[1.0cm]
+		
+		\Large \emph{Author:}\\
+		Minduagas \textsc{Jarmolovičius}\\
+		\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+		
+		\Large \emph{Supervisor:}\\
+		Prof. Robert \textsc{Killey}\\
+		\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+		\vfill
+		
+		{\large February  16, 2020}\\[2cm]
+		
+	\end{titlepage}
+	
+\pagebreak
+	
+\section{Progress}
+
+\subsection{Completed OISC implementation}
+In this section brief OISC implementation will be described.
+
+OISC machine code is stored in 13bits instructions that compose 1 bit that indicates if source is immediate value, 4 bits for destination address, 8 bits for source address or immediate value. This been shown in diagram below:
+
+\definecolor{c1}{HTML}{ff7568} 
+\definecolor{c2}{HTML}{8cbfff} 
+\definecolor{c3}{HTML}{a6ddb7} 
+\begin{gather*}
+\scalebox{0.8}{bit index:}
+\underbrace{\colorbox{c1}{0}}_\text{imm.}
+\underbrace{
+	\colorbox{c2}{1}\,
+	\colorbox{c2}{2}\,
+	\colorbox{c2}{3}\,
+	\colorbox{c2}{4}\,
+}_\text{destination}
+\underbrace{
+	\colorbox{c3}{5}\,
+	\colorbox{c3}{6}\,
+	\colorbox{c3}{7}\,
+	\colorbox{c3}{8}\,
+	\colorbox{c3}{9}\,
+	\colorbox{c3}{10}\,
+	\colorbox{c3}{11}\,
+	\colorbox{c3}{12}
+}_\text{source}
+\end{gather*} 
+
+Such design been chosen to match RISC's small instructions design. Tables \ref{table:oisc_dst_instr} and \ref{table:oisc_src_instr} describes currently implemented OISC source and destination addresses.
+
+\arrayrulecolor{black}
+\begin{longtable}[h!]{| l | p{.85\textwidth} | }	
+	\hline 
+	\rowcolor[rgb]{0.82,0.82,0.82}
+	Name & Description \\\hline
+	\endhead		
+
+	\endfoot
+	
+	ALU0 & Store value in ALU input A register\\\hline
+	ALU1 & Store value in ALU input B register\\\hline
+	BRPT0 & Store value in branch pointer lower byte register\\\hline
+	BRPT1 & Store value in branch pointer higher byte register\\\hline
+	BRZ & Set program counter to branch pointer if value is 0x00\\\hline
+	STACK & Push value to stack\\\hline
+	MEMPT0 & Store value in memory pointer lower byte register\\\hline
+	MEMPT1 & Store value in memory pointer middle byte register\\\hline
+	MEMPT2 & Store value in memory pointer higher byte register\\\hline
+	MEMHI & Store higher byte in memory at address stored in memory pointer\\\hline
+	MEMLO & Store lower byte in memory at address stored in memory pointer\\\hline
+	COMA & Store value to communication block address register\\\hline
+	COMD & Send instruction to communication block with address specified in COMA and data as a source\\\hline	
+	REG0 & Store value in general purpose register 0\\\hline	
+	REG1 & Store value in general purpose register 1\\\hline
+	
+	\caption{Destination registers for OISC processor.}
+	\label{table:oisc_dst_instr}
+\end{longtable}	
+
+\arrayrulecolor{black}
+\begin{longtable}[h!]{| l | p{.90\textwidth} | }	
+	\hline 
+	\rowcolor[rgb]{0.82,0.82,0.82}
+	Name & Description \\\hline
+	\endhead		
+	
+	\endfoot
+	
+	NULL & Always returns 0x00\\\hline
+	ALU0 & Returns value stored in ALU input A register\\\hline
+	ALU1 & Returns value stored in ALU input B register\\\hline
+	ADD  & Returns ALU input A added with input B\\\hline
+	ADC  & Returns ALU input A added with input B with carry from previous time ADD or ADC been used\\\hline
+	ADDC & Returns carry bit from previous time ADD or ADC was used\\\hline
+	SUB  & Returns ALU input A subtracted input B\\\hline
+	SBC  & Returns ALU input A subtracted input B with carry from previous time SUB or SBC been used\\\hline
+	SUBC & Returns carry bit from previous time SUB or SBC source was use\\\hline
+	AND  & Returns ALU input A AND gated with input B\\\hline
+	OR   & Returns ALU input A OR gated with input B\\\hline
+	XOR  & Returns ALU input A XOR gated with input B\\\hline
+	SLL  & Returns ALU input A shifted left by input B (only least significant 3bits)\\\hline
+	SRL  & Returns ALU input A shifted right by input B (only least significant 3bits)\\\hline
+	ROL  & Returns rolled off "reminder" from last time SLL was used\\\hline
+	ROR  & Returns rolled off "reminder" from last time SRL was used\\\hline
+	EQ   & Returns 0x01 if ALU input A is equals to input B, otherwise returns 0x00\\\hline
+	NE   & Returns 0x01 if ALU input A is not equals to input B, otherwise returns 0x00\\\hline
+	LT   & Returns 0x01 if ALU input A is less than input B, otherwise returns 0x00\\\hline
+	GT   & Returns 0x01 if ALU input A is greater than input B, otherwise returns 0x00\\\hline
+	LE   & Returns 0x01 if ALU input A is less or equal to input B, otherwise returns 0x00\\\hline
+	GE   & Returns 0x01 if ALU input A is greater or equal to input B, otherwise returns 0x00\\\hline
+	MULLO& Returns ALU input A multiplied with input B, lower byte\\\hline
+	MULHI& Returns ALU input A multiplied with input B, higher byte\\\hline
+	DIV  & Returns ALU input A divided by input B\\\hline
+	MOD  & Returns ALU input A modulus of input B\\\hline
+	BRPT0& Returns value stored in branch pointer lower byte register\\\hline
+	BRPT1& Returns value stored in branch pointer higher byte register\\\hline
+	PC0 & Returns program counter + 1, lower byte\\\hline
+	PC1 & Returns program counter + 1, higher byte\\\hline
+	MEMPT0 & Returns value stored in memory pointer lower byte register \\\hline
+	MEMPT1 & Returns value stored in memory pointer middle byte register \\\hline
+	MEMPT2 & Returns value stored in memory pointer higher byte register \\\hline
+	MEMLO & Returns lower byte from memory at memory pointer address \\\hline
+	MEMHI & Returns higher byte from memory at memory pointer address \\\hline
+	STACK & Pop value from stack\\\hline
+	STPT0 & Returns stack pointer lower byte\\\hline
+	STPT1 & Returns stack pointer higher byte\\\hline
+	
+	COMA & Returns value stored in communication block address register\\\hline
+	COMD & Requests and returns value from communication block\\\hline
+	REG0 & Returns value stored in general purpose register 0\\\hline
+	REG1 & Returns value stored in general purpose register 1\\\hline
+				
+	\caption{Source registers for OISC processor.}
+	\label{table:oisc_src_instr}
+\end{longtable}	
+
+\subsection{OISC Benchmark}
+Following functions have written in assembly for OISC:
+\begin{description}
+	\item[$\bullet$] \texttt{print\_char}: writes byte to terminal.
+	\item[$\bullet$] \texttt{read\_char}: reads byte from terminal.
+	\item[$\bullet$] \texttt{print\_bin}: prints 8bit value as binary to terminal.
+	\item[$\bullet$] \texttt{print\_hex}: prints 8bit value as hexadecimal to terminal.
+	\item[$\bullet$] \texttt{print\_u8}: prints unsigned 8bit value as digit to terminal.
+	\item[$\bullet$] \texttt{print\_u16}: prints unsigned 16bit value as digit to terminal.	
+	\item[$\bullet$] \texttt{print\_string}: prints string (until 0x00 is reached)from memory to terminal.
+	\item[$\bullet$] \texttt{mul\_u16}: Multiply 16bit numbers to produce 32bit result. Seems like easier to implement than in RISC due to possibility to use \texttt{MEMLO}/\texttt{MEMHI} instructions as general purpose registers.	
+	\item[$\bullet$] \texttt{mod\_u16}: Uses Russian Peasant multiplication to calculate 16bit modulus
+	\item[$\bullet$] \texttt{calc\_sieve}: Uses Sieve of Atkin algorithm to populate memory and mark prime numbers from 5 to 255 (up to 8bits), 16bit calculation is already started. A more memory efficient code was written comparing to RISC, it packs every number as 1bit instead of 1 memory cell (16bits)
+
+\end{description}
+
+
+\subsection{Improved assembler}
+Two new features have been added to assembler (which applies for both RISC and OISC)
+
+\subsubsection{Macros}
+Operators \texttt{\%macro} and \texttt{\%endmacro} allows to define code that can be reused multiple times.
+
+\subsubsection{Definitions}
+Operator \texttt{\%def} allows to define a variable name under local scope (inside function) so assembly code would be easier to read. Example:
+\\\\
+\texttt{
+function\_label: \quad; function name\\
+\%def \$x,REG0  \qquad; define REG0 as \$x\\
+\$x 10			\qquad\qquad; set REG0 to decimal 10 \\
+} 
+
+
+\section{Difficulties encountered}
+Multiple difficulties has been encountered:
+
+\subsection{Timing}
+There were multiple timing issues between source/destination latches/registers and common data bus. These issues were difficult to remove because initially ModelSim was running into cycling loop which did not allowed to proceed with simulation and locate issue. 
+Secondly when this was resolved and simulation worked, synthesised code on FPGA did not work causing some issues when moving data from ALU calculated location back to ALU register. This been temporary resolved by adding negative edge sensitive flip-flop to ALU inputs which results is reducing time for combinational logic to settle by two.
+
+\subsection{Memory instructions}
+While writing benchmark programs another issue has been discovered - memory instructions (read to/write from memory and push to/pop from stack) cannot be used in single instruction e.g.: \\\\
+\texttt{
+	MEMP  0x0000	\quad; macro to set memory pointer\\
+	MEMHI 0xFF		\quad; write immediate to memory high byte \\
+	STACK MEMHI		\quad; push memory high byte to stack \\
+} 
+
+This will result in unexpected result as instruction tries to read and write from memory at the same time with two different addresses, therefore it can potentially store data to a unknown address. Current work-around is to avoid such instruction combination by storing value to a temporary register. This usually does not cause extra instructions as in most cases values from memory/stack are required and stored in temporary registers anyway. 
+
+\subsection{ROM memory}
+Initial implementation of OISC stored instruction in 16bit, 2048 word configuration using M9K memory. As this was inefficient recently a decision was made to implement this using 3 M9K memory blocks with 2 instructions sliced into 3 - 9bits slices and stored in each memory block (extra bit is kept as parity check). This been successfully implemented in SystemVerilog and tested with ModelSim but still does not work with FPGA.
+
+One of the problems is representation of non-integer byte sizes and multiple file formats used for each case - ModelSim uses \texttt{\$readmemh} or \texttt{\$readmemb} functions that reads file with raw binary or hexadecimal numbers; Quartus uses "mif" format which is quite well documented and already implemented; writing into ROM without resynthesising HDL requires reversed hexadecimal format, however it is not documented how it has to be represented when memory width is not an integer byte. 
+
+Furthermore probes might be implemented to record internal processor registers by using Quartus "In-System Sources and Probes" feature. This would allow quickly debug programs and find out any other problems related to processor.
+
+\section{Failure Risk Assessment}
+There are no updates on failure risk assessment. 
+
+\section{Updated Safety Risk Assessment}
+There are no updates on safety risk assessment.
+
+\section{Help and Advice Needed}
+At this state no help is needed, and any issues and advices are sorted out and discussed in weekly supervisor meetings.
+
+\newpage
+\begin{landscape}
+	\section{Updated Schedule}
+		Table below includes project schedule. Note that a new objective has been added - \textbf{benchmarking}. This includes developing adequate methods to test and to performs these tests in order to evaluate performance of both processors on various tasks, such as time taking to execute a task, memory usage, power consumption etc.
+	\begin{table}[h!]
+		\centering
+		\begin{ganttchart}[
+			y unit title=0.4cm,
+			y unit chart=0.5cm,
+			x unit=1.1mm,
+			hgrid,
+			today=2020-02-16,
+			today label node/.append style={below=12pt},
+			today label font=\itshape\color{blue},
+			today rule/.style={draw=blue, ultra thick},
+			title height=1,
+			bar/.append style={fill=blue!50},
+			bar incomplete/.append style={fill=gray!50},
+			progress label text={$\displaystyle{#1\%}$},
+			time slot format=isodate
+			]{2019-10-01}{2020-03-31}
+			\gantttitlecalendar{year, month=shortname} \\
+			\gantttitle{40}{6}
+			\gantttitlelist{41,...,52}{7}
+			\gantttitlelist{1,...,13}{7}
+			\gantttitle{}{2} \\
+			\ganttbar[progress=100]{RISC implementation}{2019-10-01}{2019-10-27}\\
+			\ganttbar[progress=95]{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+			\ganttbar[progress=100]{UART and I/O}{2019-10-21}{2019-10-27}
+			\ganttbar[progress=100]{}{2019-11-25}{2019-12-08} \\
+			\ganttbar[progress=100]{RISC Assembler}{2019-10-14}{2019-11-11}\\
+			\ganttbar[progress=80]{Developing benchmark}{2019-11-11}{2019-12-13}
+			\ganttbar[progress=50]{}{2020-02-23}{2020-03-07} \\
+			\ganttbar[progress=100]{OISC Implementation}{2019-12-02}{2019-12-13}
+			\ganttbar[progress=100]{}{2020-01-13}{2020-02-02}\\
+			\ganttbar[progress=90]{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+			\ganttbar[progress=100]{OISC Assembler}{2020-01-20}{2020-02-09}\\
+			\ganttbar[progress=0]{Benchmarking}{2020-02-17}{2020-03-22}\\
+			\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+			\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+			\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+			\ganttmilestone{December Interim Report}{2019-12-13}\\
+			\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+			\ganttmilestone{Progress Report \#4}{2020-02-14}\\
+			\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+			\ganttmilestone{Poster Presentation}{2020-03-18}\\
+			\ganttmilestone{Final Report}{2020-03-30}
+			\ganttvrule{Reading Week}{2019-11-03}
+			\ganttvrule{}{2019-11-10}
+			\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+			\ganttvrule{}{2020-01-12}
+			\ganttvrule{Reading Week}{2020-02-17}
+			\ganttvrule{}{2020-02-23}
+		\end{ganttchart}	
+		\caption{Updated project schedule Grantt chart}
+		\label{table:time}
+	\end{table}
+\end{landscape}
+
+\end{document}
