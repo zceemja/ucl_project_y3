@@ -80,6 +80,12 @@ FORMAT_MAP = {
     'memb': ('mem',  convert_to_mem, {'binary': True}),
 }
 
+FORMAT_INPUT = [
+    "raw",
+    "bin",
+    "hex",
+]
+
 if __name__ == '__main__':
     import argparse
     import sys
@@ -93,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('-S', '--slice', type=int, default=0, help='Slice output')
     parser.add_argument('-n', '--slice_no', type=int, default=-1, help='Output only nth slice')
     parser.add_argument('-w', '--width', type=int, default=8, help='Data width in bits')
+    parser.add_argument('-i', '--input_format', choices=FORMAT_INPUT, default='raw', help='Input format')
     parser.add_argument('-t', '--output_type', choices=list(FORMAT_MAP.keys()), default='mem', help='Output type')
 
     args = parser.parse_args(sys.argv[1:])
@@ -114,7 +121,13 @@ if __name__ == '__main__':
         mkdir(output_dir)
 
     ifile = open(args.file, 'rb')
-    binary = BitArray(ifile.read())
+    if args.input_format == 'bin':
+        binary = BitArray(bin=ifile.read().decode(encoding='ascii', errors='ignore'))
+    elif args.input_format == 'hex':
+        binary = BitArray(hex=ifile.read().decode(encoding='ascii', errors='ignore'))
+    else:
+        binary = BitArray(ifile.read())
+
     ifile.close()
 
     if args.slice > 1 and len(binary) % (args.slice*args.width) != 0:

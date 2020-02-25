@@ -1,7 +1,7 @@
 import curses
 import math
-from debugging.quartus_tcl import QuartusTCL, INSYS_SPI_ERROR, INSYS_MEM_ERROR, QUATUS_TCL_TIMEOUT
-
+from quartus_tcl import INSYS_SPI_ERROR, INSYS_MEM_ERROR, QuartusTCL, QUATUS_TCL_TIMEOUT
+from . import oisc8asm
 
 def render_list(w, items, offset=3):
     selected = 0
@@ -66,7 +66,6 @@ def read_probes(ps, q, pren):
 
 
 def memeditor(w, q, hw, dev, mem):
-    import traceback
     error = None
     try:
         memedit_window(w, q, hw, dev, mem)
@@ -305,6 +304,20 @@ def memedit_window(w, q, hw, dev, mem):
             return
 
 
+def oisc_comments(probe, value):
+    try:
+        data = int(value[0], 16)
+    except ValueError:
+        return None
+    except IndexError:
+        return None
+
+    if probe == "INST":
+        val = oisc8asm.asmc.decompile([data]).split('\n')[0]
+        return val
+    return None
+
+
 def debugging_window(w, q, hw, dev, ps, mem, pren):
     w.addstr(3, 0, "      Probes:", curses.color_pair(2) | curses.A_BOLD)
     w.clrtoeol()
@@ -315,6 +328,7 @@ def debugging_window(w, q, hw, dev, ps, mem, pren):
     profile = False
     ps_map = {name: (i, src_width, prb_width) for i, src_width, prb_width, name in ps}
     if pren and 'RST' in ps_map and 'CLKD' in ps_map and 'MCLK' in ps_map:
+        ## This is oisc
         profile = True
         q.write_source_data(ps_map['RST'][0], '1')
         q.write_source_data(ps_map['CLKD'][0], '1')
@@ -339,6 +353,10 @@ def debugging_window(w, q, hw, dev, ps, mem, pren):
                         w.addstr(d, mode)
                     if di < len(data) - 1:
                         w.addstr('|', mode)
+                if profile:
+                    comment = oisc_comments(name, data)
+                    if comment is not None:
+                        w.addstr(' ' + comment, curses.color_pair(1))
                 w.clrtoeol()
                 index += 1
             # <index> <depth> <width> <read/write mode> <instance type> <instance name>
@@ -492,17 +510,5 @@ def main(w):
         break
     q.disconnect()
 
-
-if __name__ == '__main__':
-    print_last = ""
-    try:
-        curses.wrapper(main)
-        # q = QuartusTCL()
-        # q.list_devices()
-        # q.disconnect()
-    except KeyboardInterrupt:
-        print('Interrupt!')
-    except curses.error as e:
-        print('Failed to start curses: ' + e.args[0])
     # except Exception as e:
     #     print("Unexpected error:" + e.args[0])
