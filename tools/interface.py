@@ -1,7 +1,8 @@
 import curses
 import math
 from quartus_tcl import INSYS_SPI_ERROR, INSYS_MEM_ERROR, QuartusTCL, QUATUS_TCL_TIMEOUT
-from . import oisc8asm
+import oisc8asm
+
 
 def render_list(w, items, offset=3):
     selected = 0
@@ -266,7 +267,7 @@ def memedit_window(w, q, hw, dev, mem):
                 del moded[selected]
         elif key == ord('s'):
             for i, val in moded.items():
-                data[i] = val
+                data[i] = str(val)
             content = ''.join(list(reversed(data)))
             q.write_content_to_memory(mem_index, 0, depth, content)
         elif key in {curses.KEY_ENTER, ord('\n')}:
@@ -306,14 +307,18 @@ def memedit_window(w, q, hw, dev, mem):
 
 def oisc_comments(probe, value):
     try:
-        data = int(value[0], 16)
+        hexdata = value[0]
+        if len(hexdata) % 2 == 1:
+            hexdata = "0" + hexdata
+        data = bytes.fromhex(hexdata)
     except ValueError:
         return None
     except IndexError:
         return None
 
     if probe == "INST":
-        val = oisc8asm.asmc.decompile([data]).split('\n')[0]
+        val = oisc8asm.asmc.decompile(data).split('\n')[0]
+        val = ' '.join(list(filter(None, val.split(' ')))[1:3])
         return val
     return None
 
@@ -466,6 +471,7 @@ def main(w):
             reprint_header(w, q, hw, dev)
             w.addstr(3, 2, "Checking device in-system sources and probes..")
             w.refresh()
+            cont_flag = False
             try:
                 spis = q.get_insystem_source_probe_instance_info(dev, hw)
                 w.addstr(3, 2, f"Found {len(spis)} source/probe instances..")
@@ -473,9 +479,16 @@ def main(w):
             except INSYS_SPI_ERROR as e:
                 w.addstr(3, 2, "ERROR: ", curses.color_pair(4) | curses.A_BOLD)
                 w.addstr(e.message, curses.color_pair(4))
+                cont_flag = True
                 spis = []
             w.refresh()
             w.addstr(4, 2, "Checking device in-system memory..")
+            # Attemt to close previous connections
+            try:
+                q.end_memory_edit()
+            except INSYS_MEM_ERROR:
+                pass
+
             try:
                 mems = q.get_editable_mem_instances(dev, hw)
                 w.addstr(4, 2, f"Found {len(mems)} memory instances..")
@@ -483,6 +496,7 @@ def main(w):
             except INSYS_MEM_ERROR as e:
                 w.addstr(4, 2, "ERROR: ", curses.color_pair(4) | curses.A_BOLD)
                 w.addstr(e.message, curses.color_pair(4))
+                cont_flag = True
                 mems = []
             w.refresh()
             try:
@@ -492,10 +506,13 @@ def main(w):
             except INSYS_SPI_ERROR as e:
                 w.addstr(5, 2, "ERROR: ", curses.color_pair(4) | curses.A_BOLD)
                 w.addstr("Transaction setup failed: " + e.message, curses.color_pair(4))
+                cont_flag = True
                 pren = False
             w.refresh()
-            w.addstr(6, 4, "Press any key to start..", curses.color_pair(1))
-            w.getch()
+            if cont_flag:
+                w.addstr(6, 4, "Press any key to start..", curses.color_pair(1))
+                w.refresh()
+                w.getch()
             debugging_window(w, q, hw, dev, spis, mems, pren)
             try:
                 if pren:
