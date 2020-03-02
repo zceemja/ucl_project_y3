@@ -1,3 +1,4 @@
+`include "../const.sv"
 
 module m9k_ram (
 	address,
@@ -8,8 +9,9 @@ module m9k_ram (
 	
 	parameter PROGRAM = "";
 	parameter NAME="";
+	parameter DEPTH=`RAM_SIZE;
 	
-	input	[11:0]  address;
+	input	[$clog2(DEPTH)-1:0]  address;
 	input	  clock;
 	input	[15:0]  data;
 	input	  wren;
@@ -58,27 +60,29 @@ module m9k_ram (
 		altsyncram_component.intended_device_family = "Cyclone IV E",
 		altsyncram_component.lpm_hint = {"ENABLE_RUNTIME_MOD=YES,INSTANCE_NAME=", NAME},
 		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 4096,
+		altsyncram_component.numwords_a = DEPTH,
 		altsyncram_component.operation_mode = "SINGLE_PORT",
 		altsyncram_component.outdata_aclr_a = "NONE",
 		altsyncram_component.outdata_reg_a = "UNREGISTERED",
 		altsyncram_component.power_up_uninitialized = "FALSE",
 		altsyncram_component.ram_block_type = "M9K",
 		altsyncram_component.read_during_write_mode_port_a = "DONT_CARE",
-		altsyncram_component.widthad_a = 12,
+		altsyncram_component.widthad_a = $clog2(DEPTH),
 		altsyncram_component.width_a = 16,
 		altsyncram_component.width_byteena_a = 1;
 endmodule
 
 module pseudo_ram(addr, clk, data, wren, rden, q);
 	
-	input [11:0] addr;
+	parameter PROGRAM = "";
+	parameter DEPTH=`RAM_SIZE;
+
+	input [$clog2(DEPTH)-1:0] addr;
 	input clk, wren, rden;
 	input [15:0] data;
 	output reg [15:0] q;
-	parameter PROGRAM = "";
 	
-	reg [15:0] memory [4095:0];
+	reg [15:0] memory [DEPTH-1:0];
 	initial if(PROGRAM != "") begin
 			$readmemh({PROGRAM, ".mem"}, memory);
 			$display({"Initialising RAM Memory: ", PROGRAM, ".mem"});
@@ -94,17 +98,18 @@ endmodule
 
 
 module ram(address, clk, data, wren, rden, q);
+	parameter PROGRAM = "";
+	parameter DEPTH=`RAM_SIZE;
 
-	input [11:0] address;
+	input [$clog2(DEPTH)-1:0] address;
 	input clk, wren, rden;
 	input [15:0] data;
 	output [15:0] q;
-	parameter PROGRAM = "";
 	
 	`ifdef SYNTHESIS
-		m9k_ram#(PROGRAM, "ram0") ram0(address, clk, data, wren, q);
+		m9k_ram#(PROGRAM, "ram0", DEPTH) ram0(address, clk, data, wren, q);
 	`else
-		pseudo_ram#(PROGRAM) ram0(address, clk, data, wren, rden, q);
+		pseudo_ram#(PROGRAM, DEPTH) ram0(address, clk, data, wren, rden, q);
 	`endif
 
 endmodule

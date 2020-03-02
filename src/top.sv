@@ -95,7 +95,7 @@ module top(
 	`elsif
 	ram#({`RAMDIR, "risc8.data"}) 
 	`endif
-	ram_block0(ram_addr[11:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
+	ram_block0(ram_addr[$clog2(`RAM_SIZE)-1:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	
 	`ifdef DEBUG
 		reg[23:0] ram_addr_rd_pr, ram_addr_wr_pr;
