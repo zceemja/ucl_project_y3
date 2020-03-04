@@ -1,0 +1,160 @@
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{newunicodechar}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage{svg}
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{chngcntr}
+\usepackage{longtable}
+\usepackage{xcolor,colortbl}
+\usepackage{pdfpages}
+%
+\counterwithin{figure}{subsection}
+\usepackage{multicol} 
+
+\setcounter{tocdepth}{3}
+
+
+\begin{document}
+	
+	\begin{titlepage}
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+		\begin{tikzpicture}[remember picture, overlay]
+		\node [anchor=north east, inner sep=0pt]  at (current page.north east)
+		{\includegraphics[width=21cm]{graphics/ucl-banner-dl-port-outline.eps}};
+		\end{tikzpicture}\\[3cm]
+		\center
+		
+		\textsc{\Large University College London}\\[0.5cm]
+		\textsc{\large Department of Electronic and Electrical Engineering}\\[0.5cm]
+		
+		\HRule \\[0.4cm]
+		\setstretch{1.5}
+		{ \huge \bfseries Project Progress Report No. 5}\\[0.4cm]
+		\setstretch{1.0}
+		\HRule \\[1.0cm]
+		
+		\Large \emph{Author:}\\
+		Minduagas \textsc{Jarmolovičius}\\
+		\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\[0.5cm]
+		
+		\Large \emph{Supervisor:}\\
+		Prof. Robert \textsc{Killey}\\
+		\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+		\vfill
+		
+		{\large Match  2, 2020}\\[2cm]
+		
+	\end{titlepage}
+	
+\pagebreak
+	
+\section{Progress}
+Over past 2 weeks following were completed:
+\subsection{Prime numbers}
+Almost completed OISC program to calculate and efficiently store prime numbers up to 16bit, also print all of them to the terminal. Only missing loop to remove square numbers.
+
+\subsection{Debugging interface}
+Written debugging interface that can access verilog implemented probes and sources, as well as read and modify memory (RAM and instruction ROM) on working processor via JTAG. This enables to see internal processor state, control clock and after each step view changes in memory.
+
+\subsection{Benchmarking plan}
+Following benchmarks been designed to be completed until the end of project:
+\begin{description}
+	\item[$\bullet$] Compare used LUL and registers between different blocks processor parts for both processors.
+	\item[$\bullet$] Measure power consumption in order to estimate average energy per instruction.
+	\item[$\bullet$] Do program simulation to find characteristic of instructions been executed on different tasks e.g. see most commonly executed instructions on 16bit division, multiplication, 
+	modulus, prime number calculator.	
+	\item[$\bullet$] Measure time that takes each task mentioned above to execute.
+	\item[$\bullet$] If there will be enough time - test both processors critical path and estimate/test maximum frequency.
+\end{description}
+
+
+
+\section{Difficulties encountered}
+Minor difficulties with time management.
+
+\section{Failure Risk Assessment}
+There are no updates on failure risk assessment. 
+
+\section{Updated Safety Risk Assessment}
+There are no updates on safety risk assessment.
+
+\section{Help and Advice Needed}
+At this state no help is needed, and any issues and advices are sorted out and discussed in weekly supervisor meetings.
+
+\newpage
+\begin{landscape}
+	\section{Updated Schedule}
+	\begin{table}[h!]
+		\centering
+		\begin{ganttchart}[
+			y unit title=0.4cm,
+			y unit chart=0.5cm,
+			x unit=1.1mm,
+			hgrid,
+			today=2020-03-02,
+			today label node/.append style={below=12pt},
+			today label font=\itshape\color{blue},
+			today rule/.style={draw=blue, ultra thick},
+			title height=1,
+			bar/.append style={fill=blue!50},
+			bar incomplete/.append style={fill=gray!50},
+			progress label text={$\displaystyle{#1\%}$},
+			time slot format=isodate
+			]{2019-10-01}{2020-03-31}
+			\gantttitlecalendar{year, month=shortname} \\
+			\gantttitle{40}{6}
+			\gantttitlelist{41,...,52}{7}
+			\gantttitlelist{1,...,13}{7}
+			\gantttitle{}{2} \\
+			\ganttbar[progress=100]{RISC implementation}{2019-10-01}{2019-10-27}\\
+			\ganttbar[progress=95]{RISC Optimisations}{2019-10-27}{2019-11-25}\\
+			\ganttbar[progress=100]{UART and I/O}{2019-10-21}{2019-10-27}
+			\ganttbar[progress=100]{}{2019-11-25}{2019-12-08} \\
+			\ganttbar[progress=100]{RISC Assembler}{2019-10-14}{2019-11-11}\\
+			\ganttbar[progress=100]{Developing benchmark}{2019-11-11}{2019-12-13}
+			\ganttbar[progress=95]{}{2020-02-23}{2020-03-07} \\
+			\ganttbar[progress=100]{OISC Implementation}{2019-12-02}{2019-12-13}
+			\ganttbar[progress=100]{}{2020-01-13}{2020-02-02}\\
+			\ganttbar[progress=100]{OISC Optimisations}{2020-02-02}{2020-02-23}\\
+			\ganttbar[progress=100]{OISC Assembler}{2020-01-20}{2020-02-09}\\
+			\ganttbar[progress=20]{Benchmarking}{2020-02-17}{2020-03-22}\\
+			\ganttmilestone{Project Proposal finalised}{2019-10-14}\\
+			\ganttmilestone{Progress Report \#1}{2019-11-04}\\
+			\ganttmilestone{Progress Report \#2}{2019-11-25}\\
+			\ganttmilestone{December Interim Report}{2019-12-13}\\
+			\ganttmilestone{Progress Report \#3}{2020-01-20}\\
+			\ganttmilestone{Progress Report \#4}{2020-02-17}\\
+			\ganttmilestone{Progress Report \#5}{2020-03-02}\\
+			\ganttmilestone{Poster Presentation}{2020-03-18}\\
+			\ganttmilestone{Final Report}{2020-03-30}
+			\ganttvrule{Reading Week}{2019-11-03}
+			\ganttvrule{}{2019-11-10}
+			\ganttvrule[vrule label node/.append style={anchor=north west}]{Holidays}{2019-12-13}
+			\ganttvrule{}{2020-01-12}
+			\ganttvrule{Reading Week}{2020-02-17}
+			\ganttvrule{}{2020-02-23}
+		\end{ganttchart}	
+		\caption{Updated project schedule Grantt chart}
+		\label{table:time}
+	\end{table}
+\end{landscape}
+
+\end{document}
