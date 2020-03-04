@@ -308,6 +308,7 @@ class Compiler:
         else:
             args = line_args[1]
         instr_name = line_args[0].lower()
+        instr_nameCS = line_args[0]
 
         # Builtin instructions
         if instr_name == 'db':
@@ -361,8 +362,12 @@ class Compiler:
                     raise CompilingError(f"Previous error")
             return scope
 
-        if scope + '.' + instr_name in self.labels:
-            instr_name = self.labels[scope + '.' + instr_name]  # replace with definition
+        dscope = scope + '.' if scope else ''
+        if dscope + instr_name in self.labels:
+            instr_name = self.labels[dscope + instr_name]  # replace with definition
+
+        if dscope + instr_nameCS in self.labels:
+            instr_name = self.labels[dscope + instr_nameCS]  # replace with definition
 
         if instr_name not in self.instr_db:
             raise CompilingError(f"Instruction '{instr_name}' not recognised!")
@@ -370,8 +375,11 @@ class Compiler:
         # replace args with %def
         ops = args2operands(args)
         for i, arg in enumerate(ops):
-            if scope + '.' + arg in self.labels:
-                ops[i] = self.labels[scope + '.' + arg]
+            if dscope + arg in self.labels:
+                val = self.labels[dscope + arg]
+                if isinstance(val, bytes):
+                    val = '0x' + val.hex()
+                ops[i] = val
         args = ','.join(ops)
 
         instr_obj = self.instr_db[instr_name.lower()]
@@ -440,6 +448,8 @@ class Compiler:
                                     s.depth = int(val)
                                 if key == 'width':
                                     s.width = int(val)
+                                if key == 'length':
+                                    s.length = int(val)
                             # m = secs_re.match(line_args[2])
                             # if m is not None:
                             #     g = m.groups()

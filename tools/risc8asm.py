@@ -73,91 +73,92 @@ asmc.add_instr(compiler.Instruction('RJUMP', '1111_1100', 2))
 asmc.add_instr(compiler.Instruction('RBWI ', '1111_1101'))
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Assembly compiler', add_help=True)
-    parser.add_argument('file', help='Files to compile')
-    parser.add_argument('-t', '--output_type', choices=['bin', 'mem', 'binary', 'mif', 'uhex'], default='mem',
-                        help='Output type')
-    parser.add_argument('-S', '--slice', default=-1, type=int, help='Slice output for section')
-    parser.add_argument('-o', '--output', help='Output directory')
-    parser.add_argument('-f', '--force', action='store_true', help='Force override output file')
-    parser.add_argument('-s', '--stdout', action='store_true', help='Print to stdout')
-    parser.add_argument('-D', '--decompile', action='store_true', help='Print decompiled')
-    parser.add_argument('section', help='Section')
-    args = parser.parse_args(sys.argv[1:])
-    if not path.isfile(args.file):
-        print(f'No file {args.file}!')
-        sys.exit(1)
-
-    output_dir = args.output or path.dirname(args.file)
-    if not path.exists(output_dir):
-        mkdir(output_dir)
-
-    if args.output_type == 'mem':
-        ext = '.mem'
-    elif args.output_type == 'bin':
-        ext = '.bin'
-    elif args.output_type == 'mif':
-        ext = '.mif'
-    elif args.output_type == 'uhex':
-        ext = '.uhex'
-    else:
-        ext = '.out'
-    bname = path.basename(args.file).rsplit('.', 1)[0]
-
-    sformat = f'01d'
-    outputs = []
-    if args.slice > 0:
-        sformat = f'0{int(math.log10(args.slice)) + 1}d'
-        for i in range(0, args.slice):
-            outputs.append(path.join(output_dir,f'{bname}{args.section}_{format(i, sformat)}{ext}'))
-    else:
-        outputs = [path.join(output_dir, bname + args.section + ext)]
-    if not args.stdout and not args.force:
-        for output in outputs:
-            if path.isfile(output):
-                print(f'Output file already exists {output}!')
-                sys.exit(1)
-
-    data = asmc.compile_file(args.file)
-    if data is not None:
-        section = args.section
-        if section in data:
-            width, length, size, bdata = data[section]
-            asize = len(bdata)
-            if size > 0:
-                bdataf = bdata + (size - len(bdata)) * bytearray(b'\x00')
-            else:
-                bdataf = bdata
-
-            for i, output in enumerate(outputs):
-
-                y = bdataf[i::len(outputs)]
-                if args.output_type == 'binary':
-                    x = compiler.convert_to_binary(y)
-                elif args.output_type == 'mem':
-                    x = compiler.convert_to_mem(y, width=width)
-                elif args.output_type == 'mif':
-                    x = compiler.convert_to_mif(y, width=width, depth=len(y)/width)
-                elif args.output_type == 'uhex':
-                    x = compiler.convert_to_mem(y, width=width, uhex=True)
-                else:
-                    x = bytes(y)
-
-                op = 'Printing' if args.stdout else 'Saving'
-                print(f"{op} {args.output_type} {section} data '{output}' [Size: {len(y)}B Slice: {format(i + 1, sformat)}/{len(outputs)}]")
-                if args.stdout:
-                    if args.decompile:
-                        print(asmc.decompile(bdata))
-                    else:
-                        print(x.decode())
-                else:
-                    with open(output, 'wb') as of:
-                        of.write(x)
-
-            print(f"Total {section} size: {len(bdata)/len(bdataf)*100:.1f}% [{len(bdata)}B/{len(bdataf)}B]")
-        else:
-            print(f'No such section {section}!')
-    else:
-        print(f'Failed to compile {args.file}!')
-        sys.exit(1)
-    sys.exit(0)
+    compiler.main(asmc)
+    # parser = argparse.ArgumentParser(description='Assembly compiler', add_help=True)
+    # parser.add_argument('file', help='Files to compile')
+    # parser.add_argument('-t', '--output_type', choices=['bin', 'mem', 'binary', 'mif', 'uhex'], default='mem',
+    #                     help='Output type')
+    # parser.add_argument('-S', '--slice', default=-1, type=int, help='Slice output for section')
+    # parser.add_argument('-o', '--output', help='Output directory')
+    # parser.add_argument('-f', '--force', action='store_true', help='Force override output file')
+    # parser.add_argument('-s', '--stdout', action='store_true', help='Print to stdout')
+    # parser.add_argument('-D', '--decompile', action='store_true', help='Print decompiled')
+    # parser.add_argument('section', help='Section')
+    # args = parser.parse_args(sys.argv[1:])
+    # if not path.isfile(args.file):
+    #     print(f'No file {args.file}!')
+    #     sys.exit(1)
+    #
+    # output_dir = args.output or path.dirname(args.file)
+    # if not path.exists(output_dir):
+    #     mkdir(output_dir)
+    #
+    # if args.output_type == 'mem':
+    #     ext = '.mem'
+    # elif args.output_type == 'bin':
+    #     ext = '.bin'
+    # elif args.output_type == 'mif':
+    #     ext = '.mif'
+    # elif args.output_type == 'uhex':
+    #     ext = '.uhex'
+    # else:
+    #     ext = '.out'
+    # bname = path.basename(args.file).rsplit('.', 1)[0]
+    #
+    # sformat = f'01d'
+    # outputs = []
+    # if args.slice > 0:
+    #     sformat = f'0{int(math.log10(args.slice)) + 1}d'
+    #     for i in range(0, args.slice):
+    #         outputs.append(path.join(output_dir,f'{bname}{args.section}_{format(i, sformat)}{ext}'))
+    # else:
+    #     outputs = [path.join(output_dir, bname + args.section + ext)]
+    # if not args.stdout and not args.force:
+    #     for output in outputs:
+    #         if path.isfile(output):
+    #             print(f'Output file already exists {output}!')
+    #             sys.exit(1)
+    #
+    # data = asmc.compile_file(args.file)
+    # if data is not None:
+    #     section = args.section
+    #     if section in data:
+    #         width, length, size, bdata = data[section]
+    #         asize = len(bdata)
+    #         if size > 0:
+    #             bdataf = bdata + (size - len(bdata)) * bytearray(b'\x00')
+    #         else:
+    #             bdataf = bdata
+    #
+    #         for i, output in enumerate(outputs):
+    #
+    #             y = bdataf[i::len(outputs)]
+    #             if args.output_type == 'binary':
+    #                 x = compiler.convert_to_binary(y)
+    #             elif args.output_type == 'mem':
+    #                 x = compiler.convert_to_mem(y, width=width)
+    #             elif args.output_type == 'mif':
+    #                 x = compiler.convert_to_mif(y, width=width, depth=len(y)/width)
+    #             elif args.output_type == 'uhex':
+    #                 x = compiler.convert_to_mem(y, width=width, uhex=True)
+    #             else:
+    #                 x = bytes(y)
+    #
+    #             op = 'Printing' if args.stdout else 'Saving'
+    #             print(f"{op} {args.output_type} {section} data '{output}' [Size: {len(y)}B Slice: {format(i + 1, sformat)}/{len(outputs)}]")
+    #             if args.stdout:
+    #                 if args.decompile:
+    #                     print(asmc.decompile(bdata))
+    #                 else:
+    #                     print(x.decode())
+    #             else:
+    #                 with open(output, 'wb') as of:
+    #                     of.write(x)
+    #
+    #         print(f"Total {section} size: {len(bdata)/len(bdataf)*100:.1f}% [{len(bdata)}B/{len(bdataf)}B]")
+    #     else:
+    #         print(f'No such section {section}!')
+    # else:
+    #     print(f'Failed to compile {args.file}!')
+    #     sys.exit(1)
+    # sys.exit(0)
