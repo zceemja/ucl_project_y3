@@ -79,7 +79,7 @@
 % Set up paper geometry
 %-------------------------------------------------------------------------------
 \makeatletter
-	\RequirePackage[a0paper,margin=\uclposter@margin]{geometry}
+	\RequirePackage[a1paper,margin=\uclposter@margin]{geometry}
 					
 	\setlength{\columnsep}{\uclposter@margin}
 \makeatother
@@ -92,12 +92,12 @@
 \pagenumbering{gobble} % remove page numbers
 
 % font size
-\renewcommand{\LARGE}{\fontsize{100}{120}\selectfont}
-\renewcommand{\Large}{\fontsize{45}{50}\selectfont}
-\renewcommand{\large}{\fontsize{35}{40}\selectfont}
-\renewcommand{\normalsize}{\fontsize{30}{35}\selectfont}
-\renewcommand{\footnotesize}{\fontsize{25}{35}\selectfont}
-\renewcommand{\small}{\fontsize{20}{23}\selectfont}
+\renewcommand{\LARGE}{\fontsize{45}{50}\selectfont}
+\renewcommand{\Large}{\fontsize{35}{40}\selectfont}
+\renewcommand{\large}{\fontsize{25}{30}\selectfont}
+\renewcommand{\normalsize}{\fontsize{20}{23}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{20}{23}\selectfont}
+\renewcommand{\small}{\fontsize{18}{20}\selectfont}
 \renewcommand{\tiny}{\fontsize{16}{18}\selectfont}
 
 % paragraph options
@@ -120,10 +120,11 @@
 %\defaultfontfeatures{Mapping=tex-text,Scale=MatchLowercase}
 %\setallmainfonts{Arial}
 
+
 %-------------------------------------------------------------------------------
 % Official colours
 %-------------------------------------------------------------------------------
-\RequirePackage{xcolor}
+\RequirePackage[table]{xcolor}
 \definecolor{UCLlightpurple}{cmyk}{0.08,0.25,0.04,0.14}
 \definecolor{UCLdarkpurple}{cmyk}{0.67,0.79,0.24,0.59}
 \definecolor{UCLpurple}{cmyk}{0.83,0.99,0.00,0.02}
@@ -149,6 +150,7 @@
 \definecolor{UCLyellow}{cmyk}{0.00,0.29,1.00,0.00}
 \definecolor{UCLwhite}{cmyk}{0.00,0.00,0.00,0.00}
 \definecolor{UCLblack}{cmyk}{0.00,0.00,0.00,1.00}
+\definecolor{UCLIoEblue}{cmyk}{0.87,0.59,0.00,0.00}
 
 %-------------------------------------------------------------------------------
 % Make title/banner
@@ -171,12 +173,24 @@
 
 \renewcommand{\maketitle}{%
 	% include banner
+
 	\AddToShipoutPicture*{%
-		\put(0,0){\parbox[b][\paperheight]{\paperwidth}{%
+	\put(0,0){%
+		\parbox[b][\paperheight]{\paperwidth}{%
+			\vfill
+			\centering
+			\includegraphics[width=\paperwidth,height=\paperheight,%
+			keepaspectratio]{background.jpg}%
+			\vfill
+		}
+	}
+	\put(0,0){\parbox[b][\paperheight]{\paperwidth}{%
 			\uclposter@banner%
 			\vfill%
 		}}%
 	}%
+
+
 	% include title
 	\parbox[s][\uclposter@bannertextheight][s]{\uclposter@bannertextwidth}{%
 		\centering
@@ -200,12 +214,16 @@
 \RequirePackage{tikz}
 \RequirePackage{environ} % defines NewEnviron
 
+
 \makeatletter
 \newlength{\uclposter@highlightboxpad}
 \setlength{\uclposter@highlightboxpad}{0.2\uclposter@margin}
 
+
 \NewEnviron{highlightbox}[1][\uclposter@color!20!white]{%
 	\hspace*{-\uclposter@highlightboxpad}
+
+	
 	\colorbox{#1}{%
 		\hspace*{\uclposter@highlightboxpad}%
 		\begin{minipage}{\columnwidth}%
