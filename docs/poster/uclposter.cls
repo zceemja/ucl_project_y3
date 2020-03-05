@@ -93,7 +93,7 @@
 
 % font size
 \renewcommand{\LARGE}{\fontsize{45}{50}\selectfont}
-\renewcommand{\Large}{\fontsize{35}{40}\selectfont}
+\renewcommand{\Large}{\fontsize{30}{38}\selectfont}
 \renewcommand{\large}{\fontsize{25}{30}\selectfont}
 \renewcommand{\normalsize}{\fontsize{20}{23}\selectfont}
 \renewcommand{\footnotesize}{\fontsize{20}{23}\selectfont}
@@ -149,7 +149,7 @@
 \definecolor{UCLorange}{cmyk}{0.00,0.61,0.99,0.00}
 \definecolor{UCLyellow}{cmyk}{0.00,0.29,1.00,0.00}
 \definecolor{UCLwhite}{cmyk}{0.00,0.00,0.00,0.00}
-\definecolor{UCLblack}{cmyk}{0.00,0.00,0.00,1.00}
+
 \definecolor{UCLIoEblue}{cmyk}{0.87,0.59,0.00,0.00}
 
 %-------------------------------------------------------------------------------
