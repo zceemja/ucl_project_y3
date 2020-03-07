@@ -92,9 +92,9 @@
 \pagenumbering{gobble} % remove page numbers
 
 % font size
-\renewcommand{\LARGE}{\fontsize{45}{50}\selectfont}
-\renewcommand{\Large}{\fontsize{30}{38}\selectfont}
-\renewcommand{\large}{\fontsize{25}{30}\selectfont}
+\renewcommand{\LARGE}{\fontsize{40}{45}\selectfont}
+\renewcommand{\Large}{\fontsize{28}{30}\selectfont}
+\renewcommand{\large}{\fontsize{25}{28}\selectfont}
 \renewcommand{\normalsize}{\fontsize{20}{23}\selectfont}
 \renewcommand{\footnotesize}{\fontsize{20}{23}\selectfont}
 \renewcommand{\small}{\fontsize{18}{20}\selectfont}
@@ -193,15 +193,17 @@
 
 	% include title
 	\parbox[s][\uclposter@bannertextheight][s]{\uclposter@bannertextwidth}{%
-		\centering
 		\color{\uclposter@foregroundcolor}%
+		\centering
 		{\LARGE\bfseries\addfontfeature{LetterSpace=3}\@title}%
+		\\[12mm]%
 		\par\vfill%
-		{\Large\AB@authlist}%
+		{\Large Mindaugas Jarmolovi\v{c}ius}%
 		\par\vfill%
-		{\normalsize\AB@affillist}%
+		{\Large	Supervisor: Prof. Robert Killey}%
+		\\[5mm]%
 		\par\vfill%
-		{\normalsize UCL Electronic and Electrical Engineering}%
+		{\normalsize Department of Electronic \& Electrical Engineering, University College London}%
 	}%
 	\vspace{-\parskip}%
 	\vspace{2\uclposter@margin}%

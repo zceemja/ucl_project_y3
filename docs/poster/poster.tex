@@ -7,8 +7,6 @@
 
 \title{Performance characterisation of 8-bit RISC and OISC architectures}
 
-\author{Mindaugas Jarmolovicius}
-
 %\affil[1]{UCL Electronic And Electrical Engineering}
 
 \begin{document}
@@ -25,21 +23,45 @@ This is a bunch of text for introductions that describes project, what it is abo
 
 
 \begin{multicols}{2}
-	
+\definecolor{c1}{HTML}{ff7568} 
+\definecolor{c2}{HTML}{8cbfff} 
+\definecolor{c3}{HTML}{a6ddb7} 
+
 \begin{tcolorbox}[title=RISC Architecture]
 	
 	\includegraphics[width=\linewidth]{../resources/risc.eps}
 	\centering
 	\textit{Figure 1: RISC architecture general block diagram}
 	
-
+\end{tcolorbox}
+\begin{tcolorbox}[detach title]
+	\textbf{Machine code}
+	
+	\begin{gather*}
+	\scalebox{0.8}{bit index:}
+	\underbrace{
+		\colorbox{c1}{0}\,
+		\colorbox{c1}{1}\,
+		\colorbox{c1}{2}\,
+		\colorbox{c1}{3}\,
+	}_\text{op. code}
+	\underbrace{
+		\colorbox{c2}{4}\,
+		\colorbox{c2}{5}\,
+	}_\text{dst.}
+	\underbrace{
+		\colorbox{c3}{6}\,
+		\colorbox{c3}{7}\,
+	}_\text{src.}
+	\end{gather*} 
 	
 	\begin{description}
 		\item[$\bullet$] 45 Instructions
 		\item[$\bullet$] 
 	\end{description}
 
-
+\end{tcolorbox}
+\begin{tcolorbox}[detach title]
 	
 	\begin{description}
 		\item[$\bullet$] Bunch of instructions
@@ -48,6 +70,7 @@ This is a bunch of text for introductions that describes project, what it is abo
 		\item[$\bullet$] Needs optimisation.
 	\end{description}
 \end{tcolorbox}
+
 
 %\begin{highlightbox}[UCLdarkblue!20!white]
 %\end{highlightbox}
@@ -64,9 +87,6 @@ This is a bunch of text for introductions that describes project, what it is abo
 	\textit{Figure 2: OISC architecture general block diagram}
 \end{tcolorbox}
 \begin{tcolorbox}[detach title]
-	\definecolor{c1}{HTML}{ff7568} 
-	\definecolor{c2}{HTML}{8cbfff} 
-	\definecolor{c3}{HTML}{a6ddb7} 
 	\textbf{Machine code}\\
 	OISC instruction are fixed 13bit width, 1 bit to set source as immediate value, 4bits for destination address and 8bit for source or immediate.
 	\\
