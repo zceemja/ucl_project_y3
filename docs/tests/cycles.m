@@ -20,7 +20,7 @@ x_labels = [
     {'\begin{tabular}{r}\texttt{Multiply 16bit}\end{tabular}'}
 ];
 set(gca,'XTickLabel', x_labels, 'TickLabelInterpreter', 'latex')
-title("Power consumtion of implemented design on FPGA")
+title("Processor cycles per function")
 ylabel("Numer of cycles")
 xtickangle(40);
 xtips1 = [1:7] - 0.21;
@@ -47,4 +47,4 @@ er.Color = [0 0 0];
 er.LineStyle = 'none';
 set(gca,'xticklabel',{'None'; 'RISC'; 'OISC'})
 ylabel("Power (mW)")
-title("Power consumtion of implemented design on FPGA")
+title("Processor power consumtion")
