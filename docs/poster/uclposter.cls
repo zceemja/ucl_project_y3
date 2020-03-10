@@ -194,16 +194,16 @@
 	% include title
 	\parbox[s][\uclposter@bannertextheight][s]{\uclposter@bannertextwidth}{%
 		\color{\uclposter@foregroundcolor}%
-		\centering
+		\centering\hspace*{-4cm}
 		{\LARGE\bfseries\addfontfeature{LetterSpace=3}\@title}%
 		\\[12mm]%
 		\par\vfill%
-		{\Large Mindaugas Jarmolovi\v{c}ius}%
+		{\hspace*{-8cm}\Large Mindaugas Jarmolovi\v{c}ius}%
 		\par\vfill%
-		{\Large	Supervisor: Prof. Robert Killey}%
+		{\hspace*{-8cm}\Large	Supervisor: Prof. Robert Killey}%
 		\\[5mm]%
 		\par\vfill%
-		{\normalsize Department of Electronic \& Electrical Engineering, University College London}%
+		{\hspace*{-8cm}\normalsize Department of Electronic \& Electrical Engineering, University College London}%
 	}%
 	\vspace{-\parskip}%
 	\vspace{2\uclposter@margin}%
