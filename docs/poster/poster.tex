@@ -25,15 +25,15 @@
 \begin{tcolorbox}[title=Introduction]
 	\begin{Row}\begin{Cell}{2}
 	\textbf{Motivation:}\\
-	RISC (Reduced Instruction Set Computer) architecture is usually chosen over CISC (Complex Instruction Set Computer) due to simplicity and lower power consumption. This project one step further and investigates OISC (One Instruction Set Computer) MOVE variant architecture to determinate if it can achieve even better performance.
+	RISC (Reduced Instruction Set Computer) architecture is usually chosen over CISC (Complex Instruction Set Computer) due to simplicity and lower power consumption. This project goes one step further and investigates OISC (One Instruction Set Computer) MOVE variant architecture to determinate if it can achieve even better performance.
 	\end{Cell}\begin{Cell}{2}
 	\textbf{About:}\\
-	The aim of this project design 2 novel RISC and OSIC architectures with following points:
+	The aim of this project was to design two novel RISC and OSIC architectures with following points:
 	\begin{description}
 		\item[$\bullet$] Design processors such that could be used for microcontroller application (like 8-bit Atmel AVR)
 		\item[$\bullet$] Use same design criteria to make fair comparison
 		\item[$\bullet$] Implement processors on FPGA board
-		\item[$\bullet$] Design a assembly compiler and common functions
+		\item[$\bullet$] Design an assembly compiler and common functions
 	\end{description} 
 	\end{Cell}\begin{Cell}{1}
 	\textbf{Decided design criteria:}
@@ -140,7 +140,7 @@
 \end{tcolorbox}
 \begin{tcolorbox}[detach title,beforeafter skip=26pt]
 	\textbf{Machine code}\\
-	OISC instruction are fixed 13bit width, 1 bit to set source as immediate value, 4bits for destination address and 8bit for source or immediate.
+	OISC instructions are fixed 13bit width, 1 bit to set source as immediate value, 4bits for destination address and 8bit for source or immediate.
 	\\
 	\begin{gather*}
 	\scalebox{0.8}{bit index:}
@@ -272,7 +272,7 @@
 \begin{tcolorbox}[title=Conclusion]
 	\begin{description}
 		\item[$\bullet$] Processor achieved similar performance in power consumption and FPGA resources
-		\item[$\bullet$] OISC seem to be \textbf{easier} to implement and expand, easily enabling \textbf{pipelining} with hazard control implemented by software.
+		\item[$\bullet$] OISC seems to be \textbf{easier} to implement and expand, easily enabling \textbf{pipelining} with hazard control implemented by software.
 		\item[$\bullet$] OISC takes more instructions to perform same function.
 		\item[$\bullet$] OISC assembly is more difficult to write.
 		\item[$\bullet$] Further research is need to investigate benefits of multi-data-bus OISC design.
