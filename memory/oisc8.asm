@@ -169,6 +169,14 @@ sieve_arr: DBE 16
 memend: DBE 1
 
 section .text depth=3072,width=2,bin_width=13,parity=2,fill_bits=27648
+	;MEMP generalbuf2
+	;MEMP generalbuf
+	;MEMLO 0x00
+	;MEMHI 0x00
+	REG0 0xFF
+	REG1 0xFF
+	CALL print_u16
+
 	REG0 intro_text@0
 	REG1 intro_text@1
 	CALL print_string
