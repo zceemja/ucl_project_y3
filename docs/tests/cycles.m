@@ -3,24 +3,30 @@ close all
 %set(0,'DefaultTextFontname', 'CMU Serif')
 %set(0,'DefaultAxesFontName', 'CMU Serif')
 %text(0.5, 0.8, '\textsf{sans serif}','interpreter','latex')
+
+    %NaN 963;  div ffff/0001
+    %NaN 663;  div ffff/ffff
+    %NaN 598;  div 0001/ffff
+
 data = [
-    NaN 963;
-    NaN 663;
-    NaN 598;
-    618 1076;
-    59 99;
-    27 49;
-    52 55];
+    208 204
+    361 534
+    618 1076
+    59 99
+    27 49
+    52 55
+];
 grid on
 legend
-B = bar(1:7,data);
-x_labels{1} = sprintf('Divide FFFFh/0001h');
-x_labels{2} = sprintf('Divide FFFFh/FFFFh');
-x_labels{3} = sprintf('Divide 0001h/FFFFh');
-x_labels{4} = sprintf('Module FFFFh/0001h');
-x_labels{5} = sprintf('Module FFFFh/FFFFh');
-x_labels{6} = sprintf('Module 0001h/FFFFh');
-x_labels{7} = sprintf('Multiply 16bit');
+B = bar(1:length(data),data);
+x_labels = [
+    {'Print Decimal 0000h'}
+    {'Print Decimal FFFFh'}
+    {'Modulus FFFFh%0001h'}
+    {'Modulus FFFFh%FFFFh'}
+    {'Modulus 0001h%FFFFh'}
+	{'Multiply 16bit'}
+];
 set(gca,'XTickLabel', x_labels);
 %x_labels = [
     %{'\begin{tabular}{r}Divide\\FFFFh/0001h\end{tabular}'}
@@ -35,11 +41,11 @@ set(gca,'XTickLabel', x_labels);
 title("Processor cycles per function")
 ylabel("Numer of cycles")
 xtickangle(30);
-xtips1 = [1:7] - 0.21;
+xtips1 = [1:length(data)] - 0.21;
 ytips1 = B(1).YData;
 labels1 = string(B(1).YData);
 text(xtips1,ytips1,labels1,'HorizontalAlignment','center','VerticalAlignment','bottom');
-xtips2 = [1:7] + 0.21;
+xtips2 = [1:length(data)] + 0.25;
 ytips2 = B(2).YData;
 labels2 = string(B(2).YData);
 text(xtips2,ytips2,labels2,'HorizontalAlignment','center','VerticalAlignment','bottom');
