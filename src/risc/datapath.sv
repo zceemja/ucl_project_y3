@@ -65,9 +65,9 @@ module datapath8(
 					alu_rhi <= '0;
 			end else begin
 
-			if((cdi.alu_op == ALU_ADD)||(cdi.alu_op == ALU_SUB))
+			if((cdi.alu_op == ALU_ADD)|(cdi.alu_op == ALU_SUB))
 					cinr <= cout;
-			if((cdi.alu_op == ALU_MUL)||(cdi.alu_op == ALU_DIV))
+			if((cdi.alu_op == ALU_MUL)|(cdi.alu_op == ALU_DIV)|(cdi.alu_op == ALU_SL)|(cdi.alu_op == ALU_SR))
 					alu_rhi <= alu_rhit;
 			end
 	end

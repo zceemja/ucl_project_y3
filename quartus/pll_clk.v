@@ -42,6 +42,15 @@ module pll_clk (
 	c0,
 	c1,
 	c2);
+	
+	// Default parameters are for 50MHz input,
+	// CLK0 - 100MHz, CLK1 - 1MHz, CLK2 - 32kHz
+	parameter CLK0_MUL = 2;
+	parameter CLK0_DIV = 1;
+	parameter CLK1_MUL = 1;
+	parameter CLK1_DIV = 50;
+	parameter CLK2_MUL = 256;
+	parameter CLK2_DIV = 390625;
 
 	input	  areset;
 	input	  inclk0;
@@ -107,17 +116,17 @@ module pll_clk (
 				.vcounderrange ());
 	defparam
 		altpll_component.bandwidth_type = "AUTO",
-		altpll_component.clk0_divide_by = 1,
+		altpll_component.clk0_divide_by = CLK0_DIV,
 		altpll_component.clk0_duty_cycle = 50,
-		altpll_component.clk0_multiply_by = 2,
+		altpll_component.clk0_multiply_by = CLK0_MUL,
 		altpll_component.clk0_phase_shift = "0",
-		altpll_component.clk1_divide_by = 50,
+		altpll_component.clk1_divide_by = CLK1_DIV,
 		altpll_component.clk1_duty_cycle = 50,
-		altpll_component.clk1_multiply_by = 1,
+		altpll_component.clk1_multiply_by = CLK1_MUL,
 		altpll_component.clk1_phase_shift = "0",
-		altpll_component.clk2_divide_by = 390625,
+		altpll_component.clk2_divide_by = CLK2_DIV,
 		altpll_component.clk2_duty_cycle = 50,
-		altpll_component.clk2_multiply_by = 256,
+		altpll_component.clk2_multiply_by = CLK2_MUL,
 		altpll_component.clk2_phase_shift = "0",
 		altpll_component.compensate_clock = "CLK0",
 		altpll_component.inclk0_input_frequency = 20000,

@@ -52,16 +52,40 @@ module alu(
 	assign sr = signedA >>> shmt;
 	
 
-	logic isAddSub, isMulDiv;
+	logic isAddSub;
 	logic cout0, cout1, gtu, overflow0;
 	logic [2:0] overflowCK;
 	logic [WORD*2-1:0] rmul, rdiv;
 	logic [WORD-1:0] radd, rsub;
+	
+	logic [WORD-1:0] w_sllc, w_sll, w_srl, w_srlc;
+	always_comb case(shmt)
+		3'd0:    {w_sllc,w_sll} = {8'd0,a};
+		3'd1:    {w_sllc,w_sll} = {7'd0,a,1'd0};
+		3'd2:    {w_sllc,w_sll} = {6'd0,a,2'd0};
+		3'd3:    {w_sllc,w_sll} = {5'd0,a,3'd0};
+		3'd4:    {w_sllc,w_sll} = {4'd0,a,4'd0};
+		3'd5:    {w_sllc,w_sll} = {3'd0,a,5'd0};
+		3'd6:    {w_sllc,w_sll} = {2'd0,a,6'd0};
+		3'd7:    {w_sllc,w_sll} = {1'd0,a,7'd0};
+		default: {w_sllc,w_sll} =      {a,8'd0};
+	endcase
+	
+	always_comb case(shmt)
+		3'd0:    {w_srl,w_srlc} =      {a,8'd0};
+		3'd1:    {w_srl,w_srlc} = {1'd0,a,7'd0};
+		3'd2:    {w_srl,w_srlc} = {2'd0,a,6'd0};
+		3'd3:    {w_srl,w_srlc} = {3'd0,a,5'd0};
+		3'd4:    {w_srl,w_srlc} = {4'd0,a,4'd0};
+		3'd5:    {w_srl,w_srlc} = {5'd0,a,3'd0};
+		3'd6:    {w_srl,w_srlc} = {6'd0,a,2'd0};
+		3'd7:    {w_srl,w_srlc} = {6'd0,a,1'd0};
+		default: {w_srl,w_srlc} = {8'd0,a};
+	endcase
 
 	always_comb begin
 		// Flags
 		isAddSub = (op == ALU_ADD)|(op == ALU_SUB);
-		isMulDiv = (op == ALU_MUL)|(op == ALU_DIV);
 
 		// Addition/Subtraction
 		{cout0,radd} = a + b + cin;
@@ -79,8 +103,15 @@ module alu(
 			rdiv = {a/b,a%b};
 		end
   		
-		r_high = (op == ALU_MUL) ? rmul[WORD*2-1:WORD] : rdiv[WORD-1:0];
-		r_high_en = isMulDiv;
+		case(op)
+			ALU_MUL: r_high = rmul[WORD*2-1:WORD];
+			ALU_DIV: r_high = rdiv[WORD*2-1:WORD];
+			ALU_SL:  r_high = w_sllc;
+			ALU_SR:  r_high = w_srlc;
+			default: r_high = 'd0;
+		endcase
+		//r_high = (op == ALU_MUL) ? rmul[WORD*2-1:WORD] : rdiv[WORD-1:0];
+		r_high_en = (op == ALU_MUL)|(op == ALU_DIV)|(op == ALU_SL)|(op == ALU_SR);
 
 		// Overflow/Underflow
 		overflowCK = {a[WORD-1], b[WORD-1], r[WORD-1]};	
@@ -103,8 +134,8 @@ module alu(
 		ALU_NAND: r = ~(a & b);
 		ALU_NOR : r = ~(a | b);
 		ALU_XNOR: r = ~(a ^ b);
-		ALU_SL:   r = a << shmt;
-		ALU_SR:   r = (sign) ? sr : a >> shmt;
+		ALU_SL:   r = w_sll;
+		ALU_SR:   r = w_srl;
 		ALU_RA:   r = {a[0], a[WORD-1:1]};
 		ALU_RAS:  r = {a[WORD-2:0], a[WORD-1]};
 		ALU_MUL:  r = rmul[WORD-1:0];

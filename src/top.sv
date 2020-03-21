@@ -8,7 +8,9 @@
 
 `ifdef OISC
 `include "oisc/cpu.sv"
-`elsif
+`endif
+
+`ifdef RISC
 `include "risc/cpu.sv"
 `endif
 
@@ -54,28 +56,24 @@ module top(
 	wire fclk; // Fast clock 		100MHz 		(for sdram)
 	wire aclk; // Auxiliary clock 	32,768kHz 	(for timers)
 
+	wire mclk0;
 	`ifdef DEBUG
-	wire mclk1, mclk0, clkd;
+	wire mclk_debug, clkd;
 	sys_ss#("CLKD", 1) sys_clkd(clkd);
-	sys_ss#("MCLK", 1) sys_mclk(mclk0);
-	assign mclk = clkd ? mclk0 : mclk1;
-
-	pll_clk pll_clk0 (
-			.inclk0(CLK50),
-			.areset(0),
-			.c0(fclk),
-			.c1(mclk1),
-			.c2(aclk)
-	);
+	sys_ss#("MCLK", 1) sys_mclk(mclk_debug);
+	assign mclk = clkd ? mclk_debug : mclk0;
 	`else
-	pll_clk pll_clk0 (
+	assign mclk = mclk0;
+	`endif
+
+	pll_clk#(.CLK1_MUL(`MCLK_PLL_MUL),.CLK1_DIV(`MCLK_PLL_DIV))
+	pll_clk0 (
 			.inclk0(CLK50),
 			.areset(0),
 			.c0(fclk),
-			.c1(mclk),
+			.c1(mclk0),
 			.c2(aclk)
 	);
-	`endif
 
 	//clk_dive#(28'd50) clk_div_mclk(CLK50, mclk);
 	//assign mclk = ~KEY[1];	
@@ -91,11 +89,11 @@ module top(
 	wire  		ram_rd_ack;
 	
 	`ifdef OISC
-	ram#({`RAMDIR, "oisc8.data"}) 
-	`elsif
-	ram#({`RAMDIR, "risc8.data"}) 
+	ram#({`RAMDIR, "oisc8.data"}) ram_block0(ram_addr[$clog2(`RAM_SIZE)-1:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
 	`endif
-	ram_block0(ram_addr[$clog2(`RAM_SIZE)-1:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data);
+	`ifdef RISC
+	ram#({`RAMDIR, "risc8.data"}) ram_block0(ram_addr[$clog2(`RAM_SIZE)-1:0], mclk, ram_wr_data, ram_wr_en, ram_rd_en, ram_rd_data); 
+	`endif
 	
 	`ifdef DEBUG
 		reg[23:0] ram_addr_rd_pr, ram_addr_wr_pr;
@@ -116,7 +114,7 @@ module top(
 	//sdram_block sdram0(
 	//	.mclk(mclk), 
 	//	.fclk(fclk), 
-	//	.rst_n(~rst), 
+	////	.rst_n(~rst), 
 	//	.ram_addr(racm_addr),
 	//	.ram_wr_data(ram_wr_data),
 	//	.ram_rd_data(ram_rd_data),
@@ -179,7 +177,8 @@ module top(
 	
 	`ifdef OISC
 	oisc8_cpu cpu_block0(port0);
-	`elsif
+	`endif
+	`ifdef RISC
 	risc8_cpu cpu_block0(port0);
 	`endif
 
@@ -238,10 +237,11 @@ module top_tb;
 				DRAM_CS_N,	
 				DRAM_BA	
 				);
-
-	initial if(top0.com0_addr == 8'h05) $display("%t UART0 send: %s", $time, top0.com0_wr); 
-
-
+	integer cycles = 0;
+	initial forever begin
+		#10ns CLK50 = ~CLK50;
+		cycles = cycles + 1;
+	end
 	initial begin
 			CLK50 = 0;
 			KEY[0] = 0;
@@ -251,14 +251,37 @@ module top_tb;
 
 			#1100ns;
 			KEY[0] = 1;
-			//#20us;
-			//KEY[1] = 0;
-			//#5us;
-			//KEY[1] = 1;
-			#10us;
-			$stop;
+			#400ns;
 	end
-	initial forever #10ns CLK50 = ~CLK50;
-	
 
+	
+	integer f;
+	initial begin
+	f = $fopen("oisc8_mod_u16_2.log","w");
+	forever begin
+	`ifdef OISC
+		if(top0.cpu_block0.pc0.pcr==16'h0009) break;
+		#1us;
+		$fwrite(f,"%H %b %H %H\n", 
+				top0.cpu_block0.pc0.pcr,
+				top0.cpu_block0.bus0.imm,
+				top0.cpu_block0.bus0.instr_dst,
+				top0.cpu_block0.bus0.instr_src
+		);
+	`endif
+	`ifdef RISC
+		if(top0.cpu_block0.rom_block0.ff_addr==16'h000b) break;
+		#1us;
+		//$fwrite(f,"%H %b %H %H\n", 
+		//		top0.cpu_block0.pc0.pcp,
+		//		top0.cpu_block0.bus0.imm,
+		//		top0.cpu_block0.bus0.instr_dst,
+		//		top0.cpu_block0.bus0.instr_src
+		//);
+	`endif
+	end
+	$fclose(f);
+	$finish;
+	end
+	
 endmodule

@@ -483,7 +483,7 @@ def main(w):
                 spis = []
             w.refresh()
             w.addstr(4, 2, "Checking device in-system memory..")
-            # Attemt to close previous connections
+            # Attempt to close previous connections
             try:
                 q.end_memory_edit()
             except INSYS_MEM_ERROR:

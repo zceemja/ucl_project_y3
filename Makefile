@@ -125,7 +125,7 @@ build: $(BUILD_OUT)
 %.text.mif: %.text.o $(BUILD_OUT)
 	$(ASMC) -t mif -f $< .text
 
-memory: $(MEM_BUID)
+memory: $(MEM_BUILD)
 
 flash: $(BUILD_OUT)
 	$(QUARTUS_DIR)/bin/quartus_stp -t ./scripts/update_$(PROCESSOR_LOW).tcl

@@ -78,7 +78,7 @@ module pseudo_rom(addr, clk, q);
 	parameter PROGRAM="";
 	parameter WIDTH=8;
 	parameter NUMWORDS=1024;
-	parameter BINARY=0;
+	parameter BINARY=1;
 	localparam AWIDTH=$clog2(NUMWORDS);
 	
 	input  reg 	clk;
@@ -136,16 +136,16 @@ module rom (
 	end
 	//always_ff@(posedge clock) q <= qn;
 
-	m9k_rom#({PROGRAM, "_0.mif"}, "rom0") rom0(addr0, clock, q0);
-	m9k_rom#({PROGRAM, "_1.mif"}, "rom1") rom1(addr1, clock, q1);
-	m9k_rom#({PROGRAM, "_2.mif"}, "rom2") rom2(addr2, clock, q2);
-	m9k_rom#({PROGRAM, "_3.mif"}, "rom3") rom3(addr3, clock, q3);
 	`ifdef SYNTHESIS
+	m9k_rom#({PROGRAM, ".0.mif"}, "rom0") rom0(addr0, clock, q0);
+	m9k_rom#({PROGRAM, ".1.mif"}, "rom1") rom1(addr1, clock, q1);
+	m9k_rom#({PROGRAM, ".2.mif"}, "rom2") rom2(addr2, clock, q2);
+	m9k_rom#({PROGRAM, ".3.mif"}, "rom3") rom3(addr3, clock, q3);
 	`else
-		//pseudo_rom#({PROGRAM, "_0"}) rom0(addr0, clock, q0);
-		//pseudo_rom#({PROGRAM, "_1"}) rom1(addr1, clock, q1);
-		//pseudo_rom#({PROGRAM, "_2"}) rom2(addr2, clock, q2);
-		//pseudo_rom#({PROGRAM, "_3"}) rom3(addr3, clock, q3);
+		pseudo_rom#({PROGRAM, ".0.mem"}) rom0(addr0, clock, q0);
+		pseudo_rom#({PROGRAM, ".1.mem"}) rom1(addr1, clock, q1);
+		pseudo_rom#({PROGRAM, ".2.mem"}) rom2(addr2, clock, q2);
+		pseudo_rom#({PROGRAM, ".3.mem"}) rom3(addr3, clock, q3);
 		// Currently read address (for debugging)
 		reg [11:0] ff_addr;
 		always_ff@(posedge clock) ff_addr <= address;

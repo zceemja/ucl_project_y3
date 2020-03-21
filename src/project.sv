@@ -1,3 +1,5 @@
+`include "const.sv"
+
 interface processor_port(
 	input clk, rst,
 
@@ -46,9 +48,10 @@ module com_block(
 	reg uart0_recv;
 	reg uart0_transmit;
 	reg [7:0] tx_byte, rx_byte, rx_buf;
-	// Clock divide = 1e6 / (9600 * 4)
+	// Clock divide = 1e6 / (9600 * 4) = 26
+	// for 115200 clock divide = 2
 	//uart#(.CLOCK_DIVIDE(1302)) uart0(
-	uart#(.CLOCK_DIVIDE(26)) uart0(
+	uart#(.CLOCK_DIVIDE(`UART0_CLK_DIV)) uart0(
 			.clk(clk), 
 			.rst(0), 
 			.rx(uart0_rx),

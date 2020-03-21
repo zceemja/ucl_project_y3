@@ -113,9 +113,11 @@ def rus_peasant(A, B):
     :return:
     """
     X = B
-    while X <= A / 2:
+    print('0: {:04X} {:04X}'.format(A, B))
+    while X <= A // 2:
         X <<= 1
-    print('A: {:04X} {:04X} {:04X}'.format(A, X, B))
+        print('X: {:04X}'.format(X))
+    print('A: {:04X} {:04X} {:04X}'.format(A//2, X, B))
     while A >= B:
         if A >= X:
             A -= X
@@ -152,19 +154,20 @@ def div16(a, b):
     for i in range(16):
         R = R << 1
         R[15] = N[i]
-        print('R='+R.hex, end='')
-        print(' D=' + D.hex, end='')
+        print(f'i={i:2d} R={R.hex} N={N.hex} D={D.hex}', end='')
         if R.uint >= D.uint:
             R = BitArray(bin=bin(R.uint - D.uint))
             R = BitArray(bin="0" * (16 - len(R)) + R.bin)
             Q[i] = True
+            print(f' R2={R.hex} Q={Q.hex}', end='')
         print()
     return Q.uint, R.uint
+
 
 def div8(a, b):
     from bitstring import BitArray
     ab = bin(a)[2:]
-    ab = '0'*(17-len(ab)) + ab
+    ab = '0' * (17 - len(ab)) + ab
     bb = bin(b)[2:]
     bb = '0' * (9 - len(bb)) + bb
     rd1 = BitArray(bin=ab)
@@ -202,10 +205,10 @@ def div8(a, b):
 
 
 if __name__ == '__main__':
-    # d, r = div16(5, 16)
-    # print("%d and %d" % (d, r))
+    d, r = div16(50000, 2)
+    print("%x [%d] and %x [%d]" % (d, d, r, r))
     # pass
-    calc_sieve(2**16)
+    # calc_sieve(2**16)
 
     # calc(255)
     # res = rus_peasant(666, 48)[0]
