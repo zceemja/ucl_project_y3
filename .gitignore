@@ -27,3 +27,8 @@ incremental_db/
 greybox_tmp/
 *-eps-converted-to.pdf
 *.autosave
+
+*-blx.bib
+*.bbl
+*.blg
+*.run.xml

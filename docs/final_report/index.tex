@@ -1,0 +1,108 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{newunicodechar}
+\usepackage{lmodern}
+\usepackage{textgreek}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage{svg}
+
+
+\usepackage{tabularx}
+\usepackage{blindtext}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{colortbl}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{chngcntr}
+\usepackage{longtable}
+\usepackage{xcolor,colortbl}
+\usepackage{pdfpages}
+\counterwithin{figure}{subsection}
+\usepackage{multicol} 
+\usepackage{mdframed} 
+
+\setcounter{tocdepth}{3}
+
+
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{references.bib}
+
+\begin{document}
+	
+	\begin{titlepage}
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+		\begin{tikzpicture}[remember picture, overlay]
+		\node [anchor=north east, inner sep=0pt]  at (current page.north east)
+		{\includegraphics[width=21cm]{../resources/ucl-banner-dl-port-outline.eps}};
+		\end{tikzpicture}\\[3cm]
+		\center
+		
+		\textsc{\Large University College London}\\[0.5cm]
+		\textsc{\large Department of Electronic and Electrical Engineering}\\[0.5cm]
+		
+		\HRule \\[0.4cm]
+		\setstretch{1.5}
+		{ \huge \bfseries Performance characterisation of 8-bit RISC and OISC architectures}\\[0.4cm]
+		\setstretch{1.0}
+		\HRule \\[1.0cm]
+		
+		\begin{multicols}{3}
+			
+			\Large \emph{Author:}\\
+			Mindaugas \textsc{Jarmolovi\v{c}ius}\\
+			\href{mailto:zceemja@ucl.ac.uk}{zceemja@ucl.ac.uk}\\
+			
+			\columnbreak
+			
+			\Large \emph{Supervisor:}\\
+			Prof. Robert \textsc{Killey}\\
+			\href{mailto:r.killey@ucl.ac.uk}{r.killey@ucl.ac.uk}
+			
+			\columnbreak
+			
+			\Large \emph{Second Assessor:}\\
+			Dr. Ed \\\textsc{Romans}\\
+			\href{mailto:e.romans@ucl.ac.uk}{e.romans@ucl.ac.uk}
+			
+		\end{multicols}
+		
+		\vfill
+		\setstretch{2.5}
+		{ \large \bfseries A BEng Project Final Report}\\[1cm]
+		\setstretch{1.0}
+		{\large March 27, 2020}\\[2cm]
+		
+	\end{titlepage}
+	
+	\pagebreak
+	
+	\begin{multicols}{2}
+	\section{Abstract}\label{sec:abstract}
+	\input{1-abstract.tex}
+	\section{Introduction}\label{sec:introduction}
+	\input{2-introduction.tex}
+	\section{Goals and Objective}\label{sec:objectives}
+	\input{3-objectives.tex}
+	\section{Theory and Analytical Bases}\label{sec:theory}
+	\input{4-theory.tex}
+	\section{Technical Method}\label{sec:methods}
+	\input{5-methods.tex}
+	\section{Results and Analysis}\label{sec:results}
+	\input{6-results.tex}
+	\section{Conclusion}\label{sec:conclusion}
+	\input{7-conclusion.tex}
+	\section{Appendix}\label{sec:appendix}
+	\input{8-appendix.tex}
+	\section{References}
+	\printbibliography
+	\end{multicols}
+	
+\end{document}
