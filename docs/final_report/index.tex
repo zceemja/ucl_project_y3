@@ -10,6 +10,10 @@
 \usepackage{graphicx}
 \usepackage{pdflscape}
 \usepackage{svg}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{lipsum}
+
 
 
 \usepackage{tabularx}
@@ -41,7 +45,7 @@
 		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 		\begin{tikzpicture}[remember picture, overlay]
 		\node [anchor=north east, inner sep=0pt]  at (current page.north east)
-		{\includegraphics[width=21cm]{../resources/ucl-banner-dl-port-outline.eps}};
+		{\includegraphics[width=21cm]{../resources/graphics/ucl-banner-dl-port-outline.eps}};
 		\end{tikzpicture}\\[3cm]
 		\center
 		
@@ -99,10 +103,11 @@
 	\input{6-results.tex}
 	\section{Conclusion}\label{sec:conclusion}
 	\input{7-conclusion.tex}
-	\section{Appendix}\label{sec:appendix}
-	\input{8-appendix.tex}
 	\section{References}
 	\printbibliography
 	\end{multicols}
+	\pagebreak
+	\section{Appendix}\label{sec:appendix}
+	\input{8-appendix.tex}
 	
 \end{document}

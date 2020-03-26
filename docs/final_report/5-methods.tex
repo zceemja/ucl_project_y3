@@ -8,3 +8,123 @@ How did you set up the simulation: what mesh values, for example, did you use?
 Provide enough detail that your work can be duplicated by someone else.
 Be precise and use the correct units.
 \fi
+
+
+
+
+
+This section describes methods and design choices used to construct two processors.
+
+\subsection{Machine Code}\label{subsec:machine_code}
+
+\subsubsection{RISC}
+As the aim of instruction size to be as minimal as possible, RISC instruction decided to be 8bits with optional additional immediate value from 1 to 3 bytes. Immediate values are explained in section \ref{subsec:imm_values}.
+
+Decision was made to have instruction compose of operation code two operands - source/destination and source, which is similar to x86 architecture rather than MIPS. Three possible combinations of register address sizes are possible in such case from one to three bits. Two was selected as it allow having four general purpose registers which is sufficient for most applications, and allow four bits for operation code - allowing up to 16 instructions. 
+
+Due to small amount of available operation codes and not all instructions requiring two operands (for example \texttt{JUMP} instruction may not need any operands or could use one operand to have address offset), other two type instructions are added to the design - with one and zero operands. See figure \ref{fig:risc_machinecode}. This enabled processor to have 45 different instructions while maintaining minimal instruction size. Final design has:
+\begin{description}[labelindent=1cm, labelsep=1em]
+	\item[$\bullet$ \textbf{8 }]  2-operand instructions
+	\item[$\bullet$ \textbf{32}]  1-operand instructions
+	\item[$\bullet$ \textbf{5 }]  0-operand instructions
+\end{description}
+Full list of RISC instructions are listed in table \ref{tab:risc_instructions} in \nameref{sec:appendix} section.
+
+
+\definecolor{c1}{HTML}{ff7568} 
+\definecolor{c2}{HTML}{8cbfff} 
+\definecolor{c3}{HTML}{a6ddb7} 
+
+
+\begin{gather*}
+\scalebox{0.8}{2 operands:}~
+\underbrace{
+	\colorbox{c1}{0}\,
+	\colorbox{c1}{1}\,
+	\colorbox{c1}{2}\,
+	\colorbox{c1}{3}
+}_\text{op. code}
+\underbrace{
+	\colorbox{c2}{4}\,
+	\colorbox{c2}{5}
+}_\text{dst.}
+\underbrace{
+	\colorbox{c3}{6}\,
+	\colorbox{c3}{7}
+}_\text{src.}
+\\
+\scalebox{0.8}{1 operand:}~
+\underbrace{
+	\colorbox{c1}{0}\,
+	\colorbox{c1}{1}\,
+	\colorbox{c1}{2}\,
+	\colorbox{c1}{3}
+}_\text{op. code}
+\underbrace{
+	\colorbox{c2}{4}\,
+	\colorbox{c2}{5}
+}_\text{dst.}
+\underbrace{
+	\colorbox{c1}{6}\,
+	\colorbox{c1}{7}
+}_\text{op. c.}\\
+\scalebox{0.8}{0 operands:}~
+\underbrace{
+	\colorbox{c1}{0}\,
+	\colorbox{c1}{1}\,
+	\colorbox{c1}{2}\,
+	\colorbox{c1}{3}\,
+	\colorbox{c1}{4}\,
+	\colorbox{c1}{5}\,
+	\colorbox{c1}{6}\,
+	\colorbox{c1}{7}
+}_\text{operation code}
+\end{gather*}
+\begin{center}
+\captionof{figure}{\textit{RISC instructions composition. Number inside box represents bit index. Destination (dst.) bits represents of source and destination register address.}}
+\label{fig:risc_machinecode}
+\end{center}
+
+\subsubsection{OISC}
+
+As OISC requires only a single instruction, composition of instruction mainly requires two parts - source and destination. To allow higher instruction flexibility a immediate bit has been added to replace source address by immediate value. Composition of finalised machine code is shown in figure \ref{fig:oisc_machinecode}. 
+
+\begin{gather*}
+\underbrace{
+	\colorbox{c1}{0}
+}_\text{imm.}
+\underbrace{
+	\colorbox{c2}{1}\,
+	\colorbox{c2}{2}\,
+	\colorbox{c2}{3}\,
+	\colorbox{c2}{4}\,
+}_\text{destination}
+\underbrace{
+	\colorbox{c3}{5}\,
+	\colorbox{c3}{6}\,
+	\colorbox{c3}{7}\,
+	\colorbox{c3}{8}\,
+	\colorbox{c3}{9}\,
+	\colorbox{c3}{10}\,
+	\colorbox{c3}{11}\,
+	\colorbox{c3}{12}
+}_\text{source}
+\end{gather*}
+
+\begin{center}
+\captionof{figure}{\textit{OISC instruction composition. Number inside box represents bit index.}}
+\label{fig:oisc_machinecode}
+\end{center}
+
+Decision was made to have source address to be eight bits to allow it be replaced with immediate value. Destination address was chosen to be as minimal as possible, leaving only four bits or 16 possible destinations. Final design has \textbf{15} destination and \textbf{41} source addresses. This is not the most space efficient design as 41 source addresses would require only six bits for address, wasting two bits every time non-immediate source is used.
+
+Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
+
+\subsection{Immediate values}\label{subsec:imm_values}
+
+
+\subsection{Arithmetic Logic Unit}\label{subsec:alu}
+
+\subsection{Memory}\label{subsec:memory}
+
+
