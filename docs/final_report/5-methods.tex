@@ -31,11 +31,6 @@ Due to small amount of available operation codes and not all instructions requir
 Full list of RISC instructions are listed in table \ref{tab:risc_instructions} in \nameref{sec:appendix} section.
 
 
-\definecolor{c1}{HTML}{ff7568} 
-\definecolor{c2}{HTML}{8cbfff} 
-\definecolor{c3}{HTML}{a6ddb7} 
-
-
 \begin{gather*}
 \scalebox{0.8}{2 operands:}~
 \underbrace{
@@ -120,11 +115,50 @@ Decision was made to have source address to be eight bits to allow it be replace
 
 Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
 
-\subsection{Immediate values}\label{subsec:imm_values}
-
-
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
 
 \subsection{Memory}\label{subsec:memory}
+This section describes how instruction memory (ROM) is implemented for both processors.
+
+\pagebreak
+\subsection{Instruction decoding}\label{subsec:imm_values}
+This section describes RISC and OISC differences between instruction decoding and immediate value handling.
+\subsubsection{RISC}
+Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
+
+
+IMO block is a solution to change immediate value which enabled dynamically calculated memory pointers, branches dependant on register value or any other function that needs instruction immediate value been replaced by calculated register value. IMO is controlled by control block and \textbf{cdi.imoctl} signal, which is changed by \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. When signal is \texttt{0h}, this block is transparent connecting \textbf{immr} directly to \textbf{imm}. When any of \texttt{CI} instructions executed, one of IMO register is overridden by \textit{reg1} value from register file. In order to override two or three bytes of immediate, \texttt{CI} instructions need to be executed in order. Only for one next instruction after last \texttt{CI} will have immediate bytes changed depending on what are values in \textit{IMO} registers.
+
+This circuit has two disadvantages: 
+\\
+1. Overriding immediate bytes takes one or more clock cycles,\\
+2. At override, \textbf{immr} bytes are ignored therefore they are wasting instruction memory space.\\
+\\
+Point 2 can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
+
+\end{multicols}
+\begin{figure}[b!]
+	\centering
+	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
+	\caption{Digital diagram of RISC immediate override system}
+	\label{fig:risc_imo}
+\end{figure}
+\begin{figure}[t!]
+	\centering
+	\includegraphics[scale=0.4]{../resources/oisc_decoder.eps}
+	\caption{Digital diagram of OISC instruction decoder}
+	\label{fig:oisc_decoder}
+\end{figure}
+
+
+\subsubsection{OISC}
+OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
+\begin{multicols}{2}
+
+
+
+
+
+
 
 

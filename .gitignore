@@ -32,3 +32,6 @@ greybox_tmp/
 *.bbl
 *.blg
 *.run.xml
+*svg-tex.pdf
+*svg-tex.pdf_tex
+.~lock.*#

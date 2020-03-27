@@ -13,6 +13,7 @@
 \usepackage{caption}
 \usepackage{enumitem}
 \usepackage{lipsum}
+\usepackage{listings}
 
 
 
@@ -38,6 +39,20 @@
 
 \usepackage[backend=bibtex]{biblatex}
 \addbibresource{references.bib}
+
+\definecolor{c1}{HTML}{ff7568} 
+\definecolor{c2}{HTML}{8cbfff} 
+\definecolor{c3}{HTML}{a6ddb7} 
+\definecolor{darkred}{rgb}{0.6,0,0}
+
+\lstdefinelanguage{asm}{
+	morekeywords={ADC,ADD,ADDC,ADDI,ALU0,ALU1,AND,ANDI,BEQ,BGE,BGT,BR0,BR1,BRZ,BZ,CALL,CI0,CI1,CI2,CLC,CLN,CLS,COM,COMA,COMD,CPY0,CPY1,CPY2,CPY3,DEC,DIV,EQ,GE,GETAH,GETIF,GT,INC,INTRE,JUMP,LE,LT,LWHI,LWLO,MEM0,MEM1,MEM2,MEMHI,MEMLO,MOD,MOVE,MUL,MULHI,MULLO,NE,NULL,OR,ORI,PC0,PC1,POP,PUSH,RBWI,REG0,REG1,RET,RETI,RJUMP,ROL,ROR,SBC,SETC,SETI,SETN,SETS,SLL,SRA,SRL,SSETN,SSETS,STACK,STPT0,STPT1,SUB,SUBC,SUBI,SWHI,SWLO,XOR,XORI},
+	sensitive=false,
+	morecomment=[l]{;},
+	morestring=[b]",
+}
+
+\lstset{language=asm, basicstyle=\ttfamily, commentstyle=\color{gray}, emphstyle={\color{darkred}}}
 
 \begin{document}
 	

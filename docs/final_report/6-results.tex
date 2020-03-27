@@ -22,3 +22,44 @@ Give the facts, then give your analysis of the facts.
 Present your graphs, figures, tables, photos, and equations needed to show what you accomplished.
 Label everything clearly, using the recommendations given below in “Things to Look For”
 \fi
+
+\subsection{Benchmark Programs}
+
+
+
+\subsubsection{Number of instructions}
+
+\subsubsection{Instruction composition}
+Function composition was executed with following code:
+
+\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done}]
+setup:
+	JUMP .start
+.done:
+	JUMP .done
+.start:
+	; Setup values
+	; Call function
+	JUMP .done
+\end{lstlisting}
+
+\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done}]
+setup:
+	BR1 .start @1
+	BR0 .start @0
+	BRZ 0x00
+.done:
+	BRZ 0x00
+.start:
+	; Setup values
+	; Call function
+	BR1 .done @1
+	BR0 .done @0
+	BRZ 0x00
+\end{lstlisting}
+
+
+
+\subsection{Maximum clock frequency}
+
+\subsection{}
