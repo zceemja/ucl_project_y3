@@ -116,11 +116,44 @@ Decision was made to have source address to be eight bits to allow it be replace
 Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
 
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
+TO BE ADDED
 
 \subsection{Memory}\label{subsec:memory}
 This section describes how instruction memory (ROM) is implemented for both processors.
+\subsubsection{RISC}
+In order to allow dynamic instruction size from one to four bytes a special memory arrangement is made. A system was required to access word (8bits) from memory and next three words. To achieve this four ROM blocks been utilised, each containing one fourth of sliced original data. Input address is offset by adders \textit{ADDER1-3} and further divided by four by removing two least significant bits at \textbf{addr0-3}. 
+Before concatenating output of each ROM block into final four bytes, ROM outputs \textbf{q0-3} are rearranged depending on \textbf{ar} signal. Note that \textit{MUX1-4} each input is different, this may be better visualised with Verilog code in listing \ref{code:rom_switch}.
+
+\begin{lstlisting}[frame=single, language=Verilog, caption={RISC sliced ROM memory multiplexer arrangement Verilog code}, emph={ar, data}, label=code:rom_switch]
+case(ar)
+  2'b00: data={q3,q2,q1,q0};
+  2'b01: data={q0,q3,q2,q1};
+  2'b10: data={q1,q0,q3,q2};
+  2'b11: data={q2,q1,q0,q3};
+endcase
+\end{lstlisting}
+
+\end{multicols}
+\begin{figure}[b!]
+\centering
+\includegraphics[scale=0.35]{../resources/risc_mem.eps}
+\caption{Digital diagram of RISC sliced ROM memory logic}
+\label{fig:risc_mem}
+\end{figure}
+
+\begin{figure}[t!]
+	\centering
+	\includegraphics[scale=0.4]{../resources/oisc_mem.eps}
+	\caption{Digital diagram of OISC instruction ROM logic}
+	\label{fig:oisc_mem}
+\end{figure}
 
 \pagebreak
+\begin{multicols}{2}
+	
+\subsubsection{OISC}
+OISC instructions are fixed 13 bits, which causes different problems to RISC sliced memory - non-standard memory word size. To implement ROM in FPGA, Altera Cyclone IV M9K memory configurable blocks were used. Each blocks as 9kB of memory each allowing 1024x9bit configuration. Combining three of such blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
+
 \subsection{Instruction decoding}\label{subsec:imm_values}
 This section describes RISC and OISC differences between instruction decoding and immediate value handling.
 \subsubsection{RISC}
@@ -128,13 +161,12 @@ Already described in previous section \ref{subsec:memory}, instruction from memo
 
 
 IMO block is a solution to change immediate value which enabled dynamically calculated memory pointers, branches dependant on register value or any other function that needs instruction immediate value been replaced by calculated register value. IMO is controlled by control block and \textbf{cdi.imoctl} signal, which is changed by \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. When signal is \texttt{0h}, this block is transparent connecting \textbf{immr} directly to \textbf{imm}. When any of \texttt{CI} instructions executed, one of IMO register is overridden by \textit{reg1} value from register file. In order to override two or three bytes of immediate, \texttt{CI} instructions need to be executed in order. Only for one next instruction after last \texttt{CI} will have immediate bytes changed depending on what are values in \textit{IMO} registers.
-
-This circuit has two disadvantages: 
-\\
-1. Overriding immediate bytes takes one or more clock cycles,\\
-2. At override, \textbf{immr} bytes are ignored therefore they are wasting instruction memory space.\\
-\\
-Point 2 can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
+\\This circuit has two disadvantages: 
+\begin{enumerate}
+	\item Overriding immediate bytes takes one or more clock cycles,
+	\item At override, \textbf{immr} bytes are ignored therefore they are wasting instruction memory space.
+\end{enumerate}
+Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
 \end{multicols}
 \begin{figure}[b!]
