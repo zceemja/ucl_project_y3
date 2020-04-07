@@ -27,7 +27,7 @@ Due to small amount of available operation codes and not all instructions requir
 \end{description}
 Full list of RISC instructions are listed in table \ref{tab:risc_instructions} in \nameref{sec:appendix} section.
 
-
+\begin{blockpage}
 \begin{gather*}
 \scalebox{0.8}{2 operands:}~
 \underbrace{
@@ -76,11 +76,13 @@ Full list of RISC instructions are listed in table \ref{tab:risc_instructions} i
 \captionof{figure}{\textit{RISC instructions composition. Number inside box represents bit index. Destination (dst.) bits represents of source and destination register address.}}
 \label{fig:risc_machinecode}
 \end{center}
+\end{blockpage}
 
 \subsubsection{OISC}
 
 As OISC requires only a single instruction, composition of instruction mainly requires two parts - source and destination. To allow higher instruction flexibility a immediate bit has been added to replace source address by immediate value. Composition of finalised machine code is shown in figure \ref{fig:oisc_machinecode}. 
 
+\begin{blockpage}
 \begin{gather*}
 \underbrace{
 	\colorbox{c1}{0}
@@ -107,16 +109,25 @@ As OISC requires only a single instruction, composition of instruction mainly re
 \captionof{figure}{\textit{OISC instruction composition. Number inside box represents bit index.}}
 \label{fig:oisc_machinecode}
 \end{center}
+\end{blockpage}
 
 Decision was made to have source address to be eight bits to allow it be replaced with immediate value. Destination address was chosen to be as minimal as possible, leaving only four bits or 16 possible destinations. Final design has \textbf{15} destination and \textbf{41} source addresses. This is not the most space efficient design as 41 source addresses would require only six bits for address, wasting two bits every time non-immediate source is used.
 
 Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
-
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
-This section will discuss ALU implementations of both processors. For fair comparison between OISC and RISC, ALU in both system will have the same capabilities described in table \ref{tab:alu_set}. 
-\begin{center}
+
+\begin{figure*}[b]
+\centering
+\includegraphics[scale=0.35]{../resources/oisc_alu.eps}
+\caption{Digital diagram of OISC partial ALU logic}
+\label{fig:oisc_alu}
+\end{figure*}
+
+This section will discuss ALU implementations of both processors. For fair comparison between OISC and RISC, ALU in both system will have the same capabilities described in table \ref{tab:alu_set}.
+
+\begin{blockpage}
 	\arrayrulecolor{black}
-	\begin{tabular}{| c | l |} \hline 
+	\begin{tabular}{| c | p{0.75\linewidth} |} \hline 
 		\rowcolor[rgb]{0.82,0.82,0.82}
 		Name & Description \\\hline
 		\arrayrulecolor[rgb]{0.82,0.82,0.82}
@@ -134,16 +145,9 @@ This section will discuss ALU implementations of both processors. For fair compa
 		MOD & Arithmetic modulus \\
 		\arrayrulecolor[rgb]{0,0,0}\hline
 	\end{tabular}
-\captionof{table}{\textit{Supported ALU commands for both processors}}
-\label{tab:alu_set}
-\end{center}
-
-\begin{figure*}[t!]
-	\centering
-	\includegraphics[scale=0.35]{../resources/oisc_alu.eps}
-	\caption{Digital diagram of OISC partial ALU logic}
-	\label{fig:oisc_alu}
-\end{figure*}
+	\captionof{table}{\textit{Supported ALU commands for both processors}}
+	\label{tab:alu_set}
+\end{blockpage}
 
 \subsubsection{OISC}
 Due to the structure of OISC processor, ALU source A and B are two latches that are written into when \texttt{ALU0} or \texttt{ALU1} destination address is present. ALU sources are connected with every ALU operator and performed in single clock cycle. This value is stored in register so that it would immediately available in a next clock cycle as a source data. Figure \ref{fig:oisc_alu} represents logic diagram of ALU with only addition and multiplication operators present. Note that output of \textit{EQ3} is connected to enable of \textit{REG3}, enabling output of carry to be only read after \texttt{ADD} source is requested. This previous source memory is also used for \texttt{SUB}, \texttt{ROL} and \texttt{ROR} operations. This allows processor to perform other operations such as store or load values, before accessing carry bit, or carried byte for \texttt{ROL} and \texttt{ROR} operations.
@@ -153,31 +157,35 @@ RISC processor has very similar structure to OISC with two exceptions. Inputs to
 
 \subsection{Memory}\label{subsec:memory}
 This section describes how instruction memory (ROM) is implemented for both processors.
+
+\begin{figure*}
+	\centering
+	\includegraphics[scale=0.35]{../resources/risc_mem.eps}
+	\caption{Digital diagram of RISC sliced ROM memory logic}
+	\label{fig:risc_mem}
+\end{figure*}
+
 \subsubsection{RISC}
 In order to allow dynamic instruction size from one to four bytes a special memory arrangement is made. A system was required to access word (8bits) from memory and next three words. To achieve this four ROM blocks been utilised, each containing one fourth of sliced original data. Input address is offset by adders \textit{ADDER1-3} and further divided by four by removing two least significant bits at \textbf{addr0-3}. 
 Before concatenating output of each ROM block into final four bytes, ROM outputs \textbf{q0-3} are rearranged depending on \textbf{ar} signal. Note that \textit{MUX1-4} each input is different, this may be better visualised with Verilog code in listing \ref{code:rom_switch}.
 
+
+
+\begin{blockpage}
 \begin{lstlisting}[frame=single, language=Verilog, caption={RISC sliced ROM memory multiplexer arrangement Verilog code}, emph={ar, data}, label=code:rom_switch]
 case(ar)
-  2'b00: data={q3,q2,q1,q0};
-  2'b01: data={q0,q3,q2,q1};
-  2'b10: data={q1,q0,q3,q2};
-  2'b11: data={q2,q1,q0,q3};
+2'b00: data={q3,q2,q1,q0};
+2'b01: data={q0,q3,q2,q1};
+2'b10: data={q1,q0,q3,q2};
+2'b11: data={q2,q1,q0,q3};
 endcase
 \end{lstlisting}
-
-\begin{figure*}[t!]
-\centering
-\includegraphics[scale=0.35]{../resources/risc_mem.eps}
-\caption{Digital diagram of RISC sliced ROM memory logic}
-\label{fig:risc_mem}
-\end{figure*}
-
+\end{blockpage}
 
 \subsubsection{OISC}
 OISC instructions are fixed 13 bits, which causes different problems to RISC sliced memory - non-standard memory word size. To implement ROM in FPGA, Altera Cyclone IV M9K memory configurable blocks were used. Each blocks as 9kB of memory each allowing 1024x9bit configuration. Combining three of such blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check, see figure \ref{fig:oisc_memory_slice}. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
 
-\end{multicols}
+\begin{figure*}[b]
 \begin{gather*}
 \overunderbraces{&\br{1}{ROM0}&\br{2}{ROM1}&\br{2}{ROM2}}%
 {&
@@ -211,11 +219,11 @@ OISC instructions are fixed 13 bits, which causes different problems to RISC sli
 }%
 {&\br{2}{InstrA}&\br{2}{InstrB}&\br{1}{parity}}
 \end{gather*}
-\captionof{figure}{\textit{OISC three memory words composition. Number inside box represents bit index.}}
+\caption{OISC three memory words composition. Number inside box represents bit index.}
 \label{fig:oisc_memory_slice}
-\begin{multicols}{2}
+\end{figure*}
 
-\begin{figure*}[t!]
+\begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_mem.eps}
 	\caption{Digital diagram of OISC instruction ROM logic}
@@ -236,27 +244,24 @@ IMO block is a solution to change immediate value which enabled dynamically calc
 \end{enumerate}
 Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
-\end{multicols}
-\begin{figure}[b!]
+\begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
 	\caption{Digital diagram of RISC immediate override system}
 	\label{fig:risc_imo}
-\end{figure}
-\begin{figure}[t!]
+\end{figure*}
+
+\begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_decoder.eps}
 	\caption{Digital diagram of OISC instruction decoder}
 	\label{fig:oisc_decoder}
-\end{figure}
-
+\end{figure*}
 
 \subsubsection{OISC}
 OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
-\begin{multicols}{2}
 
-
-
+\pagebreak
 
 
 

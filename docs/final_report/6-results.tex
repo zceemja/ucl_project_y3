@@ -22,9 +22,47 @@ Give the facts, then give your analysis of the facts.
 Present your graphs, figures, tables, photos, and equations needed to show what you accomplished.
 Label everything clearly, using the recommendations given below in “Things to Look For”
 \fi
+\subsection{FPGA logic component composition}
+This subsection looks at test and its results to find how much FPGA logic components each processor takes and what is composition of each part.
+
+Test was performed with Quartus synthesis tool and viewing flow summary report. This report includes synthesised design metrics including total logic elements, registers, memory bits and other FPGA resources. Test will only look at logic elements and registers. Total number of logic elements was found out by synthesising full processors, then commenting relevant parts of code, re-synthesising and viewing changes in total logic elements. Such method may not be the most accurate, because during HDL synthesis circuit is optimised an unused connections removed. This means that more logic may be not synthesised than intended. 
+
+There are four parts of each processor that will be tested: 
+\begin{enumerate}
+	\item \textbf{Common} - processor auxiliary logic that is used by both processors. It includes communication block with UART, RAM and PLL (Phase-Locked Loop, for master clock generation). 
+	\item \textbf{ALU} - as described in section \ref{subsec:alu}, both processors have slightly different implementation of ALU.
+	\item \textbf{Memory} - processors memory management, including stack.
+	\item \textbf{Other} - reminding logic of processor that was not analysed.
+\end{enumerate}
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../tests/fpga_comp.eps}
+	\captionof{figure}{Bar graph of FPGA logic components taken by each processor.}
+	\label{fig:fpga_comp}
+\end{colfigure}
+
+Results of a test are shown in figures \ref{fig:fpga_comp} and \ref{fig:fpga_reg_comp}. Common logic uses 293 logic elements and 170 registers. OISC uses 1705 logic elements, while RISC uses 3218. Excluding common logic, OISC takes 48.3\% of RISC's logic elements.
+
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../tests/fpga_reg_comp.eps}
+	\captionof{figure}{Bar graph of FPGA register resources taken by each processor.}
+	\label{fig:fpga_reg_comp}
+\end{colfigure}
+
+OISC uses 726 logic elements, while RISC uses 407. Excluding common logic, OISC uses 78.4\% more registers than RISC.
+
+Looking at composition, OISC ALU takes 30.2\% more logic gates. Looking at figure \ref{fig:fpga_reg_comp}, high number of OISC ALU registers can be observed which concludes, that higher resource usage is OISC ALU code include buffer logic.
+
+Memory logic elements composition of OISC is only 34.4\% of RISC's and 7\% lower for register resources, comparing to RISC. This indicate that by removing memory logic for RISC, synthesis tool may removed also other parts of processor, possibly part of control block because it mostly contains combinational logic.
+
+Other logic includes instruction decoding with ROM, register file, program counter. RISC exclusively has control block. Note that OISC uses  only three ROM memory blocks whereas RISC uses four as explained in section \ref{subsec:memory}, however this should make a minimal difference as M9K memory blocks are not included in FPGA logic element or register count. Comparing both processors, OISC has only 37\% of other logic components to RISC, however it has 2.28 times more registers. This shows a logic component - register trade-off. OISC buffer and common registers logic that connects bus require many more registers whereas RISC uses combination logic in control block in order to control same data in datapath. 
+
+Much higher logic components in RISC can be also explained more complicated register file, ROM memory logic and program counter. All of these components has some additional logic for timing correction or additional functionality required by these blocks integration into datapath.
 
 \subsection{Benchmark Programs}
-
 
 
 \subsubsection{Number of instructions}
@@ -32,6 +70,7 @@ Label everything clearly, using the recommendations given below in “Things to 
 \subsubsection{Instruction composition}
 Function composition was executed with following code:
 
+\begin{blockpage}
 \begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done}]
 setup:
 	JUMP .start
@@ -42,7 +81,9 @@ setup:
 	; Call function
 	JUMP .done
 \end{lstlisting}
+\end{blockpage}
 
+\begin{blockpage}
 \begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done}]
 setup:
 	BR1 .start @1
@@ -57,7 +98,7 @@ setup:
 	BR0 .done @0
 	BRZ 0x00
 \end{lstlisting}
-
+\end{blockpage}
 
 
 \subsection{Maximum clock frequency}

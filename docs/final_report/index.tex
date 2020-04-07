@@ -1,46 +1,45 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[a4paper,12pt,twocolumn]{article}
 \usepackage[top=1in,bottom=1in,left=1in,right=1in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{newunicodechar}
-\usepackage{lmodern}
-\usepackage{textgreek}
+%\usepackage{newunicodechar}
+%\usepackage{lmodern}
+%\usepackage{textgreek}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{graphicx}
-\usepackage{pdflscape}
-\usepackage{svg}
+\usepackage{float}
 \usepackage{caption}
 \usepackage{enumitem}
 \usepackage{lipsum}
 \usepackage{listings}
-
+\usepackage{balance}
 
 
 \usepackage{tabularx}
-\usepackage{blindtext}
+%\usepackage{blindtext}
 \usepackage{hyperref}
-\usepackage{pgfgantt}
-\usepackage{colortbl}
-\usepackage{pdfpages}
+%\usepackage{pgfgantt}
 \usepackage{setspace}
 \usepackage{subcaption}
 \usepackage{tikz}
 \usepackage{chngcntr}
 \usepackage{longtable}
 \usepackage{xcolor,colortbl}
-\usepackage{pdfpages}
-\counterwithin{figure}{subsection}
 \usepackage{multicol} 
-\usepackage{mdframed} 
+%\usepackage{mdframed} 
 \usepackage{oubraces}
+\usepackage{stfloats}
+%\usepackage{fixltx2e}
 
 \setcounter{tocdepth}{3}
-
+\counterwithin{figure}{subsection}
+\counterwithin{table}{subsection}
 
 \usepackage[backend=bibtex]{biblatex}
 \addbibresource{references.bib}
 
+% Our base colours
 \definecolor{c1}{HTML}{ff7568} 
 \definecolor{c2}{HTML}{8cbfff} 
 \definecolor{c3}{HTML}{a6ddb7} 
@@ -54,6 +53,16 @@
 }
 \lstset{language=asm, basicstyle=\ttfamily, commentstyle=\color{gray}, emphstyle={\color{darkred}}}
 
+
+% This enviroment ensures that structures like listing and tables are not broken between columns or pages.
+\newenvironment{blockpage}
+{\begin{center}\begin{minipage}[c]{\linewidth}}
+{\end{minipage}\end{center}}
+
+% This allows placing figure in column
+\newenvironment{colfigure}
+{\par\medskip\noindent\minipage{\linewidth}}
+{\endminipage\par\medskip}
 
 \begin{document}
 	
@@ -103,8 +112,6 @@
 	\end{titlepage}
 	
 	\pagebreak
-	
-	\begin{multicols}{2}
 	\section{Abstract}\label{sec:abstract}
 	\input{1-abstract.tex}
 	\section{Introduction}\label{sec:introduction}
@@ -121,8 +128,8 @@
 	\input{7-conclusion.tex}
 	\section{References}
 	\printbibliography
-	\end{multicols}
 	\pagebreak
+	\onecolumn
 	\section{Appendix}\label{sec:appendix}
 	\input{8-appendix.tex}
 	

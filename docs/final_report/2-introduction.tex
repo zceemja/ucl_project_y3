@@ -35,9 +35,19 @@ End the Introduction with a one-line description of the contents of each followi
 
 Since the 70s there has been a rise of many processor architectures that try to fulfil specific performance and power application constraints. One of more noticeable cases are ARM's RISC  architecture being used in mobile devices instead of the more popular and robust x86 CISC (Complex Instruction Set Computer) architecture in favour of simplicity, cost and lower power consumption \autocite{jamil_1995,blem_menon_sankaralingam_2013}. It has been shown that in low power applications, such as IoTs (Internet of Things), OISC implementation can be superior in power and data throughput comparing to traditional RISC architectures \autocite{yokota_saso_hara-azumi_2017, ahmed_sakamoto_anderson_hara-azumi_2015}. This project proposes to compare two novel RISC and OISC 8bit architectures and compare their performance, design complexity and efficiency.
 
+
+Project 3 aims:
+\begin{enumerate}
+	\item Compare how well OISC \texttt{MOVE} architecture would perform in low performance microcontroller application comparing to equivalent RISC architecture.
+	\item Study and explore RISC and OISC architectures.
+	\item View an alternative method of using OISC MOVE as SISO (single instruction, single operation) architecture.
+	
+\end{enumerate}
+
+
 The project has 3 main objectives:
 \begin{enumerate}
 	\item Design and build a RISC based processor. As this is aimed for low power and performance applications it will be 8bit word processor with 4 general purpose registers, structure is similar to MIPS.
-	\item Design and build an OISC based processor. There are many different types of OISC processor, \texttt{MOVE} variant has been selected which is described in \refname{sec:theory} chapter.
+	\item Design and build an OISC based processor. There are many different types of OISC processor, \texttt{MOVE} variant has been selected which is described in \refname{sec:theory} chapter. This type of OISC variant is also known as TTA (Transport Triggered Architecture). 
 	\item Design a fair benchmark that both processors could execute. This benchmark include different algorithms that are commonly used in controllers, IoT devices or similar low power microprocessor applications.
 \end{enumerate}
