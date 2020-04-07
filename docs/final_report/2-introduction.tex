@@ -36,18 +36,31 @@ End the Introduction with a one-line description of the contents of each followi
 Since the 70s there has been a rise of many processor architectures that try to fulfil specific performance and power application constraints. One of more noticeable cases are ARM's RISC  architecture being used in mobile devices instead of the more popular and robust x86 CISC (Complex Instruction Set Computer) architecture in favour of simplicity, cost and lower power consumption \autocite{jamil_1995,blem_menon_sankaralingam_2013}. It has been shown that in low power applications, such as IoTs (Internet of Things), OISC implementation can be superior in power and data throughput comparing to traditional RISC architectures \autocite{yokota_saso_hara-azumi_2017, ahmed_sakamoto_anderson_hara-azumi_2015}. This project proposes to compare two novel RISC and OISC 8bit architectures and compare their performance, design complexity and efficiency.
 
 
-Project 3 aims:
-\begin{enumerate}
-	\item Compare how well OISC \texttt{MOVE} architecture would perform in low performance microcontroller application comparing to equivalent RISC architecture.
-	\item Study and explore RISC and OISC architectures.
-	\item View an alternative method of using OISC MOVE as SISO (single instruction, single operation) architecture.
-	
-\end{enumerate}
+\subsection{Aims and Objectives}
 
-
-The project has 3 main objectives:
+The project has three main objectives:
 \begin{enumerate}
-	\item Design and build a RISC based processor. As this is aimed for low power and performance applications it will be 8bit word processor with 4 general purpose registers, structure is similar to MIPS.
-	\item Design and build an OISC based processor. There are many different types of OISC processor, \texttt{MOVE} variant has been selected which is described in \refname{sec:theory} chapter. This type of OISC variant is also known as TTA (Transport Triggered Architecture). 
+	\item Design and build a RISC based processor. As this is aimed for low power and performance applications it will be 8bit word processor with four general purpose registers, structure is similar to MIPS.
+	\item Design and build an OISC based processor. There are many different types of OISC processor, \texttt{MOVE} variant has been selected which is described in \refname{sec:theory} chapter. This type of OISC architecture variant may be also named TTA (Transport Triggered Architecture). 
 	\item Design a fair benchmark that both processors could execute. This benchmark include different algorithms that are commonly used in controllers, IoT devices or similar low power microprocessor applications.
 \end{enumerate}
+
+\subsection{Supporting Theory}
+This section goes though supporting theory of RISC and OISC architectures.
+
+Principal functions of general OISC architecture should have advantage in performance and power consumption while having lower transistor count. This expectation is supported mainly by the following papers:\\
+$\bullet$ Using OISC \texttt{SUBLEQ} as a coprocessor for the MIPS-ISA processor to emulate the functionality of different classes shows desirable area/performance/power trade-offs \autocite{ahmed_sakamoto_anderson_hara-azumi_2015}.\\
+$\bullet$ Comparing OISC \texttt{SUBLEQ} multicore to RISC achieves better performance and lower energy for streaming data processing \autocite{yokota_saso_hara-azumi_2017}.
+More specific OISC type - \texttt{MOVE} has been researched since early 90s. It showed that \texttt{MOVE} can benefits of VLIW (very large instruction word) arrangement, classifying it as SIMO (single instruction, multiple operation) or SIMT (single instruction, multiple transports) architectures. Problem with all of these arrangement is that they exhibit poor or complex hardware utilization. OISC \texttt{MOVE} has been proposed as a design framework enabling lower complexity, better hardware utilization, and scalable performance \autocite{5348869}. A MOVE32INT architecture as been designed \autocite{Corporaal94move32int} and proven to be superior architecture to RISC. Using 1.6$\mu m$ fabrication technology RISC achieved 20MHz clock with 20Mops/second, MOVE32INT implemented using SoGs (Sea of Gates) achieved 80MHz with 320Mops/second \autocite{289981}.
+
+TTA framework as further used in other researches to implement Application-Specific Instruction Set Processors (ASIPs) to solve various problems. Some of the relevant examples are RSA calculation \autocite{6128530}; matrix inversion \autocite{1540373}; Fast Fourier Transform (FFT) \autocite{8682289}; IWEP, RC4 and 3DES encryption \autocite{922340}; Parallel Finite Impulse Response (FIR) filter \autocite{1511285}; Low-Density Parity-Check (LDPC) encoding \autocite{6855236}; Software Defined Radio (SDR) \autocite{7363689}. One of the most recent researches use TTA architecture to solve Compressive Sensing algorithms. It showed 9 times of energy efficiency that of FPGA implemented NIOS II processor, and theoretical 20 time energy efficiency that of ARM Cortex-A15 \autocite{8573494}. Most of these researches show that TTA has greater power efficiency, higher clock frequency, lower logic resource count. 
+
+These benefits come with an expense, VLIW has bigger instruction word therefore bigger program size. TTA especially suffers from this due to redundant instructions. Some proposed solutions are variable length instructions with templates, which reduced program size between 30\% and 44\%; \autocite{1213033,6893206}; compression based on arithmetic coding \autocite{4627144}; and method to remove redundant instructions \autocite{5403730}. 
+
+With proposed \texttt{MOVE} framework hardware utilisation shown to be improved by reducing transition activity \autocite{1207041}, reducing interconnects shown saving 13\% of energy \autocite{6972455} on small scale. A novel architecture named SynZEN also showed a further improvements by using adaptable processing unit and simple control logic \autocite{6403142}.
+
+There is a lack of research investigating and comparing more general purpose OISC \texttt{MOVE} 8bit processor for lower power applications.  The main theory for OISC architecture used in this project will be based on \autocite{ong_ang_seng_2010,gilreath_laplante_2003,kong_ang_seng_adejo_2010,dharshana_balasubramanian_arun_2016}.
+\\[1cm]
+
+Section \ref{sec:objectives} \ref{sec:theory} . Section \ref{sec:methods} explains both processor design choices and how each processor part is implemented on OISC and RISC processor. It also includes assembly design. In section \ref{sec:results}, results will be discussed, including benchmark methods. Summary and conclusion of design and results can be found in section \ref{sec:conclusion}. Appendix in section \ref{sec:appendix} includes any other information such as both processor instruction set.
+\input{7-conclusion.tex}

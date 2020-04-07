@@ -4,16 +4,15 @@
 \usepackage[utf8]{inputenc}
 %\usepackage{newunicodechar}
 %\usepackage{lmodern}
-%\usepackage{textgreek}
+\usepackage{textgreek}
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{caption}
+\usepackage[format=plain,labelfont={bf,it},font=it]{caption}
 \usepackage{enumitem}
 \usepackage{lipsum}
 \usepackage{listings}
-\usepackage{balance}
 
 
 \usepackage{tabularx}
@@ -36,7 +35,7 @@
 \counterwithin{figure}{subsection}
 \counterwithin{table}{subsection}
 
-\usepackage[backend=bibtex]{biblatex}
+\usepackage[backend=bibtex,style=numeric,sorting=none]{biblatex}
 \addbibresource{references.bib}
 
 % Our base colours
@@ -114,21 +113,27 @@
 	\pagebreak
 	\section{Abstract}\label{sec:abstract}
 	\input{1-abstract.tex}
+	
 	\section{Introduction}\label{sec:introduction}
 	\input{2-introduction.tex}
-	\section{Goals and Objective}\label{sec:objectives}
+
+	\section{Goals and Objectives}\label{sec:objectives}
 	\input{3-objectives.tex}
+
 	\section{Theory and Analytical Bases}\label{sec:theory}
 	\input{4-theory.tex}
+
 	\section{Technical Method}\label{sec:methods}
 	\input{5-methods.tex}
+
 	\section{Results and Analysis}\label{sec:results}
 	\input{6-results.tex}
+
 	\section{Conclusion}\label{sec:conclusion}
 	\input{7-conclusion.tex}
+
 	\section{References}
 	\printbibliography
-	\pagebreak
 	\onecolumn
 	\section{Appendix}\label{sec:appendix}
 	\input{8-appendix.tex}
