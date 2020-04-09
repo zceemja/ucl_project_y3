@@ -1,3 +1,4 @@
+% !TeX root = index.tex
 \iffalse
 This chapter looks specifically at your results.
 * You measured some samples. 
@@ -67,6 +68,8 @@ Much higher logic components in RISC can be also explained more complicated regi
 
 \subsubsection{Number of instructions}
 
+
+
 \subsubsection{Instruction composition}
 Function composition was executed with following code:
 
@@ -100,6 +103,22 @@ setup:
 \end{lstlisting}
 \end{blockpage}
 
+Results are represented in figure \ref{fig:instr_comp}. 
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{../tests/instr_comp.eps}
+	\caption{Graph of instruction composition for every benchmark program.}
+	\label{fig:instr_comp}
+\end{figure*}
+
+\subsubsection{Program space}
+Figure \ref{fig:program_size}
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../tests/program_size.eps}
+	\captionof{figure}{Bar graph showing effective size in bits each benchmark function is taking in program memeory.}
+	\label{fig:program_size}
+\end{colfigure}
 
 \subsection{Maximum clock frequency}
 

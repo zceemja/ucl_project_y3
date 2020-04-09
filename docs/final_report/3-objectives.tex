@@ -1,3 +1,4 @@
+% !TeX root = index.tex
 \iffalse
 This chapter describes your Goals and Objectives. 
 Indicate how your work is intended to expand on previous historical work.
@@ -11,15 +12,25 @@ electrical or electronic apparatus or device within the bounds
 of the department's educational mandate.
 \fi
 
-OISC \texttt{MOVE} has many benefits from VLIW and SIMO or SIMT design, however there is a lack of research investigating and comparing more general purpose OISC \texttt{MOVE} 8bit processor with short instruction word and SISO (single instruction, single operation) configuration.  The main theory for building both architectures will be based on following resources \autocite{ong_ang_seng_2010,gilreath_laplante_2003,kong_ang_seng_adejo_2010,dharshana_balasubramanian_arun_2016}.
 
-RISC architecture will be mainly based on MIPS architecture explained in \autocite{harris_harris_2013}, except it is 8bit and would have multiple optimisations. 
-This project has three main motivations:
+This project can be classified as Design and Construction which explores alternative designs of processor architecture and microarchitecture. :
 \begin{enumerate}
-	\item Compare how well OISC \texttt{MOVE} architecture would perform in low performance microcontroller application comparing to equivalent RISC architecture.
 	\item Study and explore computer architectures, SystemVerilog and assembly languages. 
-	\item View an alternative method of using OISC \texttt{MOVE} as SISO architecture, comparing to more commonly implemented TTAs architectures that are either VLIW SIMO type or SIMT.
+	\item Compare how well OISC \texttt{MOVE} architecture would perform in low performance microcontroller application comparing to equivalent and most commonly used RISC architecture.
+	\item View an alternative method of using OISC \texttt{MOVE} in a SISO (single instruction, single operation) structure, comparing to more commonly implemented TTAs VLIW architectures that are either SIMO or SIMT structure.
 \end{enumerate}
+
+
+\subsection{RISC Processor}
+As this is aimed for low power and performance applications it will be 8bit word processor with four general purpose registers, structure is similar to MIPS.
+RISC architecture will be mainly based on MIPS architecture explained in \autocite{harris_harris_2013}, except it this RISC processor would have 8bit databus and would have multiple optimisations related to 8bit limits. Some minimalistic ideas was also from \autocite{gilreath_laplante_2003}.
+
+
+\subsection{OISC Processor}
+There are number of different implementations that uses only single instruction. OISC \texttt{MOVE} has many benefits from VLIW and SIMO or SIMT design, however there is a lack of research investigating and comparing more general purpose OISC \texttt{MOVE} 8bit processor with short instruction word and SISO configuration.  The main theory for building OISC architecture will be based on \autocite{gilreath_laplante_2003}.
+
+\subsection{Benchmark}
+This benchmark include different algorithms that are commonly used in 8bit microcontrollers, IoT devices or similar low power microprocessor applications.
 
 
 \iffalse

@@ -37,6 +37,7 @@
 
 \usepackage[backend=bibtex,style=numeric,sorting=none]{biblatex}
 \addbibresource{references.bib}
+\renewcommand*{\bibfont}{\footnotesize}
 
 % Our base colours
 \definecolor{c1}{HTML}{ff7568} 
@@ -51,7 +52,6 @@
 	morestring=[b]",
 }
 \lstset{language=asm, basicstyle=\ttfamily, commentstyle=\color{gray}, emphstyle={\color{darkred}}}
-
 
 % This enviroment ensures that structures like listing and tables are not broken between columns or pages.
 \newenvironment{blockpage}

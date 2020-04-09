@@ -1,3 +1,4 @@
+% !TeX root = index.tex
 \iffalse
 This chapter lays out your approach. 
 What did you actually do to reach your goal, or attempt to reach your goal? 
@@ -158,7 +159,7 @@ RISC processor has very similar structure to OISC with two exceptions. Inputs to
 \subsection{Memory}\label{subsec:memory}
 This section describes how instruction memory (ROM) is implemented for both processors.
 
-\begin{figure*}
+\begin{figure*}[b]
 	\centering
 	\includegraphics[scale=0.35]{../resources/risc_mem.eps}
 	\caption{Digital diagram of RISC sliced ROM memory logic}
@@ -174,10 +175,10 @@ Before concatenating output of each ROM block into final four bytes, ROM outputs
 \begin{blockpage}
 \begin{lstlisting}[frame=single, language=Verilog, caption={RISC sliced ROM memory multiplexer arrangement Verilog code}, emph={ar, data}, label=code:rom_switch]
 case(ar)
-2'b00: data={q3,q2,q1,q0};
-2'b01: data={q0,q3,q2,q1};
-2'b10: data={q1,q0,q3,q2};
-2'b11: data={q2,q1,q0,q3};
+  2'b00: data={q3,q2,q1,q0};
+  2'b01: data={q0,q3,q2,q1};
+  2'b10: data={q1,q0,q3,q2};
+  2'b11: data={q2,q1,q0,q3};
 endcase
 \end{lstlisting}
 \end{blockpage}
@@ -185,7 +186,7 @@ endcase
 \subsubsection{OISC}
 OISC instructions are fixed 13 bits, which causes different problems to RISC sliced memory - non-standard memory word size. To implement ROM in FPGA, Altera Cyclone IV M9K memory configurable blocks were used. Each blocks as 9kB of memory each allowing 1024x9bit configuration. Combining three of such blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check, see figure \ref{fig:oisc_memory_slice}. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
 
-\begin{figure*}[b]
+\begin{figure*}[t]
 \begin{gather*}
 \overunderbraces{&\br{1}{ROM0}&\br{2}{ROM1}&\br{2}{ROM2}}%
 {&
@@ -223,7 +224,7 @@ OISC instructions are fixed 13 bits, which causes different problems to RISC sli
 \label{fig:oisc_memory_slice}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[t]
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_mem.eps}
 	\caption{Digital diagram of OISC instruction ROM logic}
@@ -244,14 +245,14 @@ IMO block is a solution to change immediate value which enabled dynamically calc
 \end{enumerate}
 Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
-\begin{figure*}
+\begin{figure*}[t]
 	\centering
 	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
 	\caption{Digital diagram of RISC immediate override system}
 	\label{fig:risc_imo}
 \end{figure*}
 
-\begin{figure*}
+\begin{figure*}[t]
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_decoder.eps}
 	\caption{Digital diagram of OISC instruction decoder}
