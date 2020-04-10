@@ -23,6 +23,7 @@ Give the facts, then give your analysis of the facts.
 Present your graphs, figures, tables, photos, and equations needed to show what you accomplished.
 Label everything clearly, using the recommendations given below in “Things to Look For”
 \fi
+
 \subsection{FPGA logic component composition}
 This subsection looks at test and its results to find how much FPGA logic components each processor takes and what is composition of each part.
 
@@ -65,45 +66,121 @@ Much higher logic components in RISC can be also explained more complicated regi
 
 \subsection{Benchmark Programs}
 
-
-\subsubsection{Number of instructions}
-
-
-
 \subsubsection{Instruction composition}
-Function composition was executed with following code:
+This test is performed to investigate instruction composition of each function to see how similar it is between RISC and OISC processors. 
+\begin{description}
+	\item[$\bullet$ MOVE] - All instructions that move data around internal processor registers.
+	\item[$\bullet$ ALU] - Instructions that are used to perform ALU operation.
+	\item[$\bullet$ MEMORY] - Instructions that are required to send/retrieve data from system memory, except stack.
+	\item[$\bullet$ STACK] - Instructions that push/pop data from memory stack.
+	\item[$\bullet$ COM] - Instruction(s) that send/receive data from communication block.
+	\item[$\bullet$ BRANCH] - Instructions that are used to make program branching.
+	\item[$\bullet$ OTHER] - Any other instructions.
+\end{description}
 
 \begin{blockpage}
-\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done}]
-setup:
-	JUMP .start
-.done:
-	JUMP .done
-.start:
-	; Setup values
-	; Call function
-	JUMP .done
-\end{lstlisting}
+	\arrayrulecolor{black}
+	\begin{tabular}{| c | p{0.65\linewidth} |} \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Name & Instructions \\\hline
+		MOVE & \texttt{MOVE, CPY0, CPY1, CPY2, CPY3, CI0, CI1, CI2} \\\hline
+		ALU & \texttt{%
+			ADD, ADDI,
+			SUB, SUBI,
+			AND, ANDI,
+			OR, ORI,
+			XOR, XORI,
+			DIV, MUL,
+			ADDC, SUBC,
+			INC, DEC,
+			SLL, SRL, 
+			SRA, GETAH
+		} \\\hline
+		MEMORY & \texttt{LWLO, LWHI, SWLO, SWHI} \\\hline
+		STACK  & \texttt{PUSH, POP} \\\hline
+		COM & \texttt{COM} \\\hline
+		BRANCH & \texttt{BEQ, BGT, BGE, BZ, JUMP, CALL, RET} \\\hline
+		\arrayrulecolor[rgb]{0,0,0}\hline
+	\end{tabular}
+	\captionof{table}{RISC processor instruction groups used in instruction composition test.}
+	\label{tab:instr_groups_risc}
 \end{blockpage}
 
 \begin{blockpage}
-\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done}]
-setup:
+	\arrayrulecolor{black}
+	\begin{tabular}{| c | p{0.65\linewidth}|} \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Name & Destination \\\hline
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}
+		MOVE & \texttt{REG0, REG1} \\\hline
+		ALU & \texttt{ALU0, ALU1} \\\hline
+		MEMORY & \texttt{MEM0, MEM1, MEM2, MEMLO, MEMHI} \\\hline
+		STACK  & \texttt{STACK}\\\hline
+		COM & \texttt{COMA, COMD}\\\hline
+		BRANCH & \texttt{BR0, BR1, BRZ}\\\hline
+		\arrayrulecolor[rgb]{0,0,0}\hline
+	\end{tabular}
+	\captionof{table}{OISC processor instruction desination groups used in instruction composition test}
+	\label{tab:instr_groups_oisc_dst}
+\end{blockpage}
+
+\begin{blockpage}
+	\arrayrulecolor{black}
+	\begin{tabular}{| c | p{0.65\linewidth} |} \hline 
+		\rowcolor[rgb]{0.82,0.82,0.82}
+		Name & Instructions \\\hline	
+		\arrayrulecolor[rgb]{0.82,0.82,0.82}	
+		MOVE & \texttt{ALU0, ALU1, REG0, REG1, PC0, PC1, NULL, IMMEDIATE} \\\hline
+		ALU & \texttt{ADD, ADDC, SUB, SUBC,
+		AND, OR, XOR, SLL,
+		SRL, EQ, GT, GE, NE,
+		LT, LE, MULLO, MULHI, DIV, MOD,
+		ADC, SBC, ROL, ROR} \\\hline
+		MEMORY & \texttt{MEM0, MEM1, MEM2, MEMLO, MEMHI} \\\hline
+		STACK  & \texttt{STACK} \\\hline
+		COM & \texttt{COMA, COMD} \\\hline
+		BRANCH & \texttt{BR0, BR1} \\\hline
+		\arrayrulecolor[rgb]{0,0,0}\hline
+	\end{tabular}
+	\captionof{table}{OISC processor instruction source groups used in instruction composition test}
+	\label{tab:instr_groups_oisc_src}
+\end{blockpage}
+
+Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in listings \ref{list:asm_risc_test} and \ref{list:asm_oisc_test} enabled both location to be static, not depending on test function executed.
+
+\begin{blockpage}
+	\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done} label=list:asm_risc_test]
+	setup:
+	JUMP .start
+	.done:
+	JUMP .done
+	.start:
+	; Setup values
+	; Call function
+	JUMP .done
+	\end{lstlisting}
+\end{blockpage}
+
+\begin{blockpage}
+	\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done} label={list:asm_oisc_test}]
+	setup:
 	BR1 .start @1
 	BR0 .start @0
 	BRZ 0x00
-.done:
+	.done:
 	BRZ 0x00
-.start:
+	.start:
 	; Setup values
 	; Call function
 	BR1 .done @1
 	BR0 .done @0
 	BRZ 0x00
-\end{lstlisting}
+	\end{lstlisting}
 \end{blockpage}
 
-Results are represented in figure \ref{fig:instr_comp}. 
+Each function recorded file then was further analysed and each instruction was grouped. Recorded program counter was used to find effective program space. This has been achieved by calculating unique instances of program counter and summing up instruction size for each of them. In RISC, dynamic instruction size has been taken into account. 
+
+Results or each function composition are represented in figure \ref{fig:instr_comp}. 
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{../tests/instr_comp.eps}
@@ -112,7 +189,8 @@ Results are represented in figure \ref{fig:instr_comp}.
 \end{figure*}
 
 \subsubsection{Program space}
-Figure \ref{fig:program_size}
+
+Figure \ref{fig:program_size} represents effective program size for each test function. Effective program size only includes instruction that been executed depending on argument, meaning that it does not fully represent complete function. A specific argument might cause branching and skipping some function code which would not be added to effective program size. In this test, the main objective is to look difference in instruction size required to execute the same function, therefore not representing full program size is not relevant. 
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../tests/program_size.eps}
