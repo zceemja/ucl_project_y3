@@ -236,6 +236,13 @@ This section describes RISC and OISC differences between instruction decoding an
 \subsubsection{RISC}
 Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
 
+\begin{figure*}[t]
+	\centering
+	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
+	\caption{Digital diagram of RISC immediate override system}
+	\label{fig:risc_imo}
+\end{figure*}
+
 
 IMO block is a solution to change immediate value which enabled dynamically calculated memory pointers, branches dependant on register value or any other function that needs instruction immediate value been replaced by calculated register value. IMO is controlled by control block and \textbf{cdi.imoctl} signal, which is changed by \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. When signal is \texttt{0h}, this block is transparent connecting \textbf{immr} directly to \textbf{imm}. When any of \texttt{CI} instructions executed, one of IMO register is overridden by \textit{reg1} value from register file. In order to override two or three bytes of immediate, \texttt{CI} instructions need to be executed in order. Only for one next instruction after last \texttt{CI} will have immediate bytes changed depending on what are values in \textit{IMO} registers.
 \\This circuit has two disadvantages: 
@@ -245,12 +252,10 @@ IMO block is a solution to change immediate value which enabled dynamically calc
 \end{enumerate}
 Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
-\begin{figure*}[t]
-	\centering
-	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
-	\caption{Digital diagram of RISC immediate override system}
-	\label{fig:risc_imo}
-\end{figure*}
+
+
+\subsubsection{OISC}
+OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
 
 \begin{figure*}[t]
 	\centering
@@ -259,8 +264,24 @@ Second point can be resolved by designing a circuit that would subtract the amou
 	\label{fig:oisc_decoder}
 \end{figure*}
 
-\subsubsection{OISC}
-OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
+\subsection{Assembly}\label{subsec:assembly}
+There are two steps between assembly code and its execution on a processor. First it needs to be converted to binary machine code. Secondly, binary data needs to be sliced to different parts described in section \ref{subsec:memory}. These slices also need to be converted into appropriate formats, as simulation, HDL synthesis and flashing memory directly to FPGA memory, all use different formats.
+
+A universal assembler was implemented with python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts - sections, definitions and macros. Definitions are keywords mapped to values which are saved in global label dictionary. Macros are a chunk of assembly code and is used as templates. 
+
+\begin{colfigure}
+	\centering
+	\includegraphics[scale=0.4]{../resources/assembler.eps}
+	\captionof{figure}{Flow chart of assember converting assembly code into machine code and memory binary.}
+	\label{fig:assembler}
+\end{colfigure}
+
+There are only two sections implemented in assembler - \texttt{.text} and \texttt{.data}. Section \texttt{.text} contains all machine instructions which will be stored in program ROM memory. Section \texttt{.data} is used for global and static data, and it will be written into RAM memory. This section contains values such as strings and structures uninitialised data as labels which data is RAM memory location. 
+
+Section \texttt{.text} is processed line by line. Each has label, instruction name and instruction arguments. Label however is optional, if line contains it, label is saved to global label dictionary with program address. If line instruction name is a macro, line is replaces by macro and instruction arguments are used as macro arguments. Otherwise instruction name is decoded and stored in instruction list with original arguments.
+
+After all instruction lines are completed, each stored instruction arguments are processed, labels are replaced with binary values, any other processing is done such as addition by constant, byte selection, etc. Completed list is then saved as raw binary. Similarly, \texttt{.data} section labels also replaced and it is saved as binary data.
+
 
 
 
