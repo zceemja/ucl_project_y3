@@ -29,6 +29,18 @@ RISC architecture will be mainly based on MIPS architecture explained in \autoci
 \subsection{OISC Processor}
 There are number of different implementations that uses only single instruction. OISC \texttt{MOVE} has many benefits from VLIW and SIMO or SIMT design, however there is a lack of research investigating and comparing more general purpose OISC \texttt{MOVE} 8bit processor with short instruction word and SISO configuration.  The main theory for building OISC architecture will be based on \autocite{gilreath_laplante_2003}.
 
+\subsection{Design Criteria}
+In order for fair comparison between both architectures, a common design criteria:
+\begin{description}
+	\item[$\bullet$] Minimal instruction size
+	\item[$\bullet$] Minimalistic design
+	\item[$\bullet$] 8bit data bus width
+	\item[$\bullet$] 16bit ROM address width
+	\item[$\bullet$] 24bit RAM address width
+	\item[$\bullet$] 16bit RAM word size
+\end{description}
+When constructing these points, time and equipment resources were taken into consideration. 
+
 \subsection{Benchmark}
 This benchmark include different algorithms that are commonly used in 8bit microcontrollers, IoT devices or similar low power microprocessor applications.
 

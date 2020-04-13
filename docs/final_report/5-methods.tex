@@ -115,6 +115,71 @@ As OISC requires only a single instruction, composition of instruction mainly re
 Decision was made to have source address to be eight bits to allow it be replaced with immediate value. Destination address was chosen to be as minimal as possible, leaving only four bits or 16 possible destinations. Final design has \textbf{15} destination and \textbf{41} source addresses. This is not the most space efficient design as 41 source addresses would require only six bits for address, wasting two bits every time non-immediate source is used.
 
 Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
+
+\subsection{Data flow} \label{sec:dataflow}
+\begin{landscape}
+	\subsubsection{RISC Datapath} \label{subsec:datapath}
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=\linewidth]{../resources/datapath.eps}
+		\caption{Digital diagram of RISC datapath}
+		\label{fig:datapath}	
+	\end{figure}
+	
+	Figure \ref{fig:datapath} above represents partial RISC datapath. Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:program_counter}, \ref{fig:stack_pointer} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
+	Data to register file is selected and saved with \textit{MUX0}. This data is delayed 1 cycle with \textit{R2} to match timing that of data is taken from memory. If \texttt{LWLO} or \texttt{LWHI} is executed, \textit{MUX1} select high or low byte from memory to read. To compensate for timing as value written to register file is delayed by 1 cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}.\\
+\end{landscape}
+
+
+\subsubsection{OISC Datapath} \label{subsec:oisc_cells}
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../resources/oisc_cell_in.eps}
+	\captionof{figure}{OISC processor data bus to destination connection logic}
+	\label{fig:oisc_cell_in}
+\end{colfigure}
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../resources/oisc_cell_out.eps}
+	\captionof{figure}{OISC processor data bus to source connection logic}
+	\label{fig:oisc_cell_out}
+\end{colfigure}
+
+
+\subsection{Stack} \label{subsec:stack}
+
+\subsubsection{RISC}
+RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the digital diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
+
+One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. The solution to this may be implemented in future.
+
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=\linewidth]{../resources/risc_stack.eps}
+	\caption{Digital diagram of RISC stack pointer logic}
+	\label{fig:risc_stack}
+
+\end{figure*}
+
+\subsubsection{OISC}
+
+\subsection{Program Counter} \label{subsec:pc}
+
+\subsubsection{RISC}
+
+\begin{figure*}[h!]
+	\centering
+	\includegraphics[width=\linewidth]{../resources/risc_pc.eps}
+	\caption{Digital diagram of RISC program counter}
+	\label{fig:risc_pc}
+\end{figure*}
+
+Figure \ref{fig:risc_pc} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
+
+\subsubsection{OISC}
+
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
 
 \begin{figure*}[b]
@@ -150,13 +215,13 @@ This section will discuss ALU implementations of both processors. For fair compa
 	\label{tab:alu_set}
 \end{blockpage}
 
-\subsubsection{OISC}
+\subsubsection{OISC ALU}
 Due to the structure of OISC processor, ALU source A and B are two latches that are written into when \texttt{ALU0} or \texttt{ALU1} destination address is present. ALU sources are connected with every ALU operator and performed in single clock cycle. This value is stored in register so that it would immediately available in a next clock cycle as a source data. Figure \ref{fig:oisc_alu} represents logic diagram of ALU with only addition and multiplication operators present. Note that output of \textit{EQ3} is connected to enable of \textit{REG3}, enabling output of carry to be only read after \texttt{ADD} source is requested. This previous source memory is also used for \texttt{SUB}, \texttt{ROL} and \texttt{ROR} operations. This allows processor to perform other operations such as store or load values, before accessing carry bit, or carried byte for \texttt{ROL} and \texttt{ROR} operations.
 
-\subsubsection{RISC}
+\subsubsection{RISC ALU}
 RISC processor has very similar structure to OISC with two exceptions. Inputs to ALU comes from logic router that decided how to route data in datapath. Output buffers are replaced by one multiplexer that selects single output from all ALU operations. Another point is that RISC ALU output is 16bit, higher byte saved in "ALU high byte register" for \texttt{MUL}, \texttt{MOD}, \texttt{ROL} and \texttt{ROR} operations. This register is accessible with \texttt{GETAH} instruction.
 
-\subsection{Memory}\label{subsec:memory}
+\subsection{Program Memory}\label{subsec:memory}
 This section describes how instruction memory (ROM) is implemented for both processors.
 
 \begin{figure*}[b]
@@ -166,7 +231,7 @@ This section describes how instruction memory (ROM) is implemented for both proc
 	\label{fig:risc_mem}
 \end{figure*}
 
-\subsubsection{RISC}
+\subsubsection{RISC Program Memory}
 In order to allow dynamic instruction size from one to four bytes a special memory arrangement is made. A system was required to access word (8bits) from memory and next three words. To achieve this four ROM blocks been utilised, each containing one fourth of sliced original data. Input address is offset by adders \textit{ADDER1-3} and further divided by four by removing two least significant bits at \textbf{addr0-3}. 
 Before concatenating output of each ROM block into final four bytes, ROM outputs \textbf{q0-3} are rearranged depending on \textbf{ar} signal. Note that \textit{MUX1-4} each input is different, this may be better visualised with Verilog code in listing \ref{code:rom_switch}.
 
@@ -183,7 +248,7 @@ endcase
 \end{lstlisting}
 \end{blockpage}
 
-\subsubsection{OISC}
+\subsubsection{OISC Program Memory}
 OISC instructions are fixed 13 bits, which causes different problems to RISC sliced memory - non-standard memory word size. To implement ROM in FPGA, Altera Cyclone IV M9K memory configurable blocks were used. Each blocks as 9kB of memory each allowing 1024x9bit configuration. Combining three of such blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check, see figure \ref{fig:oisc_memory_slice}. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
 
 \begin{figure*}[t]
@@ -233,7 +298,7 @@ OISC instructions are fixed 13 bits, which causes different problems to RISC sli
 
 \subsection{Instruction decoding}\label{subsec:imm_values}
 This section describes RISC and OISC differences between instruction decoding and immediate value handling.
-\subsubsection{RISC}
+\subsubsection{RISC} \label{subsec:imo}
 Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
 
 \begin{figure*}[t]
@@ -252,12 +317,10 @@ IMO block is a solution to change immediate value which enabled dynamically calc
 \end{enumerate}
 Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
-
-
 \subsubsection{OISC}
 OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
 
-\begin{figure*}[t]
+\begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_decoder.eps}
 	\caption{Digital diagram of OISC instruction decoder}
@@ -267,8 +330,6 @@ OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc
 \subsection{Assembly}\label{subsec:assembly}
 There are two steps between assembly code and its execution on a processor. First it needs to be converted to binary machine code. Secondly, binary data needs to be sliced to different parts described in section \ref{subsec:memory}. These slices also need to be converted into appropriate formats, as simulation, HDL synthesis and flashing memory directly to FPGA memory, all use different formats.
 
-A universal assembler was implemented with python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts - sections, definitions and macros. Definitions are keywords mapped to values which are saved in global label dictionary. Macros are a chunk of assembly code and is used as templates. 
-
 \begin{colfigure}
 	\centering
 	\includegraphics[scale=0.4]{../resources/assembler.eps}
@@ -276,13 +337,15 @@ A universal assembler was implemented with python for both processors. Flowchart
 	\label{fig:assembler}
 \end{colfigure}
 
+A universal assembler was implemented with python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts - sections, definitions and macros. Definitions are keywords mapped to values which are saved in global label dictionary. Macros are a chunk of assembly code and is used as templates. 
+
 There are only two sections implemented in assembler - \texttt{.text} and \texttt{.data}. Section \texttt{.text} contains all machine instructions which will be stored in program ROM memory. Section \texttt{.data} is used for global and static data, and it will be written into RAM memory. This section contains values such as strings and structures uninitialised data as labels which data is RAM memory location. 
 
 Section \texttt{.text} is processed line by line. Each has label, instruction name and instruction arguments. Label however is optional, if line contains it, label is saved to global label dictionary with program address. If line instruction name is a macro, line is replaces by macro and instruction arguments are used as macro arguments. Otherwise instruction name is decoded and stored in instruction list with original arguments.
 
 After all instruction lines are completed, each stored instruction arguments are processed, labels are replaced with binary values, any other processing is done such as addition by constant, byte selection, etc. Completed list is then saved as raw binary. Similarly, \texttt{.data} section labels also replaced and it is saved as binary data.
 
-
+\subsection{System setup}\label{subsec:setup}
 
 
 
