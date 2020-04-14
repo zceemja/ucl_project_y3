@@ -66,6 +66,11 @@ Much higher logic components in RISC can be also explained more complicated regi
 
 \subsection{Benchmark Programs}
 
+\colorbox{yellow}{\parbox{\columnwidth}{Description of each function in benchmark to be added.}}
+
+\subsubsection{Performance}
+\colorbox{yellow}{\parbox{\columnwidth}{Data of benchmark functions timings to be added.}}
+
 \subsubsection{Instruction composition}
 This test is performed to investigate instruction composition of each function to see how similar it is between RISC and OISC processors. 
 \begin{description}
@@ -146,10 +151,10 @@ This test is performed to investigate instruction composition of each function t
 	\label{tab:instr_groups_oisc_src}
 \end{blockpage}
 
-Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in listings \ref{list:asm_risc_test} and \ref{list:asm_oisc_test} enabled both location to be static, not depending on test function executed.
+Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in listings \ref{asmrisctest} and \ref{asm_oisc_test} enabled both location to be static, not depending on test function executed.
 
 \begin{blockpage}
-	\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done} label=list:asm_risc_test]
+	\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done} label=asmrisctest]
 	setup:
 	JUMP .start
 	.done:
@@ -162,7 +167,7 @@ Each function was ran on simulated processor, program counter and instruction be
 \end{blockpage}
 
 \begin{blockpage}
-	\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done} label={list:asm_oisc_test}]
+	\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done} label=asm_oisc_test]
 	setup:
 	BR1 .start @1
 	BR0 .start @0
@@ -199,5 +204,6 @@ Figure \ref{fig:program_size} represents effective program size for each test fu
 \end{colfigure}
 
 \subsection{Maximum clock frequency}
+\colorbox{yellow}{Description to be added.}
 
-\subsection{}
+

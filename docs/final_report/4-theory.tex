@@ -21,11 +21,11 @@ These
 
 In this section differences in RISC and OISC are explained. It includes predictions and theory behind it. 
 
-This paper will be exploring is classical SISO (single instruction, single operation) processor. TTAs described section \ref{subsec:supporting_theory} are usually of type SIMT (single instruction, multiple transports) \autocite{289981}; A middle between these two classes is SIMO type (single instruction, multiple operation)
+This paper will be exploring is classical SISO processors. TTAs described section \ref{subsec:supporting_theory} are usually of type SIMT (single instruction, multiple transports) \autocite{289981}; A middle between these two classes is SIMO type (single instruction, multiple operation).
 
 \subsection{RISC Processor}
 
-\begin{figure*}[b!]
+\begin{figure*}[t!]
 	\centering
 	\includegraphics[width=\linewidth]{../resources/risc.eps}
 	\caption{Abstract diagram of proposed RISC structure}
@@ -73,8 +73,13 @@ Multicore processor requires software adjustments as each processor core would e
 
 Figure \ref{fig:oisc_simple} represents simplified structure of OISC MOVE architecture. In simplest case, processor has a pair of buses - data and instruction. Instruction bus has source and destination address that connects two parts of processor via data bus. This mechanism allows data to flow around processor. Computation is accomplished by setting accumulators at destination addresses and taking computed values from source addresses. Other actions can be performed by at destination node for instance check value for branching or sending data to memory. 
 
+\colorbox{yellow}{Needs to be finished.}
+
+\subsection{Predictions}
+\colorbox{yellow}{To be added.}
 % Compare pipelining + software
 \vfill
+
 
 
 

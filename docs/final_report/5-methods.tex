@@ -116,8 +116,8 @@ Decision was made to have source address to be eight bits to allow it be replace
 
 Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
 
-\subsection{Data flow} \label{sec:dataflow}
 \begin{landscape}
+	\subsection{Data flow} \label{sec:dataflow}
 	\subsubsection{RISC Datapath} \label{subsec:datapath}
 	\begin{figure}[h!]
 		\centering
@@ -126,7 +126,7 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 		\label{fig:datapath}	
 	\end{figure}
 	
-	Figure \ref{fig:datapath} above represents partial RISC datapath. Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:program_counter}, \ref{fig:stack_pointer} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
+	Figure \ref{fig:datapath} above represents partial RISC datapath. Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:risc_pc}, \ref{fig:risc_stack} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
 	Data to register file is selected and saved with \textit{MUX0}. This data is delayed 1 cycle with \textit{R2} to match timing that of data is taken from memory. If \texttt{LWLO} or \texttt{LWHI} is executed, \textit{MUX1} select high or low byte from memory to read. To compensate for timing as value written to register file is delayed by 1 cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}.\\
 \end{landscape}
 
@@ -147,27 +147,29 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 	\label{fig:oisc_cell_out}
 \end{colfigure}
 
+\colorbox{yellow}{Description to be added.}
 
 \subsection{Stack} \label{subsec:stack}
 
-\subsubsection{RISC}
+\subsubsection{RISC Stack}
 RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the digital diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
 
-One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. The solution to this may be implemented in future.
+One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. However with current implementation this does not affect processor comparison, it only increases stack size in memory.
 
 \begin{figure*}[h!]
 	\centering
 	\includegraphics[width=\linewidth]{../resources/risc_stack.eps}
 	\caption{Digital diagram of RISC stack pointer logic}
 	\label{fig:risc_stack}
-
 \end{figure*}
 
-\subsubsection{OISC}
+\subsubsection{OISC Stack}
+
+\colorbox{yellow}{Description to be added.}
 
 \subsection{Program Counter} \label{subsec:pc}
 
-\subsubsection{RISC}
+\subsubsection{RISC PC}
 
 \begin{figure*}[h!]
 	\centering
@@ -178,7 +180,9 @@ One of the problems with the current stack pointer implementation is 8bit data s
 
 Figure \ref{fig:risc_pc} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
 
-\subsubsection{OISC}
+\subsubsection{OISC PC}
+
+\colorbox{yellow}{Description to be added.}
 
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
 
@@ -301,7 +305,7 @@ This section describes RISC and OISC differences between instruction decoding an
 \subsubsection{RISC} \label{subsec:imo}
 Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
 
-\begin{figure*}[t]
+\begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/risc_imo.eps}
 	\caption{Digital diagram of RISC immediate override system}
@@ -328,14 +332,9 @@ OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc
 \end{figure*}
 
 \subsection{Assembly}\label{subsec:assembly}
+
 There are two steps between assembly code and its execution on a processor. First it needs to be converted to binary machine code. Secondly, binary data needs to be sliced to different parts described in section \ref{subsec:memory}. These slices also need to be converted into appropriate formats, as simulation, HDL synthesis and flashing memory directly to FPGA memory, all use different formats.
 
-\begin{colfigure}
-	\centering
-	\includegraphics[scale=0.4]{../resources/assembler.eps}
-	\captionof{figure}{Flow chart of assember converting assembly code into machine code and memory binary.}
-	\label{fig:assembler}
-\end{colfigure}
 
 A universal assembler was implemented with python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts - sections, definitions and macros. Definitions are keywords mapped to values which are saved in global label dictionary. Macros are a chunk of assembly code and is used as templates. 
 
@@ -345,7 +344,16 @@ Section \texttt{.text} is processed line by line. Each has label, instruction na
 
 After all instruction lines are completed, each stored instruction arguments are processed, labels are replaced with binary values, any other processing is done such as addition by constant, byte selection, etc. Completed list is then saved as raw binary. Similarly, \texttt{.data} section labels also replaced and it is saved as binary data.
 
+\begin{colfigure}
+	\centering
+	\includegraphics[scale=0.4]{../resources/assembler.eps}
+	\captionof{figure}{Flow chart of assember converting assembly code into machine code and memory binary.}
+	\label{fig:assembler}
+\end{colfigure}
+
 \subsection{System setup}\label{subsec:setup}
+
+\colorbox{yellow}{\parbox{\columnwidth}{Description to be added. Include FPGA used, makefile, how programs are flashed into memory via JTAG and debugging tools}}
 
 
 
