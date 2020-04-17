@@ -64,6 +64,31 @@ Other logic includes instruction decoding with ROM, register file, program count
 
 Much higher logic components in RISC can be also explained more complicated register file, ROM memory logic and program counter. All of these components has some additional logic for timing correction or additional functionality required by these blocks integration into datapath.
 
+\subsection{Power analysis}
+
+Power analysis was performed to analyse power consumption of both processors.
+This has been accomplished by connecting FPGA board to a laboratory power supply with 4V to an external power input. A shunt resistor of was used of 1.020$\Omega$ was connected in series to calculate current. Supply voltage and voltage across shut resistor were measured using oscilloscope with data sampling feature. Multiple tests have been performed with different processor configurations. Between each tests a period of about 5 minutes was given for FPGA to reach steady state. 
+
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../tests/power.eps}
+	\captionof{figure}{Measured power of processors when implemented on FPGA, running 16bit multiplication function in loop. None indicates auxiliary-only power.}
+	\label{fig:power}
+\end{colfigure}
+
+Figure \ref{fig:power} represents power results. Auxiliary power includes whole FPGA board, voltage regulators, and synthesised logic on FPGA required to support a processor (such as PLL, UART, Input/Output control, RAM). RISC and OISC bars in the graph indicate auxiliary power plus processor power, which means that the processor itself takes relatively small amount comparing to auxiliary power, about 0.5\%.
+
+During this test clock frequency of 1MHz was used. Due to equipment unavailability, further tests were not carried out to investigate power consumption at different frequencies. 
+
+\subsubsection{Activity Factor}
+An activity factor could be also found using Equation \ref{eq:activity_factor} where $P$ is power, $C_{total}$ indicate total gate capacitance and $V_{DD}$ indicate voltage supplied to the transistors.
+\begin{align}\label{eq:activity_factor}
+\alpha = \frac{P}{C_{total}\cdot f \cdot V_{DD}^2}
+\end{align}
+As $C_{total}$ and $V_{DD}$ are constants, measuring power at different frequencies allows finding activity factor. This value could be used to compare how much of a processor circuit is active. Further design improvements could be used to optimise power \autocite{8682289,7363689,1207041,6972455}.
+
+
 \subsection{Benchmark Programs}
 
 \colorbox{yellow}{\parbox{\columnwidth}{Description of each function in benchmark to be added.}}
@@ -204,6 +229,34 @@ Figure \ref{fig:program_size} represents effective program size for each test fu
 \end{colfigure}
 
 \subsection{Maximum clock frequency}
-\colorbox{yellow}{Description to be added.}
+To find maximum clock frequency, processors were loaded with basic print string function an d 16bit multiplication. Then frequency was constantly increased until resulting output though UART was not correct. 
 
+In order to change clock frequency, three parameters were changed and HDL code resynthesised: 
+\begin{description}
+	\item[$\bullet$ PLL frequency multiplier and divider:]
+	PLL takes 50MHz clock that is sourced from crystal on FPGA board and converts it to master clock $f_{mclk}$. Multiplier and divider values are used to adjust $f_{mclk}$.
+	
+	\item[$\bullet$ UART frequency divider:]
+	Division value was calculated as $D = \left \lfloor \frac{f_{mclk}}{4 f_{baud}} \right \rfloor$. UART rate was set to 9600 baud. UART module itself has four times oversample. 
+\end{description}
+Frequency was changed in 5MHz increments. 
+
+Theoretical maximum frequency was found using Quartus Timing Analysis tool. Slow 1200mV 85$^{\circ}$C model was used. 
+
+\begin{center}
+	\begin{tabular}{ l | c | c  }
+		     & Theoretical & Actual \\ \hline
+		RISC & 114.08MHz & 75-70MHz \\ \hline
+		OISC & 64.68MHz & 45-40MHz \\
+	\end{tabular}
+	\captionof{table}{Theoretical and actual maximum frequencies of both processors.}
+	\label{tab:max_freq}
+\end{center}
+
+Theoretical and actual results show unexpected results shown in Table \ref{tab:max_freq}, RISC operated at about 40\% higher maximum frequency than OISC.
+
+As explained in Subsection \ref{subsec:oisc_cell_issue}, OISC logic blocks has about twice less time for data propagation. Keeping that in mind, and assuming that latch propagation and register setup periods are insignificant to critical path of OISC logic block, maximum OISC frequency could be double as high as, reaching 80-90MHz. This also assumes that there is no other part of processor would have limit. Further timing analysis needs to be carried out to confirm this.
+
+\subsection{Future work}
+\colorbox{yellow}{Description to be added.}
 

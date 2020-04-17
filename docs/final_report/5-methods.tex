@@ -133,12 +133,17 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 
 \subsubsection{OISC Datapath} \label{subsec:oisc_cells}
 
+OISC datapath only consists of instruction and data buses, and small circuit that connect them to logic blocks that process the data. These logic blocks can represent ALU operation combinational logic, or any other part of a processor.
+
+Figure \ref{fig:oisc_cell_in} represents common destination circuit. It checks if particular block destination matches one on instruction bus, then enables latch and also sets flag to further logic. 
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../resources/oisc_cell_in.eps}
 	\captionof{figure}{OISC processor data bus to destination connection logic}
 	\label{fig:oisc_cell_in}
 \end{colfigure}
+
+Similarly Figure \ref{fig:oisc_cell_out} represents source circuit connecting output of logic block. As logic block may only involve combinational logic a register is placed at the output of it. Buffer is used to connect data in register to data bus. This ensures that only one bus driver is present, ensuring do data collision. 
 
 \begin{colfigure}
 	\centering
@@ -147,16 +152,24 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 	\label{fig:oisc_cell_out}
 \end{colfigure}
 
-\colorbox{yellow}{Description to be added.}
+The general timing is designed so that the information at the source is immediately ready in data bus at rise of the processor clock. The source is connected to the destination connection where combinational logic is present. 
+
+\subsubsection{OISC Datapath Implementation Problems} \label{subsec:oisc_cell_issue}
+
+The complete implementation using latches for destination was not successful. Latches did not operate correctly when synthesised on FPGA. This issue might be caused by some timing problem between some source and destination logic combination. Exact cause was not resolved.
+
+As a quick solution, latches at destination has been replaced with a clocked register that is triggered at opposite to source register clock edge (negative). This resolved this issue, however it effectively reduce period that data can propagate though logic blocks between source and destination by two.
 
 \subsection{Stack} \label{subsec:stack}
+This section describes RISC and OISC dedicated logic for stack pointer control. Stack pointer starts from the highest memory address value and "stacks" to lower memory address values. Both designs were simplified to only operate on two byte addresses, meaning that stack pointer has a constant \texttt{0xFF} value at least significant byte. 
+
 
 \subsubsection{RISC Stack}
 RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the digital diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
 
 One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. However with current implementation this does not affect processor comparison, it only increases stack size in memory.
 
-\begin{figure*}[h!]
+\begin{figure*}
 	\centering
 	\includegraphics[width=\linewidth]{../resources/risc_stack.eps}
 	\caption{Digital diagram of RISC stack pointer logic}
@@ -165,11 +178,26 @@ One of the problems with the current stack pointer implementation is 8bit data s
 
 \subsubsection{OISC Stack}
 
-\colorbox{yellow}{Description to be added.}
+Stack pointer in OISC is very similar to RISC. In basic operation, when reset, push or pop flags are set, it changes the state of stack pointer by adding or subtracting its value by one, or resetting it to default. Logic diagram is shown in Figure \ref{fig:oisc_stack}
+\begin{figure*}[b]
+	\centering
+	\includegraphics[scale=0.4]{../resources/oisc_stack.eps}
+	\caption{Digital diagram of OISC stack pointer logic}
+	\label{fig:oisc_stack}
+\end{figure*}
 
-\subsection{Program Counter} \label{subsec:pc}
+Logic diagram of stack control unique to OISC processor is shown in Figure \ref{fig:oisc_stack_2}. Push and pop flags are taken from source and destination logic. A cached value of last stored value is kept, so that it would be immediately available on source request. Pop flag is delayed by one cycle which ensures that once popped, lower stack value is written to cache during next cycle.
+\begin{figure*}
+	\centering
+	\includegraphics[scale=0.4]{../resources/oisc_stack_2.eps}
+	\caption{Digital diagram of OISC stack control logic}
+	\label{fig:oisc_stack_2}
+\end{figure*}
 
-\subsubsection{RISC PC}
+\subsection{Program Counters} \label{subsec:pc}
+In this subsection, program counter and their differences will be described.
+
+\subsubsection{RISC Program Counter}
 
 \begin{figure*}[h!]
 	\centering
@@ -180,9 +208,43 @@ One of the problems with the current stack pointer implementation is 8bit data s
 
 Figure \ref{fig:risc_pc} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
 
-\subsubsection{OISC PC}
+\subsubsection{OISC Program Counter}
+ 
+ OISC program counter is much simpler than RISC, as it does not have variable length instruction, delay flags instructions, or logic for selecting branch source address. 
+ 
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../resources/oisc_pc.eps}
+	\captionof{figure}{Digital diagram of OISC program counter}
+	\label{fig:oisc_pc}
+\end{colfigure}
 
-\colorbox{yellow}{Description to be added.}
+Looking at Figure \ref{fig:oisc_pc} bottom, the basic operation is to just add one to previous program counter with \textit{ADDER1} and \textit{REG1}, reset it to zero at reset with \textit{MUX2}. Two destination logic blocks are used as accumulators to store branch address. Once instruction with BRZ destination is executed, \textit{EQ2} check if data bus value is zero, which enables \textit{MUX1} and overrides program counter to address stored in \texttt{BR0} and \texttt{BR1} accumulators. Unlike in RISC however, it requires three instructions to set new address and jump. Similarly, \textit{CALL} and \textit{RET} requires five and three instructions respectively. These RISC equivalent instructions are show in Listing \ref{code:oisc_jump}.
+
+\begin{blockpage}
+	\begin{lstlisting}[frame=single, emph={JUMP, CALL, RET, return}, label=code:oisc_jump, caption={OISC assembly code emulating RISC \texttt{JUMP}, \texttt{CALL} and \texttt{RET} instructions.}]
+%macro JUMP 1
+  BR1 %1 @1
+  BR0 %1 @0
+  BRZ 0x00
+%endmacro
+
+%macro CALL 1
+  BR1 %1 @1
+  BR0 %1 @0
+  STACK %%return @1
+  STACK %%return @0
+  BRZ 0x00
+  %%return:
+%endmacro
+
+%macro RET 0
+  BR0 STACK
+  BR1 STACK
+  BRZ 0x00
+%endmacro
+	\end{lstlisting}
+\end{blockpage}
 
 \subsection{Arithmetic Logic Unit}\label{subsec:alu}
 
