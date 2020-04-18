@@ -96,28 +96,14 @@ A number of and programs have been written to test both processors. These involv
 	\item[$\bullet$ Printing:] Sends data to UART. It includes waiting until UART is available for transmission. 
 	\item[$\bullet$ Printing unsinged integer:] Uses binary-coded decimal algorithm to convert 8 or 16bit binary value to decimal value and print it. 
 	\item[$\bullet$ 16bit multiplication:] Uses simple matrix multiplication. 
-	\item[$\bullet$ 16bit division:] Uses Long division algorithm to divide two 16bit numbers, including reminder.
-	\item[$\bullet$ 16bit modulus:] Uses "Russian Peasant Multiplication" algorithm to perform Modulo operation with two 16bit numbers.
-	\item[$\bullet$ Prime number calculator:] Uses Sieve of Atkins algorithm to calculate primer numbers up to from number 5 to $2^{16}$. 
+	\item[$\bullet$ 16bit division:] Uses Long division algorithm to divide two 16bit numbers, result including a reminder.
+	\item[$\bullet$ 16bit modulo:] Uses "Russian Peasant Multiplication" algorithm to perform Modulo operation with two 16bit numbers.
+	\item[$\bullet$ Prime number calculator:] Uses Sieve of Atkins algorithm to calculate primer number, operates on 16bit numbers and utilise 16bit multiplication and modulo functions. 
 \end{description}
-
-\subsubsection{Performance}
-This subsection investigates time and clock cycles to run benchmark programs. Simulation was sued to find a number of cycles required to execute each function. 
-
-Print 16bit decimal and modulus were executed with different arguments to show the worst and the best case scenarios as algorithms length depend on inputs. This is not the case for 16bit multiplication as this it has no branching. 
-
-Results are shown in Figure \ref{fig:cycles}. In most cases, OISC requires around 55-67\% more instruction, with some exceptions. These results can be better explained in following subsection \ref{subsec:instr_comp}.
-
-\begin{colfigure}
-	\centering
-	\includegraphics[width=\linewidth]{../tests/cycles.eps}
-	\captionof{figure}{Simulated results of cycles that taken to perform function.}
-	\label{fig:cycles}
-\end{colfigure}
-
 
 
 \subsubsection{Instruction composition}\label{subsec:instr_comp}
+
 This test is performed to investigate instruction composition of each function to see how similar it is between RISC and OISC processors. 
 \begin{description}
 	\item[$\bullet$ MOVE] - All instructions that move data around internal processor registers.
@@ -212,6 +198,13 @@ Each function was ran on simulated processor, program counter and instruction be
 	\end{lstlisting}
 \end{blockpage}
 
+\begin{figure*}[ht!]
+	\centering
+	\includegraphics[width=\linewidth]{../tests/instr_comp.eps}
+	\caption{Graph of instruction composition for every benchmark program.}
+	\label{fig:instr_comp}
+\end{figure*}
+
 \begin{blockpage}
 	\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done} label=asm_oisc_test]
 	setup:
@@ -231,13 +224,43 @@ Each function was ran on simulated processor, program counter and instruction be
 
 Each function recorded file then was further analysed and each instruction was grouped. Recorded program counter was used to find effective program space. This has been achieved by calculating unique instances of program counter and summing up instruction size for each of them. In RISC, dynamic instruction size has been taken into account. 
 
-Results or each function composition are represented in figure \ref{fig:instr_comp}. 
-\begin{figure*}[t]
+From results in Figure \ref{fig:instr_comp} few key differences can be seen. Across every test, OISC has much more \textit{BRANCH} destination and \textit{MOVE} source groups. \textit{BRANCH} group can be explained by emulated \texttt{CALL}, \texttt{RET} and \texttt{JUMP} instruction explained in section \ref{subsec:oisc_pc}.
+High number of \textit{MOVE} source group instructions may be explained by using immediate values as separate source, where RISC uses instruction that integrate with immediate in instructions such as \texttt{ADDI}. In most cases \textit{ALU} group instructions are also higher than for OISC comparing to RISC. This shows lower OISC ALU efficiency, mostly due to need to move data to septate accumulators.
+
+\subsubsection{Performance}
+This subsection investigates time and clock cycles to run benchmark programs. Simulation was sued to find a number of cycles required to execute each function. Note that prime number calculator was not simulated due to too complex dynamic nature of program. 
+
+Print 16bit decimal and modulo operation were executed with different arguments to show the worst and the best case scenarios as algorithms length depend on inputs. This is not the case for 16bit multiplication as this it has no branching. 
+
+Results are shown in Figure \ref{fig:cycles}. In most cases, OISC requires around 55-67\% more instruction, with some exceptions. These results can be better explained in following subsection \ref{subsec:instr_comp}.
+
+\begin{colfigure}
 	\centering
-	\includegraphics[width=\linewidth]{../tests/instr_comp.eps}
-	\caption{Graph of instruction composition for every benchmark program.}
-	\label{fig:instr_comp}
-\end{figure*}
+	\includegraphics[width=\linewidth]{../tests/cycles.eps}
+	\captionof{figure}{Simulated results of cycles that taken to perform function.}
+	\label{fig:cycles}
+\end{colfigure}
+
+Another set of benchmarks have been performed and on both processors once they been implemented on FPGA. Time taken for perform each set has been recorded. This have been done via UART connection, a single character was sent to indicate start and stop of benchmark. In order to void slight timing variation due low baud rate of UART, each benchmark was performed many iterations. Figure \ref{fig:timing} represents results.
+
+\begin{colfigure}
+	\centering
+	\includegraphics[width=\linewidth]{../tests/timing.eps}
+	\captionof{figure}{Time taken perform each benchmark on FPGA.}
+	\label{fig:timing}
+\end{colfigure}
+
+Results indicate that on average OISC takes about 71\% longer to execute same benchmark. This is close to results found with simulation. Prime number calculator have taken 3.26 times longer.
+
+Benchmarks include:
+\begin{description}
+	\item[$\bullet$ Prime Numbers:] Calculate every prime number between 5 to $2^{16}$.  
+	\item[$\bullet$ Multipy:] 16bit multiplication iterated 65536 times.
+	\item[$\bullet$ Modulo 0010h:] 16bit \textit{0010h} modulo that operated on every number between 0 and 65536.
+	\item[$\bullet$ Modulo FFFFh:] 16bit \textit{FFFFh} modulo that operated on every number between 0 and 65536.
+	\item[$\bullet$ BDC:] Encoded 16bit binary to ASCII decimal number without printing.
+\end{description}
+
 
 \subsubsection{Program space}
 
@@ -248,6 +271,9 @@ Figure \ref{fig:program_size} represents effective program size for each test fu
 	\captionof{figure}{Bar graph showing effective size in bits each benchmark function is taking in program memeory.}
 	\label{fig:program_size}
 \end{colfigure}
+
+
+
 
 \subsection{Maximum clock frequency}
 To find maximum clock frequency, processors were loaded with basic print string function an d 16bit multiplication. Then frequency was constantly increased until resulting output though UART was not correct. 

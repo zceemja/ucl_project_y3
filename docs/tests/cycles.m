@@ -54,6 +54,27 @@ legend("RISC", "OISC");
 grid on
 %set(gcf, 'Color', 'None')
 
+%%
+data = [
+    20.316 3.474 26.438 2.033 14.705
+    66.126 3.998 48.040 3.542 23.044
+]';
+grid on
+legend
+B = bar(1:length(data),data);
+x_labels = [
+    {'Prime Numbers'}
+    {'Multiply'}
+    {'Modulo 0010h'}
+    {'Modulo FFFFh'}
+    {'BCD'}
+];
+set(gca,'XTickLabel', x_labels);
+ylabel('Time (s)')
+title("Time taken for each benchmark")
+grid on
+legend("RISC", "OISC");
+xtickangle(30);
 
 %%
 figure

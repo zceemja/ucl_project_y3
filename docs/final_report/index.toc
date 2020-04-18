@@ -90,18 +90,18 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.3}Benchmark Programs}{19}{subsection.5.3}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.3.1}Performance}{19}{subsubsection.5.3.1}% 
+\contentsline {subsubsection}{\numberline {5.3.1}Instruction composition}{19}{subsubsection.5.3.1}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.3.2}Instruction composition}{20}{subsubsection.5.3.2}% 
+\contentsline {subsubsection}{\numberline {5.3.2}Performance}{22}{subsubsection.5.3.2}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.3.3}Program space}{21}{subsubsection.5.3.3}% 
+\contentsline {subsubsection}{\numberline {5.3.3}Program space}{23}{subsubsection.5.3.3}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.4}Maximum clock frequency}{21}{subsection.5.4}% 
+\contentsline {subsection}{\numberline {5.4}Maximum clock frequency}{23}{subsection.5.4}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.5}Future work}{23}{subsection.5.5}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {6}Conclusion}{23}{section.6}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {7}Appendix}{25}{section.7}% 
+\contentsline {section}{\numberline {7}Appendix}{26}{section.7}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.1}Processor instruction set tables}{25}{subsection.7.1}% 
+\contentsline {subsection}{\numberline {7.1}Processor instruction set tables}{26}{subsection.7.1}% 

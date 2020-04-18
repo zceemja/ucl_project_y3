@@ -1,5 +1,11 @@
-,ALU_ACC-dst,ALU_ACC-src,ALU-dst,ALU-src,REGS-dst,REGS-src,BRP_REG-dst,BRP_REG-src,MEMP_REG-dst,MEMP_REG-src,MEMORY-dst,MEMORY-src,STACK-dst,STACK-src,COM-dst,COM-src,BRANCH-dst,BRANCH-src,OTHER-dst,OTHER-src,IMMEDIATE-dst,IMMEDIATE-src
-oisc8_mod_u16.log,356,2,0,272,39,101,338,0,70,0,66,186,38,38,0,0,169,0,0,0,0,477
-oisc8_sieve.log,116207,8688,0,76418,13480,27516,90230,0,30208,11540,22468,36268,17720,17716,0,0,45673,0,0,0,0,157840
-oisc8_none.log,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,0,0,0,0,9
-oisc8_mul_u16.log,21,3,0,16,6,6,4,0,4,0,8,6,10,10,0,0,2,0,0,0,0,14
+,MOVE-dst,MOVE-src,ALU-dst,ALU-src,MEMORY-dst,MEMORY-src,STACK-dst,STACK-src,COM-dst,COM-src,BRANCH-dst,BRANCH-src,OTHER-dst,OTHER-src,size
+oisc8_div_u16_0001_0001.log,52,479,262,163,79,51,51,51,0,0,300,0,0,0,1794
+oisc8_mod_u16_0001_ffff.log,4,28,13,11,4,3,1,3,0,0,23,0,0,0,507
+oisc8_mod_u16_ffff_0001.log,38,586,356,272,134,186,38,38,0,0,516,0,0,0,1521
+oisc8_mod_u16_ffff_ffff.log,8,66,28,18,16,13,8,8,0,0,45,0,0,0,1261
+oisc8_mul_u16.log,6,23,21,16,12,6,10,10,0,0,6,0,0,0,689
+oisc8_none.log,0,9,0,0,0,0,0,0,0,0,9,0,0,0,104
+oisc8_print_char.log,1,22,3,2,0,0,2,2,3,1,18,0,0,0,338
+oisc8_print_u16_ffff.log,51,324,173,107,14,60,43,43,15,5,243,0,0,0,1898
+oisc8_print_u8_00.log,6,39,9,5,0,0,6,6,3,1,27,0,0,0,650
+oisc8_print_u8_ff.log,8,80,27,15,0,0,12,12,9,3,54,0,0,0,1105

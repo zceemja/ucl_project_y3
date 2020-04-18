@@ -208,7 +208,7 @@ In this subsection, program counter and their differences will be described.
 
 Figure \ref{fig:risc_pc} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
 
-\subsubsection{OISC Program Counter}
+\subsubsection{OISC Program Counter}\label{subsec:oisc_pc}
  
  OISC program counter is much simpler than RISC, as it does not have variable length instruction, delay flags instructions, or logic for selecting branch source address. 
  
