@@ -67,7 +67,7 @@ Much higher logic components in RISC can be also explained more complicated regi
 \subsection{Power analysis}
 
 Power analysis was performed to analyse power consumption of both processors.
-This has been accomplished by connecting FPGA board to a laboratory power supply with 4V to an external power input. A shunt resistor of was used of 1.020$\Omega$ was connected in series to calculate current. Supply voltage and voltage across shut resistor were measured using oscilloscope with data sampling feature. Multiple tests have been performed with different processor configurations. Between each tests a period of about 5 minutes was given for FPGA to reach steady state. 
+This has been accomplished by connecting FPGA board to a laboratory power supply with 4V to an external power input. A shunt resistor of was used of 1.020$\Omega$ was connected in series to calculate current. Supply voltage and voltage across shut resistor were measured using oscilloscope with data sampling feature. Three tests have been performed with different processor configurations. Between each tests a period of about 5 minutes was given for FPGA to reach steady state. 
 
 
 \begin{colfigure}
@@ -77,9 +77,9 @@ This has been accomplished by connecting FPGA board to a laboratory power supply
 	\label{fig:power}
 \end{colfigure}
 
-Figure \ref{fig:power} represents power results. Auxiliary power includes whole FPGA board, voltage regulators, and synthesised logic on FPGA required to support a processor (such as PLL, UART, Input/Output control, RAM). RISC and OISC bars in the graph indicate auxiliary power plus processor power, which means that the processor itself takes relatively small amount comparing to auxiliary power, about 0.5\%.
+First configuration is "None" or auxiliary-only power, which includes whole FPGA board, voltage regulators, and synthesised logic on FPGA required to support a processor (such as PLL, UART, Input/Output control, RAM). RISC and OISC indicate both processor implementations on FPGA, each running multiplication program in a loop. Figure \ref{fig:power} represents power results. RISC and OISC bars in the graph indicate auxiliary power plus processor power, which means that the processor itself takes relatively small amount comparing to auxiliary power, about 0.5\%. Result shows that OISC require 0.4\%, which including noise is almost insignificant result.
 
-During this test clock frequency of 1MHz was used. Due to equipment unavailability, further tests were not carried out to investigate power consumption at different frequencies. 
+During this test clock frequency of 1MHz was used. Due to equipment unavailability, further tests were not carried out to investigate power consumption at different frequencies. Due to constant noise, running at higher frequency may result in significant difference between processors.
 
 \subsubsection{Activity Factor}
 An activity factor could be also found using Equation \ref{eq:activity_factor} where $P$ is power, $C_{total}$ indicate total gate capacitance and $V_{DD}$ indicate voltage supplied to the transistors.
@@ -98,7 +98,7 @@ A number of and programs have been written to test both processors. These involv
 	\item[$\bullet$ 16bit multiplication:] Uses simple matrix multiplication. 
 	\item[$\bullet$ 16bit division:] Uses Long division algorithm to divide two 16bit numbers, result including a reminder.
 	\item[$\bullet$ 16bit modulo:] Uses "Russian Peasant Multiplication" algorithm to perform Modulo operation with two 16bit numbers.
-	\item[$\bullet$ Prime number calculator:] Uses Sieve of Atkins algorithm to calculate primer number, operates on 16bit numbers and utilise 16bit multiplication and modulo functions. 
+	\item[$\bullet$ Prime number calculator:] Uses Sieve of Atkins algorithm \autocite{morain_1989} to calculate primer number, operates on 16bit numbers and utilise 16bit multiplication and modulo functions. 
 \end{description}
 
 
@@ -183,44 +183,28 @@ This test is performed to investigate instruction composition of each function t
 	\label{tab:instr_groups_oisc_src}
 \end{blockpage}
 
-Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in listings \ref{asmrisctest} and \ref{asm_oisc_test} enabled both location to be static, not depending on test function executed.
+Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in Listing \ref{code:asmtest} enabled both location to be static, not depending on test function executed.
 
 \begin{blockpage}
-	\begin{lstlisting}[frame=single, caption={RISC assembly frame for executring tests}, emph={setup,start,done} label=asmrisctest]
-	setup:
-	JUMP .start
-	.done:
-	JUMP .done
-	.start:
-	; Setup values
-	; Call function
-	JUMP .done
+	\begin{lstlisting}[frame=single, caption={Assembly frame for executring tests}, emph={setup,start,done}, label={code:asmtest}]
+setup:
+  JUMP .start
+.done:
+  JUMP .done
+.start:
+  ; Setup values
+  ; Call function
+  JUMP .done
 	\end{lstlisting}
 \end{blockpage}
 
-\begin{figure*}[ht!]
+\begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{../tests/instr_comp.eps}
 	\caption{Graph of instruction composition for every benchmark program.}
 	\label{fig:instr_comp}
 \end{figure*}
 
-\begin{blockpage}
-	\begin{lstlisting}[frame=single, caption={OISC assembly frame for executring tests}, emph={setup,start,done} label=asm_oisc_test]
-	setup:
-	BR1 .start @1
-	BR0 .start @0
-	BRZ 0x00
-	.done:
-	BRZ 0x00
-	.start:
-	; Setup values
-	; Call function
-	BR1 .done @1
-	BR0 .done @0
-	BRZ 0x00
-	\end{lstlisting}
-\end{blockpage}
 
 Each function recorded file then was further analysed and each instruction was grouped. Recorded program counter was used to find effective program space. This has been achieved by calculating unique instances of program counter and summing up instruction size for each of them. In RISC, dynamic instruction size has been taken into account. 
 
@@ -246,7 +230,7 @@ Another set of benchmarks have been performed and on both processors once they b
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../tests/timing.eps}
-	\captionof{figure}{Time taken perform each benchmark on FPGA.}
+	\captionof{figure}{Time taken perform each benchmark on FPGA at 1MHz clock.}
 	\label{fig:timing}
 \end{colfigure}
 
@@ -254,7 +238,7 @@ Results indicate that on average OISC takes about 71\% longer to execute same be
 
 Benchmarks include:
 \begin{description}
-	\item[$\bullet$ Prime Numbers:] Calculate every prime number between 5 to $2^{16}$.  
+	\item[$\bullet$ Prime Numbers:] Calculate every prime number between 5 to 65536.  
 	\item[$\bullet$ Multipy:] 16bit multiplication iterated 65536 times.
 	\item[$\bullet$ Modulo 0010h:] 16bit \textit{0010h} modulo that operated on every number between 0 and 65536.
 	\item[$\bullet$ Modulo FFFFh:] 16bit \textit{FFFFh} modulo that operated on every number between 0 and 65536.
@@ -264,7 +248,8 @@ Benchmarks include:
 
 \subsubsection{Program space}
 
-Figure \ref{fig:program_size} represents effective program size for each test function. Effective program size only includes instruction that been executed depending on argument, meaning that it does not fully represent complete function. A specific argument might cause branching and skipping some function code which would not be added to effective program size. In this test, the main objective is to look difference in instruction size required to execute the same function, therefore not representing full program size is not relevant. 
+Data collected from previous instruction composition results were also used to find effective program size.
+Effective program size only includes instruction that been executed depending on argument, meaning that it does not fully represent complete function. A specific argument might cause branching and skipping some function code which would not be added to effective program size. In this test, the main objective is to look difference in instruction size required to execute the same function, therefore not representing full program size is not relevant. 
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../tests/program_size.eps}
@@ -272,18 +257,17 @@ Figure \ref{fig:program_size} represents effective program size for each test fu
 	\label{fig:program_size}
 \end{colfigure}
 
-
-
+Figure \ref{fig:program_size} represents effective program size for each test function. On average, OISC instructions take 41.71\% more space which is expected.
 
 \subsection{Maximum clock frequency}
 To find maximum clock frequency, processors were loaded with basic print string function an d 16bit multiplication. Then frequency was constantly increased until resulting output though UART was not correct. 
 
 In order to change clock frequency, three parameters were changed and HDL code resynthesised: 
 \begin{description}
-	\item[$\bullet$ PLL frequency multiplier and divider:]
+	\item[$\bullet$] \textbf{PLL frequency multiplier and divider:}
 	PLL takes 50MHz clock that is sourced from crystal on FPGA board and converts it to master clock $f_{mclk}$. Multiplier and divider values are used to adjust $f_{mclk}$.
 	
-	\item[$\bullet$ UART frequency divider:]
+	\item[$\bullet$] \textbf{UART frequency divider:}
 	Division value was calculated as $D = \left \lfloor \frac{f_{mclk}}{4 f_{baud}} \right \rfloor$. UART rate was set to 9600 baud. UART module itself has four times oversample. 
 \end{description}
 Frequency was changed in 5MHz increments. 
