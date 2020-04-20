@@ -21,8 +21,6 @@ These
 
 In this section differences in RISC and OISC are explained. It includes predictions and theory behind it. 
 
-This paper will be exploring is classical SISO processors. TTAs described section \ref{subsec:supporting_theory} are usually of type SIMT (single instruction, multiple transports) \autocite{289981}; A middle between these two classes is SIMO type (single instruction, multiple operation).
-
 \subsection{RISC Processor}
 
 \begin{figure*}[t!]
@@ -32,7 +30,7 @@ This paper will be exploring is classical SISO processors. TTAs described sectio
 	\label{fig:risc_simple}
 \end{figure*}
 
-In this project, proposed RISC microarchitecture is mainly based on MIPS microachitecture \autocite{harris_harris_2013}. Figure \ref{fig:risc_simple} represents simplified diagram of proposed RISC processor. In this architecture, program data travels from program memory to the control block where instruction is decoded. Then control block further decides how data is directed in the datapath block. Such structure requires a complicated control block and additional data routing blocks. Depending on instruction, control block sets ALU, register file, memory operations and how data flows from one to other. Therefore, if non of blocks are bypassed, data can flow though every of these blocks, creating a log chain of combinational logic and increasing critical path. However this enables great flexibility allowing multiple operations to happen during single step, for example load value from register to memory, while address value is immediate offset by other register value using ALU. In order to increase performance of such processor, pipelining or multiple cores may be used.
+In this project, proposed RISC is mainly based on MIPS microarchitecture \autocite{harris_harris_2013}. Figure \ref{fig:risc_simple} represents a simplified diagram of a proposed RISC processor. In this architecture, program data travels from a program memory to the control block where instruction is decoded. Then, control block further decides how data is directed in the datapath block. Such structure requires a complicated control block and additional data routing blocks. Depending on instruction, control block sets ALU, register file, memory operations and how data flows from one to other. Therefore, if none of the blocks are bypassed, data can flow though every single of these blocks, creating a long chain of combinational logic and increasing the critical path. However, this enables great flexibility allowing multiple operations to happen during a single step, for example load value from register to memory, while address value is immediate offset by another register value using the ALU. In order to increase performance of such processor, pipelining or multiple cores may be used.
 
 \subsubsection{Pipelining}
 \begin{multline}\label{eq:tc}
@@ -42,7 +40,7 @@ In this project, proposed RISC microarchitecture is mainly based on MIPS microac
 	\end{split}
 \end{multline}
 
-Equation \ref{eq:tc} shows maximum processor cycle period $T_c$ which depends on combinational logic delay of every logic block, flip-flop time of propagation from clock to output of synchronous sequential circuit $t_{pcq}$ and flip-flop setup time $t_{setup}$.
+Equation \ref{eq:tc} shows the maximum processor cycle period $T_c$ which depends on combinational logic delay of every logic block, flip-flop time of propagation from clock to output of synchronous sequential circuit $t_{pcq}$ and flip-flop setup time $t_{setup}$.
 
 \begin{align}\label{eq:tcp}
 	T_{cp} &= max \left( \begin{matrix}
@@ -53,15 +51,15 @@ Equation \ref{eq:tc} shows maximum processor cycle period $T_c$ which depends on
 	\end{matrix}\right)
 \end{align}
 
-Pipelinig separates each processor datapath block with a flip-flop. This changes combinational logic critical path this reducing cycle period. Pipelined processor cycle period $T_{cp}$ is represented in equation \ref{eq:tcp}. Such modification could technically increase clock frequency by 2 or 3 times.
+Pipelinig separates each processor's datapath block with a flip-flop. This changes critical path therefore reducing cycle period. A pipelined processor cycle period $T_{cp}$ is represented in the equation \ref{eq:tcp}. Such modification could theoretically increase clock frequency by 2 or 3 times.
 
-Pipelining, however, introduces other design complications. Instructions that depend on each other, for example operation $R = A + B + C$ needs to be executed in two steps, $t = A + B$ and $R = t + C$. Second step is depends and previous step result. Therefore additional logic is required to detect such dependencies and bypass datapath stages, or stall pipelining. Furthermore, breaching would also require stalling, temporary saving datapath stage and restoring it if needed when branching is concluded, or further branch prediction logic. Such dependency and branching issue requires hazards prevention logic which increases processor complexity and required resources. 
+Pipelining, however, introduces other design complications. Instructions that depend on each other, for example an operation $R = A + B + C$ needs to be executed in two steps, $t = A + B$ and $R = t + C$. Second step depends upon previous step result. Therefore, additional logic is required to detect such dependencies and bypass datapath stages, or stall pipelining. Furthermore, breaching would also require stalling; temporary saving datapath stage and restoring it if needed when branching is concluded; or further branch prediction logic. Such dependency and branching issue requires a timing hazards prevention logic which increases processor complexity and required resources. 
 
 \subsubsection{Multiple cores}
 
-Multicore system is a solution to increase processor throughput by having multiple datapath and control logic instances, each running separate instructions. Cores share other resources such as RAM.
+A multicore system is a solution to increase processor throughput by having multiple datapaths and control logic instances, each running separate instructions. Cores share other system resources such as RAM.
 
-Multicore processor requires software adjustments as each processor core would execute separate programs. Therefore, some synchronisation between them is needed. A single additional core would also double the control and datapath blocks, substantially increasing resource requirements too. In addition, problems most often cannot be perfectly divided to parallel tasks due to some result dependencies between each task. Therefore, doubling processor core count would not likely result double the performance. 
+A multicore processor requires software adjustments as each processor's core would execute separate programs. Therefore, some synchronisation between them is needed. A single additional core would also double the control and datapath blocks, substantially increasing resource requirements too. In addition, programs most often cannot be perfectly divided to parallel tasks due to some result dependencies between each subtask. Therefore, doubling processor core count would not likely result double the performance. 
 
 \subsection{OISC Processor}
 
@@ -72,10 +70,10 @@ Multicore processor requires software adjustments as each processor core would e
 	\label{fig:oisc_simple}
 \end{figure*}
 
-Figure \ref{fig:oisc_simple} represents simplified structure of OISC MOVE architecture. In simplest case, processor has a pair of buses - data and instruction. Instruction bus has source and destination address that connects two parts of processor via data bus. This mechanism allows data to flow around processor. Computation is accomplished by setting accumulators at destination addresses and taking computed values from source addresses. Other actions can be performed by at destination node for instance check value for branching or sending data to memory. 
+Figure \ref{fig:oisc_simple} represents simplified structure of an OISC MOVE architecture. In the simplest case, processor has a pair of buses — data and instruction. An instruction bus has a source and destination address that connects two parts of processor via a data bus. This mechanism allows for the data to flow around processor. Computation is accomplished by setting accumulators at destination addresses and taking computed values from the source address. Other actions can be performed by destination node, for instance check value for branching or sending data to memory. 
 
 \subsubsection{OISC Pipelining}
-Maximum processor cycle period of such processor microarchitecture can be found in Equation \ref{eq:oisc_tc}. 
+The maximum cycle period of such processor microarchitecture can be found in Equation \ref{eq:oisc_tc}. 
 
 \begin{multline}\label{eq:oisc_tc}
 	\begin{split}
@@ -92,21 +90,20 @@ t_{pcq1}\end{matrix}\right) +\\
 \end{multline}
 
 
-Where $t_{en}$ is period to check if instruction bus address match, $t_{buf}$ is period for source buffer to output value to data bus, $t_{pcq2}$ is propagation period for program memory, $t_{CL}$ represents longest propagation period though a logic block, $t_{setup}$ is setup time inside logic block. $t_{pcq1}$ and $t_{pcq2}$ are clock to output delay for sequential logic connecting logic block buffer and memory connecting instruction bus, respectively. 
+Where $t_{en}$ is period to check if instruction bus address match, $t_{buf}$ is period for source buffer to output value into the data bus, $t_{pcq2}$ is propagation period for program memory, $t_{CL}$ represents the longest propagation period though a logic block, $t_{setup}$ is the setup time inside logic block. $t_{pcq1}$ and $t_{pcq2}$ are clock to output delay for the sequential logic connecting source buffer and memory connecting instruction bus, respectively. 
 
 \subsection{Predictions}
 
-Comparing to RISC, OISC maximum processor cycle period is almost equivalent to pipelined RISC, just including 
-enable, buffer and additional ROM delays: $max \left( t_{en} + t_{buf}, t_{pcq1}\right)$. In most cases $t_{CL}$ is going to dominant value, meaning that OISC should have higher $T_{cp}$ to non-pipelined RISC, or equivalent to pipelined RISC architectures. 
+Comparing RISC and OISC, the maximum processor cycle period of OISC is almost equivalent to the pipelined RISC, with addition of enable, buffer and additional ROM delays: $max \left( t_{en} + t_{buf}, t_{pcq1}\right)$.
 
-Further more, due to the nature of processor, no additional hazard prevention logic is needed making this much simpler design. In addition, $t_{CL}$ pipelining can be introduced to logic blocks that has high propagation delay. For instance, multiplication in ALU could be pipelined in two sections, when setting ALU accumulators software could be designed in such way to retrieve multiplied result only after two cycles. This can further reduced required logic circuit.
+Further more, due to the nature of processor no additional timing hazard prevention logic is needed, making this much simpler design. OISC $t_{CL}$ pipelining can be also introduced to components that has high propagation delay. For instance, multiplication in an ALU could be pipelined into two stages. When setting ALU accumulators, software could be designed to retrieve multiplied result only after two cycles. This can further reduced required resources.
 
 \subsubsection{Execution time}
-OISC requires take extra steps to perform basic functions to set ALU, branch or memory operations need setting accumulator values. A single data-instruction bus OISC expected to be slower to execute the same task. 
+OISC requires taking extra steps to perform basic functions. ALU, branch or memory operations needs accumulator values to be set first to compute an output. A single data-instruction bus OISC therefore is expected to be slower executing the same task as RISC.
 
 \subsubsection{Instruction Space}
-RISC has fairly compact instructions as single instruction can carry a small opcode, register value and immediate value. OISC has a bigger overhead as it can only set source and destination address which can carry only single operation, register or immediate value. Therefore it is expected OISC taking more instruction space for same function.
+RISC has compact instructions, as a single instruction can carry a small opcode, register addresses and optionality a multiple word immediate value. OISC has a bigger instruction overhead as it can only carry a source and destination address, meaning it can operate on only one register or immediate value in a single instruction. Therefore, it is expected the OISC will require more instruction space to perform the same function as RISC.
 
 \subsubsection{Resources}
-OISC does not have a control block which contains how data travel in datapath. It also does not have multi-adress register file and further routing logic. This indicate that OISC should require less logic elements to implement a processor. This should also result in lower power consumption. 
+OISC does not have a control block which contains how data travel in datapath. It also does not have multi-address register file and further routing logic within a datapath. This indicates that the OISC should require less logic elements to implement. This also should result in lower power consumption. 
 %There are many papers looking into application specific TTAs. 

@@ -11,22 +11,23 @@ Be precise and use the correct units.
 \fi
 
 
-This section describes methods and design choices used to construct two processors.
+This section describes methods and design choices used to construct RISC and OISC processors.
 
 \subsection{Machine Code}\label{subsec:machine_code}
+Machine code subsection talks about instructions and how they are encoded.
 
 \subsubsection{RISC Machine Code}
-As the aim of instruction size to be as minimal as possible, RISC instruction decided to be 8bits with optional additional immediate value from 1 to 3 bytes. Immediate values are explained in section \ref{subsec:imm_values}.
+One of the aim is to ensure instruction size to be as minimal as possible. RISC instructions decided to be 8bits long with an optional additional immediate value from one to three bytes. Immediate value operation is expanded upon in section \ref{subsec:imm_values}.
 
-Decision was made to have instruction compose of operation code two operands - source/destination and source, which is similar to x86 architecture rather than MIPS. Three possible combinations of register address sizes are possible in such case from one to three bits. Two was selected as it allow having four general purpose registers which is sufficient for most applications, and allow four bits for operation code - allowing up to 16 instructions. 
+The decision was made to have an instruction to compose of operation code and two operands — first source \& destination and second only source. This is more similar to x86 architecture rather than to MIPS. Three possible combinations of register address sizes are possible, from one to three bits in order to fit them in a single instruction. Two bits was the chosen option as it allowed having four general purpose registers which is sufficient for most applications, and allowed four bits for operation code — allowing up to 16 instructions. 
 
-Due to small amount of possible operation codes and not all instructions requiring two operands (for example \texttt{JUMP} instruction may not need any operands or could use one operand to have address offset), other two type instructions are added to the design - with one and zero operands. See figure \ref{fig:risc_machinecode}. This enabled processor to have 45 different instructions while maintaining minimal instruction size. Final design has:
+Due to a small amount of possible operation codes and not all instructions requiring operate with two operands (for example, \texttt{JUMP} instruction does not need any operands, set immediate value only needs one operand), other two type instructions are added to the design — with one and zero operands. See figure \ref{fig:risc_machinecode}. This enabled processor to have 45 different instructions while maintaining minimal instruction size. Final design has:
 \begin{description}[labelindent=1cm, labelsep=1em]
 	\item[$\bullet$ \textbf{8 }]  2-operand instructions
 	\item[$\bullet$ \textbf{32}]  1-operand instructions
 	\item[$\bullet$ \textbf{5 }]  0-operand instructions
 \end{description}
-Full list of RISC instructions are listed in table \ref{tab:risc_instructions} in \nameref{sec:appendix} section.
+Full list of RISC instructions is listed in Table \ref{tab:risc_instructions} in an \nameref{sec:appendix} section.
 
 \begin{blockpage}
 \begin{gather*}
@@ -81,7 +82,7 @@ Full list of RISC instructions are listed in table \ref{tab:risc_instructions} i
 
 \subsubsection{OISC Machine Code}
 
-As OISC requires only a single instruction, composition of instruction mainly requires two parts - source and destination. To allow higher instruction flexibility a immediate bit has been added to replace source address by immediate value. Composition of finalised machine code is shown in figure \ref{fig:oisc_machinecode}. 
+As OISC operaten on a single instruction, composition of instruction mainly consists of two parts — source and destination. In order to allow higher instruction flexibility, an immediate flag has been added which sets source address to represent an immediate value. The composition of finalised machine code is shown in figure \ref{fig:oisc_machinecode}. 
 
 \begin{blockpage}
 \begin{gather*}
@@ -112,9 +113,9 @@ As OISC requires only a single instruction, composition of instruction mainly re
 \end{center}
 \end{blockpage}
 
-Decision was made to have source address to be eight bits to allow it be replaced with immediate value. Destination address was chosen to be as minimal as possible, leaving only four bits or 16 possible destinations. Final design has \textbf{15} destination and \textbf{41} source addresses. This is not the most space efficient design as 41 source addresses would require only six bits for address, wasting two bits every time non-immediate source is used.
+Decision was made for source address to be eight bits, to match immediate value and data bus width. Destination address was chosen to be as minimal as possible, leaving only four bits and 16 executable destinations. The final design has \textbf{15} destination and \textbf{41} source addresses. This is not the most space efficient design as 41 source addresses could be implemented with only six bits, not using two bits every time a non-immediate source is used.
 
-Full list of OISC sources and destinations are listed in table \ref{tab:oisc_instructions} in \nameref{sec:appendix} section.
+Full list of OISC sources and destinations is listed in Table \ref{tab:oisc_instructions} in an \nameref{sec:appendix} section.
 
 \begin{landscape}
 	\subsection{Data flow} \label{sec:dataflow}
@@ -126,16 +127,15 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 		\label{fig:datapath}	
 	\end{figure}
 	
-	Figure \ref{fig:datapath} above represents partial RISC datapath. This diagram can be extends to Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:risc_pc}, \ref{fig:risc_stack} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
-	Data to register file is selected and saved with \textit{MUX0}. This data is delayed 1 cycle with \textit{R2} to match timing that of data is taken from memory. If \texttt{LWLO} or \texttt{LWHI} is executed, \textit{MUX1} select high or low byte from memory to read. To compensate for timing as value written to register file is delayed by 1 cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}. \\
+	Figure \ref{fig:datapath} above represents a partial RISC datapath. This diagram can be extends to Program counter, Stack pointer and Immediate Override logics are shown in figures \ref{fig:risc_pc}, \ref{fig:risc_stack} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is a HDL (Hardware Description Language) concept that connect datapath and control unit together. The immediate value is provided to datapath by IMO block described in section \ref{subsec:imo}.\\
+	Data to register file is selected and saved with \textit{MUX0}. This data is delayed by one cycle with \textit{R2} to match timing that of data taken from the memory. If \texttt{LWLO} or \texttt{LWHI} instructions are executed, \textit{MUX1} select high or low byte from memory to read. In order to compensate for timing, as value written to register file is delayed by one cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}, making it act more like latch. \\
 \end{landscape}
-\textit{MUX2} allows override ALU source B, \textit{R3} and \textit{MUX3} enables control unit to enable ALU carry in allowing multi-byte number addition/subtraction. This function is not fully implemented yet.\textit{MUX4} and \textit{MUX5} allows to send data to COM block with \texttt{COM} instruction, if other instruction performed then \textit{0x00} byte for COM address and data is sent, indicating no action. Data is stored in memory only with \texttt{SWLO} instruction writing to high byte whatever is stored in \textit{R4} buffer. This buffer can be written to using \texttt{SWHI} instruction. \textit{MUX6} selects memory address value from \textit{imm} or stack pointer.
+\textit{MUX2} allows override ALU source B, \textit{R3} and \textit{MUX3} enables control unit to enable ALU carry in bit, allowing multi-word number addition/subtraction. \textit{MUX4} and \textit{MUX5} allows sending data to the COM block with \texttt{COM} instruction. If any other instruction performed, then \textit{0x00} byte for COM address and data is sent, indicating no action. Data can be stored to memory only with a \texttt{SWLO} instruction. It writes high byte value whatever is stored in \textit{R4} register. This buffer can be written to using a \texttt{SWHI} instruction. Therefore, to change only a single byte in a particular memory location, other byte has to be fetched in advanced and used in a \texttt{SWLO} or \texttt{SWHI} instruction. \textit{MUX6} selects memory address value from the \textit{imm} or stack pointer.
 
 \subsubsection{OISC Datapath} \label{subsec:oisc_cells}
+OISC datapath only consists of instruction-data bus and a small circuit that connect them to logic blocks that computes the data. These logic blocks can represent ALU operation combinational logic, or any other part of a processor as shown in Figure \ref{fig:oisc_simple}.
 
-OISC datapath only consists of instruction and data buses, and small circuit that connect them to logic blocks that process the data. These logic blocks can represent ALU operation combinational logic, or any other part of a processor.
-
-Figure \ref{fig:oisc_cell_in} represents common destination circuit. It checks if particular block destination matches one on instruction bus, then enables latch and also sets flag to further logic. 
+Figure \ref{fig:oisc_cell_in} represents a common destination circuit. It checks if a particular logic block destination address matches one in instruction bus, then enables latch and also sets flag that destination is used to the further logic. 
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../resources/oisc_cell_in.eps}
@@ -143,7 +143,7 @@ Figure \ref{fig:oisc_cell_in} represents common destination circuit. It checks i
 	\label{fig:oisc_cell_in}
 \end{colfigure}
 
-Similarly Figure \ref{fig:oisc_cell_out} represents source circuit connecting output of logic block. As logic block may only involve combinational logic a register is placed at the output of it. Buffer is used to connect data in register to data bus. This ensures that only one bus driver is present, ensuring do data collision. 
+Similarly, Figure \ref{fig:oisc_cell_out} represents a source circuit connecting output of such logic block. Logic block can be assumed to only contain combinational logic, therefore a register is placed at the output of it. A buffer \textit{BUF1} is used to connect data in a register \textit{REG1} to the data bus. This ensures that only one bus driver is present, ensuring no data collision. 
 
 \begin{colfigure}
 	\centering
@@ -156,18 +156,18 @@ The general timing is designed so that the information at the source is immediat
 
 \subsubsection{OISC Datapath Implementation Problems} \label{subsec:oisc_cell_issue}
 
-The complete implementation using latches for destination was not successful. Latches did not operate correctly when synthesised on FPGA. This issue might be caused by some timing problem between some source and destination logic combination. Exact cause was not resolved.
+The complete implementation using latches for destination logic was not successful. Latches did not operate correctly when synthesised onto FPGA. This issue might be caused by some timing problem between some combination of source and destination logic. The exact cause was not resolved.
 
-As a quick solution, latches at destination has been replaced with a clocked register that is triggered at opposite to source register clock edge (negative). This resolved this issue, however it effectively reduce period that data can propagate though logic blocks between source and destination by two.
+As a quick solution, latches at destination has been replaced with a clocked register that is triggered at negative clock edge, which is opposite to source register trigger. This solution has resolved issue, however it effectively reduced the period that data can propagate though logic blocks between source and destination by two.
 
 \subsection{Stack} \label{subsec:stack}
-This section describes RISC and OISC dedicated logic for stack pointer control. Stack pointer starts from the highest memory address value and "stacks" to lower memory address values. Both designs were simplified to only operate on two byte addresses, meaning that stack pointer has a constant \texttt{0xFF} value at least significant byte. 
+This section describes dedicated logic for stack pointer control at both processors. The stack pointer starts from the highest memory address value and "stacks" towards lower address values. Both designs were simplified to only operate on two byte addresses, meaning that stack pointer has a constant \texttt{FFh} value at the least significant byte.
 
 
 \subsubsection{RISC Stack}
-RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the logic diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
+The RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. Figure \ref{fig:risc_stack} represents the logic diagram for stack pointer. This circuit also supports \textit{pc\_halted} signal from the program counter to prevent the stack pointer from being added by 1 twice during the \texttt{RET} instruction. 
 
-One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. However with current implementation this does not affect processor comparison, it only increases stack size in memory.
+One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte, except when storing the program pointer with \texttt{CALL} instruction. This can be improved by adding a high byte register, however then it would cause complications when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. However, with current implementation this does not affect processor comparison, it only increases stack size in memory.
 
 \begin{figure*}
 	\centering
@@ -178,7 +178,7 @@ One of the problems with the current stack pointer implementation is 8bit data s
 
 \subsubsection{OISC Stack}
 
-Stack pointer in OISC is very similar to RISC. In basic operation, when reset, push or pop flags are set, it changes the state of stack pointer by adding or subtracting its value by one, or resetting it to default. Logic diagram is shown in Figure \ref{fig:oisc_stack}
+Stack pointer circuit in OISC is very similar to RISC. When reset, push or pop flags are set, it changes the state of stack pointer by adding or subtracting its value by one, or resetting it to default. Logic diagram is shown in Figure \ref{fig:oisc_stack}.
 \begin{figure*}[b]
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_stack.eps}
@@ -186,7 +186,7 @@ Stack pointer in OISC is very similar to RISC. In basic operation, when reset, p
 	\label{fig:oisc_stack}
 \end{figure*}
 
-Logic diagram of stack control unique to OISC processor is shown in Figure \ref{fig:oisc_stack_2}. Push and pop flags are taken from source and destination logic. A cached value of last stored value is kept, so that it would be immediately available on source request. Pop flag is delayed by one cycle which ensures that once popped, lower stack value is written to cache during next cycle.
+Logic diagram of stack control unique to OISC processor is shown in Figure \ref{fig:oisc_stack_2}. Push and pop flags are taken from the source and destination logic. A cached value of last stored value is kept, so that it would be immediately available on source request. Pop flag is delayed by one clock cycle. This ensures that once stack value is popped, lower stack value is written into the cache during next the clock cycle. Note that there is an issue with this design, stack source or destination instruction cannot be used together with other stack or memory operations as it creates a collision accessing system memory at the same time. This collision can be avoided with software however. 
 \begin{figure*}
 	\centering
 	\includegraphics[scale=0.4]{../resources/oisc_stack_2.eps}
@@ -206,11 +206,11 @@ In this subsection, program counter and their differences will be described.
 	\label{fig:risc_pc}
 \end{figure*}
 
-Figure \ref{fig:risc_pc} represents the digital diagram for program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by 1 byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); can jump to interrupt address; produces \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes 2 cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
+Figure \ref{fig:risc_pc} represents the digital diagram for a program counter. There are a few key features about this design: it can take values from memory for \texttt{RET} instruction; immediate value (\textit{PC\_IMM2} is shifted by one byte to allow \texttt{BEQ}, \texttt{BGT}, \texttt{BGE} instructions as first immediate byte used as ALU source B); it can jump to an interrupt address; it produces a \textit{pc\_halted} signal when memory is read (\texttt{RET} instruction takes two cycles, because cycle one fetches the address from stack and second cycle fetches the instruction from the instruction memory).
 
 \subsubsection{OISC Program Counter}\label{subsec:oisc_pc}
  
- OISC program counter is much simpler than RISC, as it does not have variable length instruction, delay flags instructions, or logic for selecting branch source address. 
+OISC program counter is much simpler than RISC, as it does not have variable length instruction, delay flags for \texttt{RET} operation, or logic for selecting branch source address. 
  
 \begin{colfigure}
 	\centering
@@ -219,7 +219,7 @@ Figure \ref{fig:risc_pc} represents the digital diagram for program counter. The
 	\label{fig:oisc_pc}
 \end{colfigure}
 
-Looking at Figure \ref{fig:oisc_pc} bottom, the basic operation is to just add one to previous program counter with \textit{ADDER1} and \textit{REG1}, reset it to zero at reset with \textit{MUX2}. Two destination logic blocks are used as accumulators to store branch address. Once instruction with BRZ destination is executed, \textit{EQ2} check if data bus value is zero, which enables \textit{MUX1} and overrides program counter to address stored in \texttt{BR0} and \texttt{BR1} accumulators. Unlike in RISC however, it requires three instructions to set new address and jump. Similarly, \textit{CALL} and \textit{RET} requires five and three instructions respectively. These RISC equivalent instructions are show in Listing \ref{code:oisc_jump}.
+Looking at Figure \ref{fig:oisc_pc} bottom, the basic operation is to just add one to previous program counter with \textit{ADDER1} and \textit{REG1}, reset it to zero at reset with \textit{MUX2}. Two destination logic blocks are used as accumulators to store branch address. Once an instruction with the \texttt{BRZ} destination is executed, comparator \textit{EQ2} checks if the data bus value is equal to zero. If this condition is met, it enables \textit{MUX1} and overrides program counter to address stored in \texttt{BR0} and \texttt{BR1} accumulators. Unlike in RISC however, it requires three instructions to set new address and jump. Similarly, \textit{CALL} and \textit{RET} requires five and three instructions respectively. RISC equivalent instructions are show in Listing \ref{code:oisc_jump}.
 
 \begin{blockpage}
 	\begin{lstlisting}[frame=single, emph={JUMP, CALL, RET, return}, label=code:oisc_jump, caption={OISC assembly code emulating RISC \texttt{JUMP}, \texttt{CALL} and \texttt{RET} instructions.}]
@@ -255,7 +255,7 @@ Looking at Figure \ref{fig:oisc_pc} bottom, the basic operation is to just add o
 \label{fig:oisc_alu}
 \end{figure*}
 
-This section will discuss ALU implementations of both processors. For fair comparison between OISC and RISC, ALU in both system will have the same capabilities described in table \ref{tab:alu_set}.
+This section will discuss ALU implementations of both processors. For fair comparison between OISC and RISC, ALU in both system will have the same capabilities as described in Table \ref{tab:alu_set}.
 
 \begin{blockpage}
 	\arrayrulecolor{black}
@@ -282,10 +282,10 @@ This section will discuss ALU implementations of both processors. For fair compa
 \end{blockpage}
 
 \subsubsection{OISC ALU}
-Due to the structure of OISC processor, ALU source A and B are two latches that are written into when \texttt{ALU0} or \texttt{ALU1} destination address is present. ALU sources are connected with every ALU operator and performed in single clock cycle. This value is stored in register so that it would immediately available in a next clock cycle as a source data. Figure \ref{fig:oisc_alu} represents logic diagram of ALU with only addition and multiplication operators present. Note that output of \textit{EQ3} is connected to enable of \textit{REG3}, enabling output of carry to be only read after \texttt{ADD} source is requested. This previous source memory is also used for \texttt{SUB}, \texttt{ROL} and \texttt{ROR} operations. This allows processor to perform other operations such as store or load values, before accessing carry bit, or carried byte for \texttt{ROL} and \texttt{ROR} operations.
+Due to the structure of OISC processor, ALU source A and B are two latches that are written into when \texttt{ALU0} or \texttt{ALU1} destination address is present. ALU sources are connected with every ALU operator and performed in single clock cycle. This value is stored in a register so that it would be immediately available in a next clock cycle as a source data, as explained in \nameref{subsec:oisc_cells} Section. Figure \ref{fig:oisc_alu} represents a logic diagram of ALU with only an addition and multiplication operations present. Note that the output of \textit{EQ3} is connected to enable of \textit{REG3}, enabling output of carry to be only read after \texttt{ADD} source is requested. Similar configuration is also used for \texttt{SUB}, \texttt{ROL} and \texttt{ROR} operations.
 
 \subsubsection{RISC ALU}
-RISC processor has very similar structure to OISC with two exceptions. Inputs to ALU comes from logic router that decided how to route data in datapath. Output buffers are replaced by one multiplexer that selects single output from all ALU operations. Another point is that RISC ALU output is 16bit, higher byte saved in "ALU high byte register" for \texttt{MUL}, \texttt{MOD}, \texttt{ROL} and \texttt{ROR} operations. This register is accessible with \texttt{GETAH} instruction.
+RISC processor has very similar structure to OISC, however with two exceptions. Inputs to ALU comes from datapath data router logic. Output buffers are replaced by one multiplexer that selects a single output from all ALU operations. Another point is that RISC ALU output is 16bit, higher byte saved in "ALU high byte register" for \texttt{MUL}, \texttt{MOD}, \texttt{ROL} and \texttt{ROR} operations. This register is accessible with \texttt{GETAH} instruction.
 
 \subsection{Program Memory}\label{subsec:memory}
 This section describes how instruction memory (ROM) is implemented for both processors.
@@ -298,9 +298,8 @@ This section describes how instruction memory (ROM) is implemented for both proc
 \end{figure*}
 
 \subsubsection{RISC Program Memory}
-In order to allow dynamic instruction size from one to four bytes a special memory arrangement is made. A system was required to access word (8bits) from memory and next three words. To achieve this four ROM blocks been utilised, each containing one fourth of sliced original data. Input address is offset by adders \textit{ADDER1-3} and further divided by four by removing two least significant bits at \textbf{addr0-3}. 
+In order to allow a dynamic instruction size from one to four bytes, a special memory arrangement is made. Such system requires accessing any a word (8bits) from memory and next three words, meaning that memory cannot simply be packed to four word segments. To achieve desired functionality, four ROM blocks been utilised, each containing one fourth of sliced original data. Input address is offset by adders \textit{ADDER1-3} and further divided by value four, which is done by removing two least significant bits at \textbf{addr0-3}. 
 Before concatenating output of each ROM block into final four bytes, ROM outputs \textbf{q0-3} are rearranged depending on \textbf{ar} signal. Note that \textit{MUX1-4} each input is different, this may be better visualised with Verilog code in listing \ref{code:rom_switch}.
-
 
 
 \begin{blockpage}
@@ -315,7 +314,7 @@ endcase
 \end{blockpage}
 
 \subsubsection{OISC Program Memory}\label{subsec:oisc_mem}
-OISC instructions are fixed 13 bits, which causes different problems to RISC sliced memory - non-standard memory word size. To implement ROM in FPGA, Altera Cyclone IV M9K memory configurable blocks were used. Each blocks as 9kB of memory each allowing 1024x9bit configuration. Combining three of such blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check, see figure \ref{fig:oisc_memory_slice}. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
+OISC instructions are fixed 13 bits, this non-standard memory word size causes some difficulties. To implement ROM in FPGA, Altera Cyclone IV M9K configurable memory blocks were used. Each blocks as 9kB of memory, each set as 1024x9bit configuration. Combining three these blocks together yields 27bits if readable data in single clock cycle. To store instruction code to such configuration, pairs of instruction machine code sliced into three parts plus one bit for parity check, see figure \ref{fig:oisc_memory_slice}. Circuit extracting each instruction is fairly simple, shown in figure \ref{fig:oisc_mem}.
 
 \begin{figure*}[t]
 \begin{gather*}
