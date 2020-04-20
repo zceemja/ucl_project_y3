@@ -15,7 +15,7 @@ This section describes methods and design choices used to construct two processo
 
 \subsection{Machine Code}\label{subsec:machine_code}
 
-\subsubsection{RISC}
+\subsubsection{RISC Machine Code}
 As the aim of instruction size to be as minimal as possible, RISC instruction decided to be 8bits with optional additional immediate value from 1 to 3 bytes. Immediate values are explained in section \ref{subsec:imm_values}.
 
 Decision was made to have instruction compose of operation code two operands - source/destination and source, which is similar to x86 architecture rather than MIPS. Three possible combinations of register address sizes are possible in such case from one to three bits. Two was selected as it allow having four general purpose registers which is sufficient for most applications, and allow four bits for operation code - allowing up to 16 instructions. 
@@ -79,7 +79,7 @@ Full list of RISC instructions are listed in table \ref{tab:risc_instructions} i
 \end{center}
 \end{blockpage}
 
-\subsubsection{OISC}
+\subsubsection{OISC Machine Code}
 
 As OISC requires only a single instruction, composition of instruction mainly requires two parts - source and destination. To allow higher instruction flexibility a immediate bit has been added to replace source address by immediate value. Composition of finalised machine code is shown in figure \ref{fig:oisc_machinecode}. 
 
@@ -126,10 +126,10 @@ Full list of OISC sources and destinations are listed in table \ref{tab:oisc_ins
 		\label{fig:datapath}	
 	\end{figure}
 	
-	Figure \ref{fig:datapath} above represents partial RISC datapath. Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:risc_pc}, \ref{fig:risc_stack} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
-	Data to register file is selected and saved with \textit{MUX0}. This data is delayed 1 cycle with \textit{R2} to match timing that of data is taken from memory. If \texttt{LWLO} or \texttt{LWHI} is executed, \textit{MUX1} select high or low byte from memory to read. To compensate for timing as value written to register file is delayed by 1 cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}.\\
+	Figure \ref{fig:datapath} above represents partial RISC datapath. This diagram can be extends to Program counter, Stack pointer and Immediate Override logics are represented in figures \ref{fig:risc_pc}, \ref{fig:risc_stack} and \ref{fig:risc_imo} respectively. CDI (Control-Data Interface) is HDL concept that connects datapath and control unit. Immediate value to datapath is provided by IMO block described in section \ref{subsec:imo}.\\
+	Data to register file is selected and saved with \textit{MUX0}. This data is delayed 1 cycle with \textit{R2} to match timing that of data is taken from memory. If \texttt{LWLO} or \texttt{LWHI} is executed, \textit{MUX1} select high or low byte from memory to read. To compensate for timing as value written to register file is delayed by 1 cycle, register file has internal logic that outputs \textit{wr\_data} to \textit{rd\_data1} or/and  \textit{rd\_data2} immediately if \textit{wr\_en} is high and \textit{rd\_addr1} or/and \textit{rd\_addr2} matches \textit{wr\_addr}. \\
 \end{landscape}
-
+\textit{MUX2} allows override ALU source B, \textit{R3} and \textit{MUX3} enables control unit to enable ALU carry in allowing multi-byte number addition/subtraction. This function is not fully implemented yet.\textit{MUX4} and \textit{MUX5} allows to send data to COM block with \texttt{COM} instruction, if other instruction performed then \textit{0x00} byte for COM address and data is sent, indicating no action. Data is stored in memory only with \texttt{SWLO} instruction writing to high byte whatever is stored in \textit{R4} buffer. This buffer can be written to using \texttt{SWHI} instruction. \textit{MUX6} selects memory address value from \textit{imm} or stack pointer.
 
 \subsubsection{OISC Datapath} \label{subsec:oisc_cells}
 
@@ -165,13 +165,13 @@ This section describes RISC and OISC dedicated logic for stack pointer control. 
 
 
 \subsubsection{RISC Stack}
-RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the digital diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
+RISC processor implements the stack pointer that is used in \texttt{PUSH}, \texttt{POP}, \texttt{CALL} and \texttt{RET} instructions. The stack pointer's initial address starts at the highest memory address (\texttt{0xFFFF}) and subtracts 1 when data is put to stack. Figure \ref{fig:risc_stack} represents the logic diagram for stack pointer. Note that the stack is only 16bit in size and the most significant byte is set to \texttt{0xFF}. The stack pointer circuit also supports \textit{pc\_halted} signal from program counter to prevent the stack pointer from being added by 1 twice during \texttt{RET} instruction. 
 
 One of the problems with the current stack pointer implementation is 8bit data stored in 16bit memory address, wasting a byte. This can be avoided by adding a high byte register, however then it would cause problems when a 16bit program pointer is stored with \texttt{CALL} instruction. This can still be improved with a more complex circuit, or by using memory cache with 8bit data input. However with current implementation this does not affect processor comparison, it only increases stack size in memory.
 
 \begin{figure*}
 	\centering
-	\includegraphics[width=\linewidth]{../resources/risc_stack.eps}
+	\includegraphics[scale=0.4]{../resources/risc_stack.eps}
 	\caption{Digital diagram of RISC stack pointer logic}
 	\label{fig:risc_stack}
 \end{figure*}
@@ -274,7 +274,7 @@ This section will discuss ALU implementations of both processors. For fair compa
 		ROR & Shifted carry from previous SRL \\\hline
 		MUL & Arithmetic multiplication \\\hline
 		DIV & Arithmetic division \\\hline
-		MOD & Arithmetic modulus \\
+		MOD & Arithmetic modulo \\
 		\arrayrulecolor[rgb]{0,0,0}\hline
 	\end{tabular}
 	\captionof{table}{\textit{Supported ALU commands for both processors}}
@@ -292,7 +292,7 @@ This section describes how instruction memory (ROM) is implemented for both proc
 
 \begin{figure*}[b]
 	\centering
-	\includegraphics[scale=0.35]{../resources/risc_mem.eps}
+	\includegraphics[width=\linewidth]{../resources/risc_mem.eps}
 	\caption{Digital diagram of RISC sliced ROM memory logic}
 	\label{fig:risc_mem}
 \end{figure*}
@@ -364,7 +364,7 @@ OISC instructions are fixed 13 bits, which causes different problems to RISC sli
 
 \subsection{Instruction decoding}\label{subsec:imm_values}
 This section describes RISC and OISC differences between instruction decoding and immediate value handling.
-\subsubsection{RISC} \label{subsec:imo}
+\subsubsection{RISC IMO} \label{subsec:imo}
 Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
 
 \begin{figure*}
@@ -383,7 +383,7 @@ IMO block is a solution to change immediate value which enabled dynamically calc
 \end{enumerate}
 Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
 
-\subsubsection{OISC}
+\subsubsection{OISC Instruction decoding}
 OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
 
 \begin{figure*}
@@ -416,7 +416,7 @@ After all instruction lines are completed, each stored instruction arguments are
 \subsection{System setup}\label{subsec:setup}
 This section will describe how system is setup.
 
-Processors are implemented on Terasic DE0-Nano board that use Altera Cyclone IV, EP4CE22P17C6 FPGA.
+Processors are implemented on Terasic DE0-Nano board that use Altera Cyclone IV, EP4CE22P17C6 FPGA, which is manufactured using $60nm$ fabrication technology.
 FPGA has embedded memory structure consisting of columns of M9K memory blocks mentioned in Subsection \ref{subsec:oisc_mem}. These memory structures were used to implement processors RAM and ROM memories. Board also has 32MB SDRAM chip, which initially was intended to be used. This set design criteria to have 24bit address space. However, M9K memory was used instead for simplicity. 
 
 FPGA has embedded phase-locked loop (PLL) stucture that is used to change 50MHz input that is generated by on-board crystal to other frequencies. 

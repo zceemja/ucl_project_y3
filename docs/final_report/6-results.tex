@@ -81,7 +81,7 @@ First configuration is "None" or auxiliary-only power, which includes whole FPGA
 
 During this test clock frequency of 1MHz was used. Due to equipment unavailability, further tests were not carried out to investigate power consumption at different frequencies. Due to constant noise, running at higher frequency may result in significant difference between processors.
 
-\subsubsection{Activity Factor}
+\subsubsection{Activity Factor}\label{subsec:activity_factor}
 An activity factor could be also found using Equation \ref{eq:activity_factor} where $P$ is power, $C_{total}$ indicate total gate capacitance and $V_{DD}$ indicate voltage supplied to the transistors.
 \begin{align}\label{eq:activity_factor}
 \alpha = \frac{P}{C_{total}\cdot f \cdot V_{DD}^2}
@@ -289,5 +289,16 @@ Theoretical and actual results show unexpected results shown in Table \ref{tab:m
 As explained in Subsection \ref{subsec:oisc_cell_issue}, OISC logic blocks has about twice less time for data propagation. Keeping that in mind, and assuming that latch propagation and register setup periods are insignificant to critical path of OISC logic block, maximum OISC frequency could be double as high as, reaching 80-90MHz. This also assumes that there is no other part of processor would have limit. Further timing analysis needs to be carried out to confirm this.
 
 \subsection{Future work}
-\colorbox{yellow}{Description to be added.}
+
+RISC has more sophisticated logic for various processor components. It is expected to see RISC having better results due to its better optimisation. OISC should be implemented with multiple data \& instruction buses. This could be performed with minimal changes on hardware, however would require many changes in assembly programs. \nameref{subsec:instr_comp} results show that OISC takes more instructions to store values in accumulators, which can can greatly benefit from multi-bus parallelisation. There a single additional bus should reduce benchmarks time by up to double, which would be more comparable with RISC. In addition, multi-bus OISC can perform truly parallel programs assuming it has enough processor resources to perform operations (for example operate different ALU operations at the same time). This potentially would be dominant feature over RISC in time-sensitive programs, GPIO (General Purpose Input/Output) and interrupt handling. 
+
+Additional buses would not greatly increase processor logic element size, especially when using interconnect optimisation techniques \autocite{1207041,6972455}. Matching processor complexity should also allow more fair and direct comparison specifically between two architectures. 
+
+A number of other improvements and future research are proposed:
+\begin{enumerate}
+	\item Perform more tests on power analysis with different frequencies. Find the activity factor described in Subsection \ref{subsec:activity_factor}.
+	\item Further investigate maximum frequency. Try to resolve OISC timing issue and repeat maximum frequency test. This would allow to confirm or deny theorised higher frequency capabilities for OISC. 
+	\item Design a higher level language compiler such as BASIC or C. This would allow to perform more complicated programs which would more closely relate to microcontroller operations. However, OISC compiler would need extra optimisation layer to efficiently organise instructions.
+	\item Compare proposed processor designs with other commercially available 8-bit processors such as Atmel AVR microcontrollers, Motorola 6800 family and Microchip PIC.
+\end{enumerate}
 

@@ -30,12 +30,6 @@ This paper will be exploring is classical SISO processors. TTAs described sectio
 	\includegraphics[width=\linewidth]{../resources/risc.eps}
 	\caption{Abstract diagram of proposed RISC structure}
 	\label{fig:risc_simple}
-	
-	\vspace{1cm}
-	
-	\includegraphics[width=\linewidth]{../resources/oisc.eps}
-	\caption{Abstract diagram of proposed OISC structure}
-	\label{fig:oisc_simple}
 \end{figure*}
 
 In this project, proposed RISC microarchitecture is mainly based on MIPS microachitecture \autocite{harris_harris_2013}. Figure \ref{fig:risc_simple} represents simplified diagram of proposed RISC processor. In this architecture, program data travels from program memory to the control block where instruction is decoded. Then control block further decides how data is directed in the datapath block. Such structure requires a complicated control block and additional data routing blocks. Depending on instruction, control block sets ALU, register file, memory operations and how data flows from one to other. Therefore, if non of blocks are bypassed, data can flow though every of these blocks, creating a log chain of combinational logic and increasing critical path. However this enables great flexibility allowing multiple operations to happen during single step, for example load value from register to memory, while address value is immediate offset by other register value using ALU. In order to increase performance of such processor, pipelining or multiple cores may be used.
@@ -71,16 +65,48 @@ Multicore processor requires software adjustments as each processor core would e
 
 \subsection{OISC Processor}
 
+\begin{figure*}[t!]
+	\centering
+	\includegraphics[width=\linewidth]{../resources/oisc.eps}
+	\caption{Abstract diagram of proposed OISC structure}
+	\label{fig:oisc_simple}
+\end{figure*}
+
 Figure \ref{fig:oisc_simple} represents simplified structure of OISC MOVE architecture. In simplest case, processor has a pair of buses - data and instruction. Instruction bus has source and destination address that connects two parts of processor via data bus. This mechanism allows data to flow around processor. Computation is accomplished by setting accumulators at destination addresses and taking computed values from source addresses. Other actions can be performed by at destination node for instance check value for branching or sending data to memory. 
 
-\colorbox{yellow}{Needs to be finished.}
+\subsubsection{OISC Pipelining}
+Maximum processor cycle period of such processor microarchitecture can be found in Equation \ref{eq:oisc_tc}. 
+
+\begin{multline}\label{eq:oisc_tc}
+	\begin{split}
+t_{CL} &= max \left( \begin{matrix}
+t_{register},\\
+t_{ALU},\\
+t_{RAM}\end{matrix}\right)\\
+&\\
+T_{cp} &= max \left( \begin{matrix}
+t_{en} + t_{buf},\\
+t_{pcq1}\end{matrix}\right) +\\
+&\qquad\qquad+ t_{pcq2} + t_{CL} + t_{setup}
+	\end{split}
+\end{multline}
+
+
+Where $t_{en}$ is period to check if instruction bus address match, $t_{buf}$ is period for source buffer to output value to data bus, $t_{pcq2}$ is propagation period for program memory, $t_{CL}$ represents longest propagation period though a logic block, $t_{setup}$ is setup time inside logic block. $t_{pcq1}$ and $t_{pcq2}$ are clock to output delay for sequential logic connecting logic block buffer and memory connecting instruction bus, respectively. 
 
 \subsection{Predictions}
-\colorbox{yellow}{To be added.}
-% Compare pipelining + software
-\vfill
 
+Comparing to RISC, OISC maximum processor cycle period is almost equivalent to pipelined RISC, just including 
+enable, buffer and additional ROM delays: $max \left( t_{en} + t_{buf}, t_{pcq1}\right)$. In most cases $t_{CL}$ is going to dominant value, meaning that OISC should have higher $T_{cp}$ to non-pipelined RISC, or equivalent to pipelined RISC architectures. 
 
+Further more, due to the nature of processor, no additional hazard prevention logic is needed making this much simpler design. In addition, $t_{CL}$ pipelining can be introduced to logic blocks that has high propagation delay. For instance, multiplication in ALU could be pipelined in two sections, when setting ALU accumulators software could be designed in such way to retrieve multiplied result only after two cycles. This can further reduced required logic circuit.
 
+\subsubsection{Execution time}
+OISC requires take extra steps to perform basic functions to set ALU, branch or memory operations need setting accumulator values. A single data-instruction bus OISC expected to be slower to execute the same task. 
 
+\subsubsection{Instruction Space}
+RISC has fairly compact instructions as single instruction can carry a small opcode, register value and immediate value. OISC has a bigger overhead as it can only set source and destination address which can carry only single operation, register or immediate value. Therefore it is expected OISC taking more instruction space for same function.
+
+\subsubsection{Resources}
+OISC does not have a control block which contains how data travel in datapath. It also does not have multi-adress register file and further routing logic. This indicate that OISC should require less logic elements to implement a processor. This should also result in lower power consumption. 
 %There are many papers looking into application specific TTAs. 
