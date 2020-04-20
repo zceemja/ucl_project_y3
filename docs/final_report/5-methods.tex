@@ -364,7 +364,7 @@ OISC instructions are fixed 13 bits, this non-standard memory word size causes s
 \subsection{Instruction decoding}\label{subsec:imm_values}
 This section describes RISC and OISC differences between instruction decoding and immediate value handling.
 \subsubsection{RISC IMO} \label{subsec:imo}
-Already described in previous section \ref{subsec:memory}, instruction from memory comes as 4 bytes. Least significant byte is sent to control block, other three bytes are sent to immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
+Already described in previous section \ref{subsec:memory}, instruction from the memory comes as four bytes. The least significant byte is sent to control block, other three bytes are sent to the immediate override block (IMO) shown in figure \ref{fig:risc_imo}. These three bytes are labelled as \textbf{immr}. 
 
 \begin{figure*}
 	\centering
@@ -374,16 +374,16 @@ Already described in previous section \ref{subsec:memory}, instruction from memo
 \end{figure*}
 
 
-IMO block is a solution to change immediate value which enabled dynamically calculated memory pointers, branches dependant on register value or any other function that needs instruction immediate value been replaced by calculated register value. IMO is controlled by control block and \textbf{cdi.imoctl} signal, which is changed by \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. When signal is \texttt{0h}, this block is transparent connecting \textbf{immr} directly to \textbf{imm}. When any of \texttt{CI} instructions executed, one of IMO register is overridden by \textit{reg1} value from register file. In order to override two or three bytes of immediate, \texttt{CI} instructions need to be executed in order. Only for one next instruction after last \texttt{CI} will have immediate bytes changed depending on what are values in \textit{IMO} registers.
+The IMO block is a solution to change the immediate sent further to the processor with a value from register. This enables dynamically calculated memory pointers, branches that are dependent on a register value or any other function that needs instruction immediate value been replaced by calculated register value. IMO is controlled by control block and \textbf{cdi.imoctl} signal, which is changed by \texttt{CI0}, \texttt{CI1} and \texttt{CI2} instructions. When a signal is \texttt{0h}, this block is transparent connecting \textbf{immr} directly to \textbf{imm}. When any of \texttt{CI} instructions executed, one of IMO register is overridden by \textit{reg1} value from the register file. In order to override two or three bytes of immediate, \texttt{CI} instructions need to be executed in order. Only for one next instruction after last \texttt{CI} will have immediate bytes changed depending on what are values in \textit{IMO} registers.
 \\This circuit has two disadvantages: 
 \begin{enumerate}
 	\item Overriding immediate bytes takes one or more clock cycles,
 	\item At override, \textbf{immr} bytes are ignored therefore they are wasting instruction memory space.
 \end{enumerate}
-Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependant on i-size value) at the program counter, thus effectively saving instruction memory space. This solution however would introduce a complication with the assembler as additional checks would need to be done during compiling to check if IMO instruction are used.
+Second point can be resolved by designing a circuit that would subtract the amount of overridden IMO bytes from \textit{pc\_off} signal (program counter offset that is dependent on i-size value) at the program counter, therefore effectively saving instruction memory space. This solution however, would introduce a complication with the assembler as additional checks would need to be done during assembly compilation to check if IMO instruction are used.
 
 \subsubsection{OISC Instruction decoding}
-OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address is \texttt{00h}, connect data bus with constant 0 via \textit{MUX2}. If immediate bit is 1, set source address to \texttt{00h} (to make sure no other buffer source connects to data bus), and connect instruction source address (immediate value) to databus via \textit{MUX2} and \textit{BUF1}. 
+OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc_decoder}. Decoder operation is simple - instruction machine code is split into three parts as described in \ref{fig:oisc_machinecode}. If instruction source address value is \texttt{00h}, it connects data bus with constant zero value via \textit{MUX2}. If immediate flag is set, source address value is set to \texttt{00h} in order to make sure no other buffer source connects to data bus. Instruction source address then is connected to databus via \textit{MUX2} and \textit{BUF1}. 
 
 \begin{figure*}
 	\centering
@@ -393,17 +393,15 @@ OISC immediate value is set in instruction decoder shown in figure \ref{fig:oisc
 \end{figure*}
 
 \subsection{Assembly}\label{subsec:assembly}
+There are two steps between the assembly code and its execution on a processor. First, it needs to be converted into a binary machine code. Secondly, binary data needs to be sliced to different parts described in section \ref{subsec:memory}. These slices also need to be converted into appropriate formats, different for simulation, HDL synthesis and direct memory flashing. 
 
-There are two steps between assembly code and its execution on a processor. First it needs to be converted to binary machine code. Secondly, binary data needs to be sliced to different parts described in section \ref{subsec:memory}. These slices also need to be converted into appropriate formats, as simulation, HDL synthesis and flashing memory directly to FPGA memory, all use different formats.
-
-
-A universal assembler was implemented with python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts - sections, definitions and macros. Definitions are keywords mapped to values which are saved in global label dictionary. Macros are a chunk of assembly code and is used as templates. 
+A universal assembler was implemented using python for both processors. Flowchart in figure \ref{fig:assembler} represents general structure of assembler process. It splits assembly file into three parts — sections, definitions and macros. Definitions are keywords mapped to values which are saved in a global label dictionary. Macros are a chunk of assembly code and are used as templates. 
 
 There are only two sections implemented in assembler - \texttt{.text} and \texttt{.data}. Section \texttt{.text} contains all machine instructions which will be stored in program ROM memory. Section \texttt{.data} is used for global and static data, and it will be written into RAM memory. This section contains values such as strings and structures uninitialised data as labels which data is RAM memory location. 
 
-Section \texttt{.text} is processed line by line. Each has label, instruction name and instruction arguments. Label however is optional, if line contains it, label is saved to global label dictionary with program address. If line instruction name is a macro, line is replaces by macro and instruction arguments are used as macro arguments. Otherwise instruction name is decoded and stored in instruction list with original arguments.
+Section \texttt{.text} code is processed line by line. Each line may have label and an instruction or macro name following with argument values. If line contains a label, it is stored into global label dictionary with current line program address as a value. If line has a macro, line is replaces by macro code. Otherwise, instruction name is decoded and stored in an instruction list with original arguments.
 
-After all instruction lines are completed, each stored instruction arguments are processed, labels are replaced with binary values, any other processing is done such as addition by constant, byte selection, etc. Completed list is then saved as raw binary. Similarly, \texttt{.data} section labels also replaced and it is saved as binary data.
+After all instruction lines are completed, each stored instruction arguments are processed, labels are replaced with binary values, any other processing is done such as addition by constant, byte selection, etc. Completed list is then saved as a raw binary. Similarly, \texttt{.data} section labels also replaced and it is saved as binary data.
 
 \begin{colfigure}
 	\centering
@@ -416,12 +414,12 @@ After all instruction lines are completed, each stored instruction arguments are
 This section will describe how system is setup.
 
 Processors are implemented on Terasic DE0-Nano board that use Altera Cyclone IV, EP4CE22P17C6 FPGA, which is manufactured using $60nm$ fabrication technology.
-FPGA has embedded memory structure consisting of columns of M9K memory blocks mentioned in Subsection \ref{subsec:oisc_mem}. These memory structures were used to implement processors RAM and ROM memories. Board also has 32MB SDRAM chip, which initially was intended to be used. This set design criteria to have 24bit address space. However, M9K memory was used instead for simplicity. 
+The FPGA has embedded memory structure consisting of M9K memory blocks columns mentioned in Subsection \ref{subsec:oisc_mem}. These memory structures were used to implement processors RAM and ROM memories. Board also has 32MB SDRAM chip, which initially was intended to be used. This set design criteria to have 24bit address space. However, M9K memory was used instead for flexibility and simplicity. 
 
-FPGA has embedded phase-locked loop (PLL) stucture that is used to change 50MHz input that is generated by on-board crystal to other frequencies. 
+FPGA has an embedded phase-locked loop (PLL) stucture that is used to change 50MHz input that is generated by on-board crystal to other frequencies. 
 
-DE0-Nano board as integrated JTAG port that is used to upload synthesised code and additional debugging tools. Quartus has "Signal Tap Logic Analyzer" tools that allow setup probes and sources within FPGA logic and control them via JTAG. "In-System Memory Content Editor" tool allows read and modify M9K memory which enabled quick machine code uploading to FPGA without need to resynthesise HDL code. This also allow reading RAM content to debug program. 
+DE0-Nano board has an integrated JTAG port that is used to upload synthesised code and control additional debugging tools. Quartus has a "Signal Tap Logic Analyzer" tool that allow setup probes and sources within FPGA logic and control them via JTAG. Another "In-System Memory Content Editor" tool allows read and modify M9K memory which enables quick machine code uploading to the processor on FPGA, without need to resynthesise HDL code. This also allow reading RAM content enabling easier program debugging. 
 
-All Quartus functions can be implemented via TCL script. This allowed constructing Makefile to allow quick build functions. Quatus signal and memory tool functions were used to write a small program with Python and Curses library to read and change internal processor state which allowed easy debugging while writing programs. 
+All Quartus functions can be accessed via TCL script. This lead to constructing Makefile which allow quick build operations. Quatus signal and memory tools were used to write a small program with Python and Curses library to read and change internal processor state which allowed easy debugging while writing the programs. 
 
 

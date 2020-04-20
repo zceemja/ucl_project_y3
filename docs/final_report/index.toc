@@ -64,29 +64,29 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.4}Program Counters}{11}{subsection.5.4}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.4.1}RISC Program Counter}{11}{subsubsection.5.4.1}% 
+\contentsline {subsubsection}{\numberline {5.4.1}RISC Program Counter}{12}{subsubsection.5.4.1}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsubsection}{\numberline {5.4.2}OISC Program Counter}{12}{subsubsection.5.4.2}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.5}Arithmetic Logic Unit}{13}{subsection.5.5}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.5.1}OISC ALU}{13}{subsubsection.5.5.1}% 
+\contentsline {subsubsection}{\numberline {5.5.1}OISC ALU}{14}{subsubsection.5.5.1}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsubsection}{\numberline {5.5.2}RISC ALU}{14}{subsubsection.5.5.2}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.6}Program Memory}{14}{subsection.5.6}% 
+\contentsline {subsection}{\numberline {5.6}Program Memory}{15}{subsection.5.6}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.6.1}RISC Program Memory}{14}{subsubsection.5.6.1}% 
+\contentsline {subsubsection}{\numberline {5.6.1}RISC Program Memory}{15}{subsubsection.5.6.1}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsubsection}{\numberline {5.6.2}OISC Program Memory}{15}{subsubsection.5.6.2}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.7}Instruction decoding}{15}{subsection.5.7}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.7.1}RISC IMO}{15}{subsubsection.5.7.1}% 
+\contentsline {subsubsection}{\numberline {5.7.1}RISC IMO}{16}{subsubsection.5.7.1}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {5.7.2}OISC Instruction decoding}{16}{subsubsection.5.7.2}% 
+\contentsline {subsubsection}{\numberline {5.7.2}OISC Instruction decoding}{17}{subsubsection.5.7.2}% 
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.8}Assembly}{16}{subsection.5.8}% 
+\contentsline {subsection}{\numberline {5.8}Assembly}{17}{subsection.5.8}% 
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {5.9}System setup}{18}{subsection.5.9}% 
 \defcounter {refsection}{0}\relax 

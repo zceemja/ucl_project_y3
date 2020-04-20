@@ -25,16 +25,16 @@ Label everything clearly, using the recommendations given below in “Things to 
 \fi
 
 \subsection{FPGA logic component composition}
-This subsection looks at test and its results to find how much FPGA logic components each processor takes and what is composition of each part.
+This subsection looks at specific test and its results which finds how much FPGA logic components each processor takes and what is composition of each part.
 
-Test was performed with Quartus synthesis tool and viewing flow summary report. This report includes synthesised design metrics including total logic elements, registers, memory bits and other FPGA resources. Test will only look at logic elements and registers. Total number of logic elements was found out by synthesising full processors, then commenting relevant parts of code, re-synthesising and viewing changes in total logic elements. Such method may not be the most accurate, because during HDL synthesis circuit is optimised an unused connections removed. This means that more logic may be not synthesised than intended. 
+The test was performed with Quartus synthesis tool by recording flow summary report data. This report includes synthesised design metrics including total logic elements, registers, memory bits and other FPGA resources. In this test, only parameters that were recorded are logic elements and registers. Number of resources was found by synthesising full processor, then commenting relevant parts of code, re-synthesising and viewing changes in the report. Such method may not be the most accurate, because during HDL synthesis, circuit is optimised and unused connections removed. This means that more of the logic than commented may be not synthesised. 
 
 There are four parts of each processor that will be tested: 
 \begin{enumerate}
-	\item \textbf{Common} - processor auxiliary logic that is used by both processors. It includes communication block with UART, RAM and PLL (Phase-Locked Loop, for master clock generation). 
+	\item \textbf{Common} - processor auxiliary logic that is used by both processors. It includes the communication block with UART, RAM and PLL (Phase-Locked Loop, for master clock generation). 
 	\item \textbf{ALU} - as described in section \ref{subsec:alu}, both processors have slightly different implementation of ALU.
-	\item \textbf{Memory} - processors memory management, including stack.
-	\item \textbf{Other} - reminding logic of processor that was not analysed.
+	\item \textbf{Memory} - the processors memory management, including stack.
+	\item \textbf{Other} - reminding processor logic that was not analysed.
 \end{enumerate}
 
 \begin{colfigure}
@@ -44,7 +44,7 @@ There are four parts of each processor that will be tested:
 	\label{fig:fpga_comp}
 \end{colfigure}
 
-Results of a test are shown in figures \ref{fig:fpga_comp} and \ref{fig:fpga_reg_comp}. Common logic uses 293 logic elements and 170 registers. OISC uses 1705 logic elements, while RISC uses 3218. Excluding common logic, OISC takes 48.3\% of RISC's logic elements.
+The test results are shown in figures \ref{fig:fpga_comp} and \ref{fig:fpga_reg_comp}. The common logic uses 293 logic elements and 170 registers. OISC uses 1705 logic elements, while RISC uses 3218. Excluding common logic, OISC takes 48.3\% of RISC's logic elements.
 
 
 \begin{colfigure}
@@ -54,20 +54,20 @@ Results of a test are shown in figures \ref{fig:fpga_comp} and \ref{fig:fpga_reg
 	\label{fig:fpga_reg_comp}
 \end{colfigure}
 
-OISC uses 726 logic elements, while RISC uses 407. Excluding common logic, OISC uses 78.4\% more registers than RISC.
+OISC uses 726 logic elements, while RISC uses only 407. Excluding common logic, OISC uses 78.4\% more registers than RISC.
 
-Looking at composition, OISC ALU takes 30.2\% more logic gates. Looking at figure \ref{fig:fpga_reg_comp}, high number of OISC ALU registers can be observed which concludes, that higher resource usage is OISC ALU code include buffer logic.
+Looking at the composition, OISC ALU takes 30.2\% more logic gates. Figure \ref{fig:fpga_reg_comp} shows high number of OISC ALU registers. This concludes that higher resource usage in OISC ALU code must be source and destination logic.
 
-Memory logic elements composition of OISC is only 34.4\% of RISC's and 7\% lower for register resources, comparing to RISC. This indicate that by removing memory logic for RISC, synthesis tool may removed also other parts of processor, possibly part of control block because it mostly contains combinational logic.
+Memory logic element composition of OISC is only 34.4\% of RISC's and 7\% lower for register resources, comparing to RISC. This indicates that by removing memory logic for RISC, synthesis tool may removed also other parts of processor, possibly part of control block because it mostly contains combinational logic.
 
-Other logic includes instruction decoding with ROM, register file, program counter. RISC exclusively has control block. Note that OISC uses  only three ROM memory blocks whereas RISC uses four as explained in section \ref{subsec:memory}, however this should make a minimal difference as M9K memory blocks are not included in FPGA logic element or register count. Comparing both processors, OISC has only 37\% of other logic components to RISC, however it has 2.28 times more registers. This shows a logic component - register trade-off. OISC buffer and common registers logic that connects bus require many more registers whereas RISC uses combination logic in control block in order to control same data in datapath. 
+Other logic includes instruction decoding with ROM, register file, program counter. RISC exclusively has control block. Note that OISC uses only three ROM memory blocks whereas RISC uses four as explained in section \ref{subsec:memory}, however this should make a minimal difference as M9K memory blocks are not included in FPGA logic element or register count. Comparing both processors, OISC has only 37\% of other logic components to RISC, however it has 2.28 times more registers. This shows a logic component - register trade-off. OISC source and destination logic requires more registers, whereas RISC uses combination logic in control block in order to control the same data in datapath. 
 
-Much higher logic components in RISC can be also explained more complicated register file, ROM memory logic and program counter. All of these components has some additional logic for timing correction or additional functionality required by these blocks integration into datapath.
+Much higher logic components in RISC can be also explained more complicated register file, ROM memory logic and program counter. All of these components has some additional logic for timing correction or other extra functionality required by these block integration into a datapath.
 
 \subsection{Power analysis}
 
 Power analysis was performed to analyse power consumption of both processors.
-This has been accomplished by connecting FPGA board to a laboratory power supply with 4V to an external power input. A shunt resistor of was used of 1.020$\Omega$ was connected in series to calculate current. Supply voltage and voltage across shut resistor were measured using oscilloscope with data sampling feature. Three tests have been performed with different processor configurations. Between each tests a period of about 5 minutes was given for FPGA to reach steady state. 
+This has been accomplished by connecting FPGA board to a laboratory power supply with 4V to an external power input. A shunt resistor with impedance of 1.020$\Omega$ was connected in series to calculate current. Supply voltage and voltage across shut resistor were measured using an oscilloscope with a data sampling feature. Three tests have been performed with different processor configurations. Between each test a period of about 5 minutes was given for FPGA to reach steady state. 
 
 
 \begin{colfigure}
@@ -77,12 +77,12 @@ This has been accomplished by connecting FPGA board to a laboratory power supply
 	\label{fig:power}
 \end{colfigure}
 
-First configuration is "None" or auxiliary-only power, which includes whole FPGA board, voltage regulators, and synthesised logic on FPGA required to support a processor (such as PLL, UART, Input/Output control, RAM). RISC and OISC indicate both processor implementations on FPGA, each running multiplication program in a loop. Figure \ref{fig:power} represents power results. RISC and OISC bars in the graph indicate auxiliary power plus processor power, which means that the processor itself takes relatively small amount comparing to auxiliary power, about 0.5\%. Result shows that OISC require 0.4\%, which including noise is almost insignificant result.
+Figure \ref{fig:power} represents power results. First configuration is "None" or auxiliary-only power, which includes whole FPGA board, voltage regulators, and synthesised logic on FPGA required to support a processor (such as PLL, UART, Input/Output control, RAM). RISC and OISC bars in the graph indicate processor implementations on FPGA, each running multiplication program in a loop. These values also include auxiliary power plus processor power, which means that the processor itself takes relatively small amount comparing to auxiliary power, about 0.5\%. Result shows that OISC require 0.4\%, which including noise is almost insignificant result.
 
-During this test clock frequency of 1MHz was used. Due to equipment unavailability, further tests were not carried out to investigate power consumption at different frequencies. Due to constant noise, running at higher frequency may result in significant difference between processors.
+During this test clock frequency of 1MHz was used. Due to equipment unavailability, any further tests were not carried out to investigate power consumption at different frequencies. Due to constant noise, running at higher frequency may result in significant difference between processors.
 
 \subsubsection{Activity Factor}\label{subsec:activity_factor}
-An activity factor could be also found using Equation \ref{eq:activity_factor} where $P$ is power, $C_{total}$ indicate total gate capacitance and $V_{DD}$ indicate voltage supplied to the transistors.
+An activity factor could be also found using Equation \ref{eq:activity_factor} where $P$ is power, $C_{total}$ is total gate capacitance and $V_{DD}$ is voltage supplied to the transistors.
 \begin{align}\label{eq:activity_factor}
 \alpha = \frac{P}{C_{total}\cdot f \cdot V_{DD}^2}
 \end{align}
@@ -90,7 +90,7 @@ As $C_{total}$ and $V_{DD}$ are constants, measuring power at different frequenc
 
 
 \subsection{Benchmark Programs}
-A number of and programs have been written to test both processors. These involve simple functions that could be commonly used in 8bit processors:
+A number of and programs have been written to test both processors. These involve simple functions that could be commonly used in a 8bit processors:
 
 \begin{description}
 	\item[$\bullet$ Printing:] Sends data to UART. It includes waiting until UART is available for transmission. 
@@ -183,7 +183,7 @@ This test is performed to investigate instruction composition of each function t
 	\label{tab:instr_groups_oisc_src}
 \end{blockpage}
 
-Each function was ran on simulated processor, program counter and instruction been recorded into file at every cycle. File recording was done with SytemVerilog test bench, it started recording when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in Listing \ref{code:asmtest} enabled both location to be static, not depending on test function executed.
+Each function was executed on a simulated processor, program counter and instruction were recorded into file at every cycle. File recording was accomplished with SytemVerilog test bench. Start of a recording was triggered when program counter matched \texttt{.start} location and stopped when it matched \texttt{.done} location. Code shown in Listing \ref{code:asmtest} enabled both locations to be static and not depend on test function that was executed.
 
 \begin{blockpage}
 	\begin{lstlisting}[frame=single, caption={Assembly frame for executring tests}, emph={setup,start,done}, label={code:asmtest}]
@@ -206,17 +206,17 @@ setup:
 \end{figure*}
 
 
-Each function recorded file then was further analysed and each instruction was grouped. Recorded program counter was used to find effective program space. This has been achieved by calculating unique instances of program counter and summing up instruction size for each of them. In RISC, dynamic instruction size has been taken into account. 
+Each recorded file with function composition was then further analysed and each instruction was grouped. Recorded program counter was used to find effective program space. This has been achieved by calculating unique instances of program counter and summing up instruction size for each of them. In RISC, dynamic instruction size has been taken into account. 
 
-From results in Figure \ref{fig:instr_comp} few key differences can be seen. Across every test, OISC has much more \textit{BRANCH} destination and \textit{MOVE} source groups. \textit{BRANCH} group can be explained by emulated \texttt{CALL}, \texttt{RET} and \texttt{JUMP} instruction explained in section \ref{subsec:oisc_pc}.
-High number of \textit{MOVE} source group instructions may be explained by using immediate values as separate source, where RISC uses instruction that integrate with immediate in instructions such as \texttt{ADDI}. In most cases \textit{ALU} group instructions are also higher than for OISC comparing to RISC. This shows lower OISC ALU efficiency, mostly due to need to move data to septate accumulators.
+From the results in Figure \ref{fig:instr_comp}, few key differences can be seen. Across every test, OISC has significantly more \textit{BRANCH} destination and \textit{MOVE} source groups. \textit{BRANCH} group can be explained by emulated \texttt{CALL}, \texttt{RET} and \texttt{JUMP} instruction explained in section \ref{subsec:oisc_pc}.
+High number of \textit{MOVE} source group instructions may be explained by using the immediate values as a separate source, where RISC uses instructions that can integrate immediate as extra word, such as instruction \texttt{ADDI}. In most cases \textit{ALU} group instructions are also higher than for OISC comparing to RISC. This shows a lower OISC ALU efficiency, mostly due to a need to move data into the septate accumulators.
 
 \subsubsection{Performance}
-This subsection investigates time and clock cycles to run benchmark programs. Simulation was sued to find a number of cycles required to execute each function. Note that prime number calculator was not simulated due to too complex dynamic nature of program. 
+This subsection investigates time and clock cycles to run benchmark programs. The simulation was performed to find a number of cycles required to execute each function. Note that prime number calculator was not simulated due to too complex dynamic nature of program. 
 
-Print 16bit decimal and modulo operation were executed with different arguments to show the worst and the best case scenarios as algorithms length depend on inputs. This is not the case for 16bit multiplication as this it has no branching. 
+Print 16bit decimal and modulo operation were executed with different input arguments. This allows to see the worst and the best case scenarios as algorithms length depend on inputs. This is not the case for 16bit multiplication as its implementation has no branching, therefore no execution time dependence on the inputs.
 
-Results are shown in Figure \ref{fig:cycles}. In most cases, OISC requires around 55-67\% more instruction, with some exceptions. These results can be better explained in following subsection \ref{subsec:instr_comp}.
+Results are shown in Figure \ref{fig:cycles}. In most of the cases, OISC requires around 55-67\% more instructions, with some exceptions.
 
 \begin{colfigure}
 	\centering
@@ -225,7 +225,7 @@ Results are shown in Figure \ref{fig:cycles}. In most cases, OISC requires aroun
 	\label{fig:cycles}
 \end{colfigure}
 
-Another set of benchmarks have been performed and on both processors once they been implemented on FPGA. Time taken for perform each set has been recorded. This have been done via UART connection, a single character was sent to indicate start and stop of benchmark. In order to void slight timing variation due low baud rate of UART, each benchmark was performed many iterations. Figure \ref{fig:timing} represents results.
+Another set of benchmarks have been performed and on both processors once they been implemented on the FPGA. Time taken for perform each set has been recorded. This has been done via UART connection, a single character was sent to indicate the start and the stop of a benchmark. In order to void a slight timing variation due low baud rate of UART or system kernel scheduler unpredictability to process UART input, each benchmark was performed with many iterations. Figure \ref{fig:timing} represents results.
 
 \begin{colfigure}
 	\centering
@@ -249,7 +249,7 @@ Benchmarks include:
 \subsubsection{Program space}
 
 Data collected from previous instruction composition results were also used to find effective program size.
-Effective program size only includes instruction that been executed depending on argument, meaning that it does not fully represent complete function. A specific argument might cause branching and skipping some function code which would not be added to effective program size. In this test, the main objective is to look difference in instruction size required to execute the same function, therefore not representing full program size is not relevant. 
+Effective program size only includes instruction that been executed depending on argument, meaning that it does not fully represent complete function. A specific input to a function might cause branching and avoiding some function code, which would not be added to effective program size. In this test, the main objective is to look difference in instruction size required to execute the same function, therefore not representing full program size is irrelevant. 
 \begin{colfigure}
 	\centering
 	\includegraphics[width=\linewidth]{../tests/program_size.eps}
@@ -257,15 +257,15 @@ Effective program size only includes instruction that been executed depending on
 	\label{fig:program_size}
 \end{colfigure}
 
-Figure \ref{fig:program_size} represents effective program size for each test function. On average, OISC instructions take 41.71\% more space which is expected.
+Figure \ref{fig:program_size} represents an effective program size for each test function. On average, OISC instructions take 41.71\% more space which is to be expected.
 
 \subsection{Maximum clock frequency}
-To find maximum clock frequency, processors were loaded with basic print string function an d 16bit multiplication. Then frequency was constantly increased until resulting output though UART was not correct. 
+In order to find maximum clock frequency, processors were loaded with basic print string function and 16bit multiplication. Then, frequency was constantly increased until resulting output though UART was not correct. 
 
 In order to change clock frequency, three parameters were changed and HDL code resynthesised: 
 \begin{description}
 	\item[$\bullet$] \textbf{PLL frequency multiplier and divider:}
-	PLL takes 50MHz clock that is sourced from crystal on FPGA board and converts it to master clock $f_{mclk}$. Multiplier and divider values are used to adjust $f_{mclk}$.
+	PLL takes 50MHz clock and converts it to master clock $f_{mclk}$. Multiplier and divider values are used to adjust $f_{mclk}$.
 	
 	\item[$\bullet$] \textbf{UART frequency divider:}
 	Division value was calculated as $D = \left \lfloor \frac{f_{mclk}}{4 f_{baud}} \right \rfloor$. UART rate was set to 9600 baud. UART module itself has four times oversample. 
@@ -290,15 +290,15 @@ As explained in Subsection \ref{subsec:oisc_cell_issue}, OISC logic blocks has a
 
 \subsection{Future work}
 
-RISC has more sophisticated logic for various processor components. It is expected to see RISC having better results due to its better optimisation. OISC should be implemented with multiple data \& instruction buses. This could be performed with minimal changes on hardware, however would require many changes in assembly programs. \nameref{subsec:instr_comp} results show that OISC takes more instructions to store values in accumulators, which can can greatly benefit from multi-bus parallelisation. There a single additional bus should reduce benchmarks time by up to double, which would be more comparable with RISC. In addition, multi-bus OISC can perform truly parallel programs assuming it has enough processor resources to perform operations (for example operate different ALU operations at the same time). This potentially would be dominant feature over RISC in time-sensitive programs, GPIO (General Purpose Input/Output) and interrupt handling. 
+RISC has more sophisticated logic for various processor components. It is expected to see RISC having better results due to its higher optimisation. OISC should be implemented with multiple data \& instruction buses. This could be performed with minimal corrections on hardware, however would require many changes in assembly programs. \nameref{subsec:instr_comp} results show that OISC takes more instructions to store values in accumulators, which could benefit from multi-bus parallelisation. Adding a single additional bus should reduce benchmarks time by up to double, which would produce more comparable to RISC. In addition, multi-bus OISC can perform truly parallel programs assuming it has enough processor resources to perform operations (for example operate different ALU operations at the same time). This potentially would be dominant feature over RISC in time-sensitive programs, GPIO (General Purpose Input/Output) and interrupt handling. 
 
 Additional buses would not greatly increase processor logic element size, especially when using interconnect optimisation techniques \autocite{1207041,6972455}. Matching processor complexity should also allow more fair and direct comparison specifically between two architectures. 
 
 A number of other improvements and future research are proposed:
 \begin{enumerate}
 	\item Perform more tests on power analysis with different frequencies. Find the activity factor described in Subsection \ref{subsec:activity_factor}.
-	\item Further investigate maximum frequency. Try to resolve OISC timing issue and repeat maximum frequency test. This would allow to confirm or deny theorised higher frequency capabilities for OISC. 
-	\item Design a higher level language compiler such as BASIC or C. This would allow to perform more complicated programs which would more closely relate to microcontroller operations. However, OISC compiler would need extra optimisation layer to efficiently organise instructions.
+	\item Further investigate maximum frequency. Try to resolve OISC timing issue and repeat maximum frequency test. This would allow confirming or denying theorised higher frequency capabilities for OISC. 
+	\item Design a higher level language compiler such as BASIC or C. This would allow performing more complicated programs which would more closely relate to microcontroller operations. However, OISC compiler would need extra optimisation layer to efficiently organise instructions.
 	\item Compare proposed processor designs with other commercially available 8-bit processors such as Atmel AVR microcontrollers, Motorola 6800 family and Microchip PIC.
 \end{enumerate}
 
