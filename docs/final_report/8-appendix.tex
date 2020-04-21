@@ -183,4 +183,38 @@ INTRE& Set interrupt entry pointer & 2 \\\hline
 	REG1 & Get value from general purpose register 1 \\
 	
 \end{longtable}	
+\pagebreak
+\subsection{Glossary}\label{subsec:glossary}
+\textbf{CISC (Comprex Instruction Set Computer)} refers to a computer architecture that follows philosophy of implementing many instructions that can process complex functions.\\
+\textbf{RISC (Reduced Instruction Set Computer)} refers to a computer architecture that follows philosophy of keeping fewer common instructions and execute complex functions in software. In this report it is commonly used to refer to the developed RISC processor.\\
+\textbf{OISC (One Instruction Set Computer)} computer architecture that has only a single instruction. As know as Ultimate RISC. In this report it is commonly used to refer to the developed OISC processor.\\
+\textbf{TTA (Transport Triggered Architecture)} type of processor that does not have control block and data is directly control by the internal transport buses.\\
+\textbf{VLIW (Very Long Instruction Word)} refers to instructions set that encodes multiple parallel operations into a single instruction.\\
+\textbf{MIPS (Microprocessor without Interlocked Pipelined Stages)} is a specific RISC architecture developed by MIPS Technologies, Inc.\\
+\textbf{ALU (Arithmetic Logic Unit)} processor part that is responsible for the mathematical operations performed upon data.\\
+\textbf{RAM (Random Access Memory)} refers so dynamic volatile processor memory.\\
+\textbf{ROM (Read Only Memory)} refers to memory that stores program instructions.\\
+\textbf{FPGA (Field Programmable Gate Array)} a chip or device that can be configured to have any digital circuit within its limits.\\
+\textbf{HDL (Hardware Description Language)} Language used to code digital circuit behaviour. SystemVerilog specifically was used throughout this project.\\
+\textbf{PLL (Phase-Locked Loop)} a control system and a circuit which is commonly used to control singal phase, frequency, duty cycle and other parameters.\\
+\textbf{Architecture} refers to processor functioning principles, general operation and its instruction set.\\
+\textbf{Microarchitecture} refers to digital logic that is used to implement a computer architecture.
+
+\pagebreak
+\subsection{Unconventional diagram notation}\label{subsec:notation}
+This is a short explanation of unconventional digital logic notation and symbols used in this report diagrams. Note that notations in diagram are only to represents logical operation and not how it is implemented on circuit level. This means that an adder symbol may be implemented either as ripple carry or carry look ahead adder.
+
+\begin{figure*}[bh]
+	\centering
+	\includegraphics[scale=0.4]{../resources/symbols/wires.eps}
+	\caption{(A) represents a single connecting wire; (B) represents a bus with width of 8; (C) represents a bus branching. Left side connects two 4 bit buses at indexes 0-3 and 4-7. Right side connects two buses, 2bit and 5bit viewing from top to bottom and a single wire that takes index 7.}
+	\vspace{1cm}
+	\includegraphics[scale=0.4]{../resources/symbols/eq.eps}
+	\caption{This represents an equality operation. It sets output flag to high of both input bus values are equal.}
+	\vspace{1cm}
+	\includegraphics[scale=0.4]{../resources/symbols/ops.eps}
+	\caption{(A) represents an adder that takes two inputs from left side and output results to bus on the right; (B) represents adder with a single input being a constant shown as decimal number in the centre of symbol; (C) repesents same adder as A, except with carry out flag at the right bottom; (D) represents multiplication circuit with two inputs at the left and two outputs at the right. As multiplication produces twice the width result than input, top output is higher word and bottom output is lower word.}
+\end{figure*}
+
+
 
